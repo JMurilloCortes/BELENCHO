@@ -1,6 +1,6 @@
-import { useEffect } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { ShoppingCart, Heart, User, LogOut } from 'lucide-react'
+import { ShoppingCart, Heart, User, LogOut, ChevronDown, LayoutDashboard, UserCircle } from 'lucide-react'
 import { useAuthStore } from '../store/auth.store'
 import { useCartStore } from '../store/cart.store'
 import { useFavoriteStore } from '../store/favorite.store'
@@ -11,16 +11,31 @@ export default function Navbar() {
   const loadCart = useCartStore((s) => s.loadCart)
   const clearCart = useCartStore((s) => s.clearCart)
   const resetFavorites = useFavoriteStore((s) => s.reset)
+  const [menuOpen, setMenuOpen] = useState(false)
+  const menuRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
     if (isAuthenticated) loadCart()
   }, [isAuthenticated])
 
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
+        setMenuOpen(false)
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside)
+    return () => document.removeEventListener('mousedown', handleClickOutside)
+  }, [])
+
   const handleLogout = () => {
     logout()
     clearCart()
     resetFavorites()
+    setMenuOpen(false)
   }
+
+  const isAdmin = user?.role === 'ADMIN' || user?.role === 'COLLABORATOR'
 
   return (
     <nav className="bg-white shadow-sm border-b border-gray-100 sticky top-0 z-50">
@@ -56,17 +71,49 @@ export default function Navbar() {
             )}
           </Link>
           {isAuthenticated ? (
-            <div className="flex items-center gap-3">
-              <Link to="/perfil" className="text-sm text-gray-600 hidden sm:block hover:text-primary transition-colors">
-                {user?.name}
-              </Link>
+            <div className="relative" ref={menuRef}>
               <button
-                onClick={handleLogout}
-                className="p-2 text-gray-400 hover:text-accent transition-colors"
-                title="Cerrar sesión"
+                onClick={() => setMenuOpen(!menuOpen)}
+                className="flex items-center gap-1.5 text-sm text-gray-600 hover:text-primary transition-colors"
               >
-                <LogOut size={20} />
+                <span className="hidden sm:block font-medium">{user?.name}</span>
+                <ChevronDown size={16} className={`transition-transform ${menuOpen ? 'rotate-180' : ''}`} />
               </button>
+              {menuOpen && (
+                <div className="absolute right-0 mt-2 w-56 bg-white rounded-xl shadow-lg border py-1.5">
+                  <div className="px-4 py-2 border-b border-gray-100">
+                    <p className="text-sm font-medium text-gray-800 truncate">{user?.name}</p>
+                    <p className="text-xs text-gray-400 truncate">{user?.email}</p>
+                  </div>
+                  <Link
+                    to="/perfil"
+                    onClick={() => setMenuOpen(false)}
+                    className="flex items-center gap-2.5 px-4 py-2 text-sm text-gray-600 hover:bg-gray-50 hover:text-primary transition-colors"
+                  >
+                    <UserCircle size={18} />
+                    Mi perfil
+                  </Link>
+                  {isAdmin && (
+                    <Link
+                      to="/admin"
+                      onClick={() => setMenuOpen(false)}
+                      className="flex items-center gap-2.5 px-4 py-2 text-sm text-gray-600 hover:bg-gray-50 hover:text-primary transition-colors"
+                    >
+                      <LayoutDashboard size={18} />
+                      Panel de administración
+                    </Link>
+                  )}
+                  <div className="border-t border-gray-100 mt-1 pt-1">
+                    <button
+                      onClick={handleLogout}
+                      className="flex items-center gap-2.5 w-full px-4 py-2 text-sm text-red-500 hover:bg-red-50 transition-colors"
+                    >
+                      <LogOut size={18} />
+                      Cerrar sesión
+                    </button>
+                  </div>
+                </div>
+              )}
             </div>
           ) : (
             <Link
