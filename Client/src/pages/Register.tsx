@@ -1,25 +1,26 @@
 import { useState } from 'react'
-import { Mail, Lock } from 'lucide-react'
+import { Mail, Lock, User } from 'lucide-react'
 import { Link, useNavigate } from 'react-router-dom'
-import { login } from '../services/auth.service'
+import { register } from '../services/auth.service'
 import { useAuthStore } from '../store/auth.store'
 
-export default function LoginPage() {
+export default function Register() {
+  const [name, setName] = useState('')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState('')
   const navigate = useNavigate()
-  const loginStore = useAuthStore((s) => s.login)
+  const login = useAuthStore((s) => s.login)
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setError('')
     try {
-      const data = await login(email, password)
-      loginStore(data.user, data.token)
+      const data = await register(email, password, name)
+      login(data.user, data.token)
       navigate('/')
     } catch (err: any) {
-      setError(err.response?.data?.error || 'Error al iniciar sesión')
+      setError(err.response?.data?.error || 'Error al registrarse')
     }
   }
 
@@ -30,8 +31,8 @@ export default function LoginPage() {
           <div className="w-16 h-16 rounded-2xl bg-primary flex items-center justify-center text-white font-bold text-2xl mx-auto mb-4">
             B
           </div>
-          <h1 className="text-2xl font-bold text-gray-800">Iniciar sesión</h1>
-          <p className="text-gray-500 mt-1">Accede a tu cuenta de BELENCHO</p>
+          <h1 className="text-2xl font-bold text-gray-800">Crear cuenta</h1>
+          <p className="text-gray-500 mt-1">Regístrate en BELENCHO</p>
         </div>
 
         {error && (
@@ -41,6 +42,20 @@ export default function LoginPage() {
         )}
 
         <form onSubmit={handleSubmit} className="space-y-4">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Nombre</label>
+            <div className="relative">
+              <User size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+              <input
+                type="text"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                className="w-full pl-10 pr-4 py-2.5 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary"
+                placeholder="Tu nombre"
+                required
+              />
+            </div>
+          </div>
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Correo electrónico</label>
             <div className="relative">
@@ -64,7 +79,8 @@ export default function LoginPage() {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 className="w-full pl-10 pr-4 py-2.5 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary"
-                placeholder="••••••••"
+                placeholder="Mínimo 6 caracteres"
+                minLength={6}
                 required
               />
             </div>
@@ -73,7 +89,7 @@ export default function LoginPage() {
             type="submit"
             className="w-full bg-primary text-white py-2.5 rounded-lg font-semibold hover:bg-primary-dark transition-colors"
           >
-            Iniciar sesión
+            Crear cuenta
           </button>
         </form>
 
@@ -82,7 +98,7 @@ export default function LoginPage() {
             <div className="w-full border-t border-gray-200" />
           </div>
           <div className="relative flex justify-center text-sm">
-            <span className="bg-white px-4 text-gray-500">O continúa con</span>
+            <span className="bg-white px-4 text-gray-500">O regístrate con</span>
           </div>
         </div>
 
@@ -100,9 +116,9 @@ export default function LoginPage() {
         </a>
 
         <p className="text-center mt-6 text-sm text-gray-500">
-          ¿No tienes cuenta?{' '}
-          <Link to="/registro" className="text-primary font-medium hover:underline">
-            Regístrate
+          ¿Ya tienes cuenta?{' '}
+          <Link to="/login" className="text-primary font-medium hover:underline">
+            Inicia sesión
           </Link>
         </p>
       </div>

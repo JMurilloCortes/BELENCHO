@@ -2,7 +2,7 @@ export interface User {
   id: string
   email: string
   name: string
-  role: 'ADMIN' | 'COLLABORATOR' | 'CLIENT'
+  role: string
   avatar?: string
 }
 
