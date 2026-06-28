@@ -102,42 +102,60 @@ export default function Navbar() {
             <div className="relative hidden sm:block" ref={menuRef}>
               <button
                 onClick={() => setMenuOpen(!menuOpen)}
-                className="flex items-center gap-1.5 text-sm text-gray-600 hover:text-primary transition-colors bg-gray-100 hover:bg-gray-200 rounded-full pl-3 pr-2 py-1.5"
+                className="flex items-center gap-2 text-sm text-gray-700 hover:text-primary transition-all duration-200 bg-gray-100 hover:bg-gray-200/80 rounded-full pl-1 pr-3 py-1 border border-gray-200/50 hover:border-primary/20"
               >
-                <span className="font-medium max-w-[100px] truncate">{user?.name}</span>
-                <ChevronDown size={14} className={`transition-transform ${menuOpen ? 'rotate-180' : ''}`} />
+                <div className="w-7 h-7 rounded-full bg-gradient-to-br from-primary to-accent flex items-center justify-center text-white text-xs font-bold">
+                  {user?.name?.[0]?.toUpperCase() || 'U'}
+                </div>
+                <span className="font-medium max-w-[80px] truncate">{user?.name}</span>
+                <ChevronDown size={12} className={`text-gray-400 transition-all duration-300 ${menuOpen ? 'rotate-180' : ''}`} />
               </button>
               {menuOpen && (
-                <div className="absolute right-0 mt-2 w-56 bg-white rounded-xl shadow-lg border py-1.5 animate-fadeIn">
-                  <div className="px-4 py-2 border-b border-gray-100">
-                    <p className="text-sm font-medium text-gray-800 truncate">{user?.name}</p>
-                    <p className="text-xs text-gray-400 truncate">{user?.email}</p>
+                <div className="absolute right-0 mt-2.5 w-64 bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden animate-dropdown">
+                  <div className="bg-gradient-to-r from-primary/5 to-accent/5 px-5 py-4 border-b border-gray-100">
+                    <div className="flex items-center gap-3">
+                      <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-primary to-accent flex items-center justify-center text-white font-bold text-lg shadow-md">
+                        {user?.name?.[0]?.toUpperCase() || 'U'}
+                      </div>
+                      <div className="min-w-0">
+                        <p className="text-sm font-semibold text-gray-800 truncate">{user?.name}</p>
+                        <p className="text-xs text-gray-400 truncate">{user?.email}</p>
+                      </div>
+                    </div>
                   </div>
-                  <Link
-                    to="/perfil"
-                    onClick={() => setMenuOpen(false)}
-                    className="flex items-center gap-2.5 px-4 py-2.5 text-sm text-gray-600 hover:bg-gray-50 hover:text-primary transition-colors"
-                  >
-                    <UserCircle size={18} />
-                    Mi perfil
-                  </Link>
-                  {isAdmin && (
+                  <div className="py-1.5 px-2">
                     <Link
-                      to="/admin"
+                      to="/perfil"
                       onClick={() => setMenuOpen(false)}
-                      className="flex items-center gap-2.5 px-4 py-2.5 text-sm text-gray-600 hover:bg-gray-50 hover:text-primary transition-colors"
+                      className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm text-gray-600 hover:bg-gray-50 hover:text-primary transition-all duration-200 group"
                     >
-                      <LayoutDashboard size={18} />
-                      Panel de administración
+                      <div className="w-8 h-8 rounded-lg bg-primary/5 flex items-center justify-center group-hover:bg-primary/10 transition-colors">
+                        <UserCircle size={16} className="text-primary" />
+                      </div>
+                      <span className="font-medium">Mi perfil</span>
                     </Link>
-                  )}
-                  <div className="border-t border-gray-100 mt-1 pt-1">
+                    {isAdmin && (
+                      <Link
+                        to="/admin"
+                        onClick={() => setMenuOpen(false)}
+                        className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm text-gray-600 hover:bg-gray-50 hover:text-primary transition-all duration-200 group"
+                      >
+                        <div className="w-8 h-8 rounded-lg bg-accent/5 flex items-center justify-center group-hover:bg-accent/10 transition-colors">
+                          <LayoutDashboard size={16} className="text-accent" />
+                        </div>
+                        <span className="font-medium">Panel de administración</span>
+                      </Link>
+                    )}
+                  </div>
+                  <div className="border-t border-gray-100 px-2 py-1.5">
                     <button
                       onClick={handleLogout}
-                      className="flex items-center gap-2.5 w-full px-4 py-2.5 text-sm text-red-500 hover:bg-red-50 transition-colors"
+                      className="flex items-center gap-3 w-full px-3 py-2.5 rounded-xl text-sm text-red-500 hover:bg-red-50 transition-all duration-200 group"
                     >
-                      <LogOut size={18} />
-                      Cerrar sesión
+                      <div className="w-8 h-8 rounded-lg bg-red-50 flex items-center justify-center group-hover:bg-red-100 transition-colors">
+                        <LogOut size={16} />
+                      </div>
+                      <span className="font-medium">Cerrar sesión</span>
                     </button>
                   </div>
                 </div>
