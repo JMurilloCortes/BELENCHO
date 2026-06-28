@@ -1,9 +1,33 @@
 import { Request, Response } from "express";
 import { prisma } from "../lib/prisma";
 
-export async function getProducts(_req: Request, res: Response) {
+export async function getProducts(req: Request, res: Response) {
   try {
+    const { search, categoryId, minPrice, maxPrice } = req.query;
+
+    const where: any = {};
+
+    if (search && typeof search === "string") {
+      where.OR = [
+        { name: { contains: search, mode: "insensitive" } },
+        { description: { contains: search, mode: "insensitive" } },
+      ];
+    }
+
+    if (categoryId && typeof categoryId === "string") {
+      where.categoryId = categoryId;
+    }
+
+    if (minPrice && typeof minPrice === "string") {
+      where.price = { ...where.price, gte: parseFloat(minPrice) };
+    }
+
+    if (maxPrice && typeof maxPrice === "string") {
+      where.price = { ...where.price, lte: parseFloat(maxPrice) };
+    }
+
     const products = await prisma.product.findMany({
+      where,
       include: { images: { orderBy: { order: "asc" } }, category: true, reviews: true },
       orderBy: { createdAt: "desc" },
     });
@@ -15,7 +39,7 @@ export async function getProducts(_req: Request, res: Response) {
 
 export async function getProduct(req: Request, res: Response) {
   try {
-    const id = req.params.id as string;
+    const id = String(req.params.id);
     const product = await prisma.product.findUnique({
       where: { id },
       include: {
@@ -29,5 +53,14 @@ export async function getProduct(req: Request, res: Response) {
     res.json(product);
   } catch {
     res.status(500).json({ error: "Error al obtener el producto" });
+  }
+}
+
+export async function getCategories(_req: Request, res: Response) {
+  try {
+    const categories = await prisma.category.findMany({ orderBy: { name: "asc" } });
+    res.json(categories);
+  } catch {
+    res.status(500).json({ error: "Error al obtener categorías" });
   }
 }
