@@ -2,13 +2,18 @@ import { prisma } from "../lib/prisma";
 import axios from "axios";
 
 const WOMPI_API = process.env.WOMPI_API || "https://sandbox.wompi.co/v1";
-const WOMPI_PUBLIC_KEY = process.env.WOMPI_PUBLIC_KEY || "";
 const WOMPI_PRIVATE_KEY = process.env.WOMPI_PRIVATE_KEY || "";
 const MP_ACCESS_TOKEN = process.env.MERCADOPAGO_ACCESS_TOKEN || "";
 const SERVER_URL = process.env.SERVER_URL || "http://localhost:4000";
 const CLIENT_URL = process.env.CLIENT_URL || "http://localhost:5173";
 
 export async function createWompiTransaction(orderId: string, total: number) {
+  if (!WOMPI_PRIVATE_KEY) {
+    return {
+      paymentId: `mock-wompi-${orderId}`,
+      redirectUrl: `${CLIENT_URL}/pago/confirmacion?orderId=${orderId}`,
+    };
+  }
   const totalCents = Math.round(Number(total) * 100);
   const { data } = await axios.post(
     `${WOMPI_API}/transactions`,
@@ -32,6 +37,9 @@ export async function createWompiTransaction(orderId: string, total: number) {
 }
 
 export async function confirmWompiTransaction(transactionId: string) {
+  if (!WOMPI_PRIVATE_KEY) {
+    return { status: "APPROVED", reference: transactionId.replace("mock-wompi-", "") };
+  }
   const { data } = await axios.get(`${WOMPI_API}/transactions/${transactionId}`, {
     headers: { Authorization: `Bearer ${WOMPI_PRIVATE_KEY}` },
   });
@@ -42,6 +50,12 @@ export async function confirmWompiTransaction(transactionId: string) {
 }
 
 export async function createMercadoPagoPreference(orderId: string, total: number, items: any[]) {
+  if (!MP_ACCESS_TOKEN) {
+    return {
+      paymentId: `mock-mp-${orderId}`,
+      redirectUrl: `${CLIENT_URL}/pago/confirmacion?orderId=${orderId}`,
+    };
+  }
   const { data } = await axios.post(
     "https://api.mercadopago.com/checkout/preferences",
     {
@@ -105,6 +119,7 @@ export async function createOrderFromCart(userId: string, paymentMethod: "WOMPI"
         })),
       },
     },
+    include: { items: true },
   });
 
   for (const item of cart.items) {
