@@ -5,6 +5,7 @@ import "./services/passport";
 import authRoutes from "./routes/auth.routes";
 import cartRoutes from "./routes/cart.routes";
 import favoriteRoutes from "./routes/favorite.routes";
+import productRoutes from "./routes/product.routes";
 
 const app = express();
 const PORT = process.env.PORT || 4000;
@@ -15,6 +16,7 @@ app.use(express.json());
 app.use("/api/auth", authRoutes);
 app.use("/api/cart", cartRoutes);
 app.use("/api/favorites", favoriteRoutes);
+app.use("/api/products", productRoutes);
 
 app.get("/api/health", (_req, res) => {
   res.json({ status: "ok" });
