@@ -5,7 +5,6 @@ import type { Product } from '../types'
 
 interface FavoriteState {
   items: Product[]
-  favoriteIds: Set<string>
   loading: boolean
   loadFavorites: () => Promise<void>
   toggleFavorite: (productId: string) => Promise<void>
@@ -16,7 +15,6 @@ export const useFavoriteStore = create<FavoriteState>()(
   persist(
     (set, get) => ({
       items: [],
-      favoriteIds: new Set(),
       loading: false,
 
       loadFavorites: async () => {
@@ -24,30 +22,28 @@ export const useFavoriteStore = create<FavoriteState>()(
         try {
           const favorites = await favoriteService.getFavorites()
           const items = favorites?.map((f: any) => f.product) || []
-          set({ items, favoriteIds: new Set(items.map((p: Product) => p.id)) })
+          set({ items })
         } catch {
-          set({ items: [], favoriteIds: new Set() })
+          set({ items: [] })
         } finally {
           set({ loading: false })
         }
       },
 
       toggleFavorite: async (productId) => {
-        const { isFavorite } = get()
-        if (isFavorite(productId)) {
+        const { items } = get()
+        const exists = items.some((p) => p.id === productId)
+        if (exists) {
           await favoriteService.removeFavorite(productId)
-          const items = get().items.filter((p) => p.id !== productId)
-          const favoriteIds = new Set(items.map((p) => p.id))
-          set({ items, favoriteIds })
+          set({ items: items.filter((p) => p.id !== productId) })
         } else {
           await favoriteService.addFavorite(productId)
           const favorites = await favoriteService.getFavorites()
-          const items = favorites?.map((f: any) => f.product) || []
-          set({ items, favoriteIds: new Set(items.map((p: Product) => p.id)) })
+          set({ items: favorites?.map((f: any) => f.product) || [] })
         }
       },
 
-      isFavorite: (productId) => get().favoriteIds.has(productId),
+      isFavorite: (productId) => get().items.some((p) => p.id === productId),
     }),
     { name: 'belencho-favorites' }
   )
