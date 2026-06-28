@@ -57,9 +57,9 @@ export default function Navbar() {
           </Link>
           {isAuthenticated ? (
             <div className="flex items-center gap-3">
-              <span className="text-sm text-gray-600 hidden sm:block">
+              <Link to="/perfil" className="text-sm text-gray-600 hidden sm:block hover:text-primary transition-colors">
                 {user?.name}
-              </span>
+              </Link>
               <button
                 onClick={handleLogout}
                 className="p-2 text-gray-400 hover:text-accent transition-colors"
