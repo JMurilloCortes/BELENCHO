@@ -9,6 +9,7 @@ interface FavoriteState {
   loadFavorites: () => Promise<void>
   toggleFavorite: (productId: string) => Promise<void>
   isFavorite: (productId: string) => boolean
+  reset: () => void
 }
 
 export const useFavoriteStore = create<FavoriteState>()(
@@ -44,6 +45,8 @@ export const useFavoriteStore = create<FavoriteState>()(
       },
 
       isFavorite: (productId) => get().items.some((p) => p.id === productId),
+
+      reset: () => set({ items: [] }),
     }),
     { name: 'belencho-favorites' }
   )

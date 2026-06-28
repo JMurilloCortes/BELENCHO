@@ -2,10 +2,19 @@ import { Link } from 'react-router-dom'
 import { ShoppingCart, Heart, User, LogOut } from 'lucide-react'
 import { useAuthStore } from '../store/auth.store'
 import { useCartStore } from '../store/cart.store'
+import { useFavoriteStore } from '../store/favorite.store'
 
 export default function Navbar() {
   const { isAuthenticated, user, logout } = useAuthStore()
   const itemCount = useCartStore((s) => s.itemCount)
+  const clearCart = useCartStore((s) => s.clearCart)
+  const resetFavorites = useFavoriteStore((s) => s.reset)
+
+  const handleLogout = () => {
+    logout()
+    clearCart()
+    resetFavorites()
+  }
 
   return (
     <nav className="bg-white shadow-sm border-b border-gray-100 sticky top-0 z-50">
@@ -46,7 +55,7 @@ export default function Navbar() {
                 {user?.name}
               </span>
               <button
-                onClick={logout}
+                onClick={handleLogout}
                 className="p-2 text-gray-400 hover:text-accent transition-colors"
                 title="Cerrar sesión"
               >

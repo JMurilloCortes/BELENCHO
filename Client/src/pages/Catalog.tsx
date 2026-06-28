@@ -12,7 +12,7 @@ export default function Catalog() {
   const [products, setProducts] = useState<Product[]>([])
   const [loading, setLoading] = useState(true)
   const addItem = useCartStore((s) => s.addItem)
-  const { toggleFavorite, isFavorite } = useFavoriteStore()
+  const { toggleFavorite, isFavorite, loadFavorites } = useFavoriteStore()
   const isAuthenticated = useAuthStore((s) => s.isAuthenticated)
 
   useEffect(() => {
@@ -21,6 +21,10 @@ export default function Catalog() {
       .catch(() => toast.error('Error al cargar productos'))
       .finally(() => setLoading(false))
   }, [])
+
+  useEffect(() => {
+    if (isAuthenticated) loadFavorites()
+  }, [isAuthenticated])
 
   const handleAddToCart = async (productId: string) => {
     if (!isAuthenticated) { window.location.href = '/login'; return }
