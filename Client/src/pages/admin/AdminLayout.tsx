@@ -23,8 +23,8 @@ export default function AdminLayout() {
       <aside className="w-64 bg-gray-900 text-gray-300 flex flex-col">
         <div className="p-4 border-b border-gray-800">
           <Link to="/admin" className="flex items-center gap-2 text-white font-bold text-sm">
-            <LayoutDashboard size={18} />
-            Admin BELENCHO
+            <img src="https://res.cloudinary.com/dtarklm7p/image/upload/v1782689025/BELENCHO/Logos/Logo_belencho_hm2kbc.jpg" alt="BELENCHO" className="h-8 w-auto" />
+            Admin
           </Link>
         </div>
         <nav className="flex-1 p-4 space-y-1">
