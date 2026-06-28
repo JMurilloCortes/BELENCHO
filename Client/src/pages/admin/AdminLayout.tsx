@@ -48,12 +48,10 @@ export default function AdminLayout() {
         sidebarOpen ? 'translate-x-0' : '-translate-x-full'
       }`}>
         <div className="p-5 border-b border-gray-800">
-          <Link to="/admin" className="flex items-center gap-3">
-            <img
-              src="https://res.cloudinary.com/dtarklm7p/image/upload/v1782689025/BELENCHO/Logos/Logo_belencho_hm2kbc.jpg"
-              alt="BELENCHO"
-              className="h-8 w-auto brightness-0 invert"
-            />
+          <Link to="/admin" className="flex items-center gap-2">
+            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-primary to-accent flex items-center justify-center text-white font-bold text-sm">
+              A
+            </div>
             <span className="text-white font-semibold text-sm">Admin</span>
           </Link>
         </div>
