@@ -1,0 +1,62 @@
+export interface User {
+  id: string
+  email: string
+  name: string
+  role: 'ADMIN' | 'COLLABORATOR' | 'CLIENT'
+  avatar?: string
+}
+
+export interface Category {
+  id: string
+  name: string
+  slug: string
+}
+
+export interface ProductImage {
+  id: string
+  url: string
+  alt?: string
+  order: number
+}
+
+export interface ProductVideo {
+  id: string
+  url: string
+}
+
+export interface Product {
+  id: string
+  name: string
+  description: string
+  price: number
+  stock: number
+  categoryId: string
+  category: Category
+  images: ProductImage[]
+  videos: ProductVideo[]
+  reviews: Review[]
+  createdAt: string
+}
+
+export interface Review {
+  id: string
+  rating: number
+  comment?: string
+  userId: string
+  user: { name: string; avatar?: string }
+  productId: string
+  createdAt: string
+}
+
+export interface CartItem {
+  id: string
+  productId: string
+  product: Product
+  quantity: number
+}
+
+export interface Favorite {
+  id: string
+  productId: string
+  product: Product
+}
