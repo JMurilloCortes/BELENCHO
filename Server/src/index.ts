@@ -7,6 +7,7 @@ import cartRoutes from "./routes/cart.routes";
 import favoriteRoutes from "./routes/favorite.routes";
 import productRoutes from "./routes/product.routes";
 import reviewRoutes from "./routes/review.routes";
+import adminRoutes from "./routes/admin.routes";
 
 const app = express();
 const PORT = process.env.PORT || 4000;
@@ -19,6 +20,7 @@ app.use("/api/cart", cartRoutes);
 app.use("/api/favorites", favoriteRoutes);
 app.use("/api/products", productRoutes);
 app.use("/api/reviews", reviewRoutes);
+app.use("/api/admin", adminRoutes);
 
 app.get("/api/health", (_req, res) => {
   res.json({ status: "ok" });

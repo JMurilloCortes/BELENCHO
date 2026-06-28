@@ -9,6 +9,10 @@ import Register from './pages/Register'
 import CartPage from './pages/CartPage'
 import FavoritesPage from './pages/FavoritesPage'
 import AuthCallback from './pages/AuthCallback'
+import AdminLayout from './pages/admin/AdminLayout'
+import AdminProducts from './pages/admin/AdminProducts'
+import AdminCategories from './pages/admin/AdminCategories'
+import AdminUsers from './pages/admin/AdminUsers'
 import { useAuthStore } from './store/auth.store'
 
 function AppContent() {
@@ -30,6 +34,12 @@ function AppContent() {
         <Route path="/favoritos" element={<FavoritesPage />} />
       </Route>
       <Route path="/auth/callback" element={<AuthCallback />} />
+      <Route path="/admin" element={<AdminLayout />}>
+        <Route index element={<AdminProducts />} />
+        <Route path="productos" element={<AdminProducts />} />
+        <Route path="categorias" element={<AdminCategories />} />
+        <Route path="usuarios" element={<AdminUsers />} />
+      </Route>
     </Routes>
   )
 }
