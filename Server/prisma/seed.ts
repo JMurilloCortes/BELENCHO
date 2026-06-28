@@ -2,12 +2,21 @@ import "dotenv/config";
 import { PrismaClient } from "../generated/prisma/client";
 import { PrismaPg } from "@prisma/adapter-pg";
 import { Pool } from "pg";
+import bcrypt from "bcryptjs";
 
 const pool = new Pool({ connectionString: process.env.DATABASE_URL });
 const adapter = new PrismaPg(pool);
 const prisma = new PrismaClient({ adapter });
 
 async function main() {
+  const adminPassword = await bcrypt.hash("admin123", 10);
+  const admin = await prisma.user.upsert({
+    where: { email: "admin@belencho.com" },
+    update: { role: "ADMIN" },
+    create: { email: "admin@belencho.com", name: "Admin", password: adminPassword, role: "ADMIN" },
+  });
+  console.log(`Admin: ${admin.email} / admin123`);
+
   const catFlores = await prisma.category.upsert({
     where: { slug: "flores" },
     update: {},

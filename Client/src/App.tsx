@@ -13,7 +13,10 @@ import Checkout from './pages/Checkout'
 import PaymentConfirmation from './pages/PaymentConfirmation'
 import AuthCallback from './pages/AuthCallback'
 import AdminLayout from './pages/admin/AdminLayout'
+import AdminDashboard from './pages/admin/AdminDashboard'
 import AdminProducts from './pages/admin/AdminProducts'
+import AdminOrders from './pages/admin/AdminOrders'
+import AdminOrderDetail from './pages/admin/AdminOrderDetail'
 import AdminCategories from './pages/admin/AdminCategories'
 import AdminUsers from './pages/admin/AdminUsers'
 import { useAuthStore } from './store/auth.store'
@@ -41,8 +44,10 @@ function AppContent() {
       </Route>
       <Route path="/auth/callback" element={<AuthCallback />} />
       <Route path="/admin" element={<AdminLayout />}>
-        <Route index element={<AdminProducts />} />
+        <Route index element={<AdminDashboard />} />
         <Route path="productos" element={<AdminProducts />} />
+        <Route path="ordenes" element={<AdminOrders />} />
+        <Route path="ordenes/:id" element={<AdminOrderDetail />} />
         <Route path="categorias" element={<AdminCategories />} />
         <Route path="usuarios" element={<AdminUsers />} />
       </Route>

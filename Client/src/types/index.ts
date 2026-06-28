@@ -56,6 +56,29 @@ export interface CartItem {
   quantity: number
 }
 
+export interface Order {
+  id: string
+  userId: string
+  user: { id: string; name: string; email: string }
+  status: 'PENDING' | 'PAID' | 'CANCELLED' | 'REFUNDED'
+  total: number
+  paymentMethod: 'WOMPI' | 'MERCADOPAGO'
+  paymentId?: string
+  redirectUrl?: string
+  items: OrderItem[]
+  createdAt: string
+  updatedAt: string
+}
+
+export interface OrderItem {
+  id: string
+  orderId: string
+  productId: string
+  product: Product
+  quantity: number
+  price: number
+}
+
 export interface Favorite {
   id: string
   productId: string
