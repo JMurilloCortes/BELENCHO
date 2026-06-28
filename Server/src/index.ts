@@ -6,6 +6,7 @@ import authRoutes from "./routes/auth.routes";
 import cartRoutes from "./routes/cart.routes";
 import favoriteRoutes from "./routes/favorite.routes";
 import productRoutes from "./routes/product.routes";
+import reviewRoutes from "./routes/review.routes";
 
 const app = express();
 const PORT = process.env.PORT || 4000;
@@ -17,6 +18,7 @@ app.use("/api/auth", authRoutes);
 app.use("/api/cart", cartRoutes);
 app.use("/api/favorites", favoriteRoutes);
 app.use("/api/products", productRoutes);
+app.use("/api/reviews", reviewRoutes);
 
 app.get("/api/health", (_req, res) => {
   res.json({ status: "ok" });

@@ -1,8 +1,9 @@
 import { useState, useEffect } from 'react'
 import { useParams, Link } from 'react-router-dom'
-import { ShoppingCart, Heart, Star, ChevronLeft, ChevronRight, ArrowLeft } from 'lucide-react'
+import { ShoppingCart, Heart, Star, ChevronLeft, ChevronRight, ArrowLeft, Send } from 'lucide-react'
 import toast from 'react-hot-toast'
 import { getProduct } from '../services/product.service'
+import { createReview } from '../services/review.service'
 import { useCartStore } from '../store/cart.store'
 import { useFavoriteStore } from '../store/favorite.store'
 import { useAuthStore } from '../store/auth.store'
@@ -45,6 +46,28 @@ export default function ProductDetail() {
       toast.success(wasFavorite ? 'Eliminado de favoritos' : 'Agregado a favoritos')
     } catch {
       toast.error('Error al actualizar favoritos')
+    }
+  }
+
+  const [reviewRating, setReviewRating] = useState(0)
+  const [reviewComment, setReviewComment] = useState('')
+  const [submittingReview, setSubmittingReview] = useState(false)
+
+  const handleSubmitReview = async () => {
+    if (!isAuthenticated) { window.location.href = '/login'; return }
+    if (!product || reviewRating === 0) return
+    setSubmittingReview(true)
+    try {
+      await createReview(product.id, reviewRating, reviewComment || undefined)
+      toast.success('Reseña publicada')
+      setReviewRating(0)
+      setReviewComment('')
+      const updated = await getProduct(product.id)
+      setProduct(updated)
+    } catch (err: any) {
+      toast.error(err.response?.data?.error || 'Error al publicar reseña')
+    } finally {
+      setSubmittingReview(false)
     }
   }
 
@@ -167,6 +190,38 @@ export default function ProductDetail() {
 
           <div className="mt-12">
             <h2 className="text-xl font-bold text-gray-800 mb-6">Reseñas</h2>
+
+            {isAuthenticated && (
+              <div className="bg-gray-50 rounded-xl p-5 mb-6">
+                <h3 className="font-semibold text-gray-700 mb-3">Deja tu reseña</h3>
+                <div className="flex gap-1 mb-3">
+                  {[1, 2, 3, 4, 5].map((star) => (
+                    <button key={star} onClick={() => setReviewRating(star)}>
+                      <Star
+                        size={24}
+                        fill={star <= reviewRating ? 'currentColor' : 'none'}
+                        className={star <= reviewRating ? 'text-yellow-400' : 'text-gray-300 cursor-pointer hover:text-yellow-300 transition-colors'}
+                      />
+                    </button>
+                  ))}
+                </div>
+                <textarea
+                  value={reviewComment}
+                  onChange={(e) => setReviewComment(e.target.value)}
+                  placeholder="Escribe tu comentario (opcional)"
+                  className="w-full p-3 border border-gray-200 rounded-lg resize-none h-20 focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary"
+                />
+                <button
+                  onClick={handleSubmitReview}
+                  disabled={reviewRating === 0 || submittingReview}
+                  className="mt-3 bg-primary text-white px-5 py-2 rounded-lg text-sm font-medium hover:bg-primary-dark transition-colors flex items-center gap-1.5 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  <Send size={16} />
+                  {submittingReview ? 'Publicando...' : 'Publicar reseña'}
+                </button>
+              </div>
+            )}
+
             {(!product.reviews || product.reviews.length === 0) ? (
               <p className="text-gray-400 text-sm">No hay reseñas aún</p>
             ) : (
