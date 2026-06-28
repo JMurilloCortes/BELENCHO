@@ -40,8 +40,9 @@ export default function ProductDetail() {
     if (!isAuthenticated) { window.location.href = '/login'; return }
     if (!product) return
     try {
+      const wasFavorite = isFavorite(product.id)
       await toggleFavorite(product.id)
-      toast.success(isFavorite(product.id) ? 'Eliminado de favoritos' : 'Agregado a favoritos')
+      toast.success(wasFavorite ? 'Eliminado de favoritos' : 'Agregado a favoritos')
     } catch {
       toast.error('Error al actualizar favoritos')
     }

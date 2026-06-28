@@ -35,8 +35,9 @@ export default function Catalog() {
   const handleToggleFavorite = async (productId: string) => {
     if (!isAuthenticated) { window.location.href = '/login'; return }
     try {
+      const wasFavorite = isFavorite(productId)
       await toggleFavorite(productId)
-      toast.success(isFavorite(productId) ? 'Eliminado de favoritos' : 'Agregado a favoritos')
+      toast.success(wasFavorite ? 'Eliminado de favoritos' : 'Agregado a favoritos')
     } catch {
       toast.error('Error al actualizar favoritos')
     }
