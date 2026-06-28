@@ -1,15 +1,22 @@
 import { useEffect, useState } from 'react'
 import { useParams, Link } from 'react-router-dom'
-import { ArrowLeft } from 'lucide-react'
+import { ArrowLeft, ShoppingCart, User as UserIcon, CreditCard, Clock } from 'lucide-react'
 import toast from 'react-hot-toast'
 import { getOrderDetail, updateOrderStatus } from '../../services/admin.service'
 
 const statuses = ['PENDING', 'PAID', 'CANCELLED', 'REFUNDED'] as const
 const statusColors: Record<string, string> = {
-  PENDING: 'bg-yellow-100 text-yellow-700',
-  PAID: 'bg-green-100 text-green-700',
-  CANCELLED: 'bg-red-100 text-red-700',
-  REFUNDED: 'bg-gray-100 text-gray-600',
+  PENDING: 'bg-yellow-50 text-yellow-600 border-yellow-200',
+  PAID: 'bg-green-50 text-green-600 border-green-200',
+  CANCELLED: 'bg-red-50 text-red-600 border-red-200',
+  REFUNDED: 'bg-gray-100 text-gray-500 border-gray-200',
+}
+
+const statusLabels: Record<string, string> = {
+  PENDING: 'Pendiente',
+  PAID: 'Pagada',
+  CANCELLED: 'Cancelada',
+  REFUNDED: 'Reembolsada',
 }
 
 export default function AdminOrderDetail() {
@@ -21,8 +28,7 @@ export default function AdminOrderDetail() {
   const load = async () => {
     if (!id) return
     try {
-      const o = await getOrderDetail(id)
-      setOrder(o)
+      setOrder(await getOrderDetail(id))
     } catch {
       toast.error('Error al cargar orden')
     } finally {
@@ -46,70 +52,136 @@ export default function AdminOrderDetail() {
     }
   }
 
-  if (loading) return <div className="animate-spin w-8 h-8 border-4 border-primary border-t-transparent rounded-full mx-auto mt-20" />
-  if (!order) return <p className="text-gray-500 text-center py-20">Orden no encontrada</p>
+  if (loading) return (
+    <div className="flex items-center justify-center min-h-[60vh]">
+      <div className="w-10 h-10 border-4 border-primary/30 border-t-primary rounded-full animate-spin" />
+    </div>
+  )
+
+  if (!order) return (
+    <div className="text-center py-16">
+      <ShoppingCart size={48} className="mx-auto text-gray-200 mb-3" />
+      <p className="text-gray-400">Orden no encontrada</p>
+      <Link to="/admin/ordenes" className="text-primary hover:underline text-sm mt-2 inline-block">Volver a órdenes</Link>
+    </div>
+  )
 
   return (
-    <div className="max-w-3xl">
-      <Link to="/admin/ordenes" className="flex items-center gap-1.5 text-sm text-gray-500 hover:text-primary mb-6">
+    <div className="max-w-4xl">
+      <Link to="/admin/ordenes" className="inline-flex items-center gap-1.5 text-sm text-gray-400 hover:text-primary mb-6 transition-colors">
         <ArrowLeft size={16} /> Volver a órdenes
       </Link>
 
-      <div className="flex items-center justify-between mb-8">
-        <h1 className="text-2xl font-bold text-gray-800">Orden #{order.id.slice(0, 8)}</h1>
-        <span className={`text-sm px-3 py-1 rounded-full font-medium ${statusColors[order.status]}`}>{order.status}</span>
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-8">
+        <div>
+          <h1 className="text-2xl font-bold text-gray-800">Orden #{order.id.slice(0, 8)}</h1>
+          <p className="text-sm text-gray-400 mt-1">{new Date(order.createdAt).toLocaleDateString()} - {new Date(order.createdAt).toLocaleTimeString()}</p>
+        </div>
+        <span className={`text-sm font-semibold px-4 py-1.5 rounded-xl border ${statusColors[order.status] || 'bg-gray-100'}`}>
+          {statusLabels[order.status] || order.status}
+        </span>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-        <div className="bg-white rounded-xl shadow-sm border p-5">
-          <h2 className="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-3">Cliente</h2>
-          <p className="font-medium text-gray-800">{order.user?.name}</p>
-          <p className="text-sm text-gray-400">{order.user?.email}</p>
+        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+          <div className="flex items-center gap-3 mb-4 pb-3 border-b border-gray-100">
+            <div className="w-9 h-9 rounded-xl bg-primary/5 flex items-center justify-center">
+              <UserIcon size={18} className="text-primary" />
+            </div>
+            <div>
+              <h2 className="text-sm font-semibold text-gray-700">Cliente</h2>
+            </div>
+          </div>
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary to-accent flex items-center justify-center text-white font-bold text-sm">
+              {order.user?.name?.[0] || '?'}
+            </div>
+            <div>
+              <p className="font-medium text-gray-800">{order.user?.name}</p>
+              <p className="text-sm text-gray-400">{order.user?.email}</p>
+            </div>
+          </div>
         </div>
-        <div className="bg-white rounded-xl shadow-sm border p-5">
-          <h2 className="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-3">Pago</h2>
-          <p className="font-medium text-gray-800">{order.paymentMethod}</p>
-          <p className="text-sm text-gray-400">Total: <span className="font-semibold">${Number(order.total).toLocaleString()}</span></p>
+
+        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+          <div className="flex items-center gap-3 mb-4 pb-3 border-b border-gray-100">
+            <div className="w-9 h-9 rounded-xl bg-accent/5 flex items-center justify-center">
+              <CreditCard size={18} className="text-accent" />
+            </div>
+            <div>
+              <h2 className="text-sm font-semibold text-gray-700">Pago</h2>
+            </div>
+          </div>
+          <div className="space-y-2">
+            <div className="flex justify-between text-sm">
+              <span className="text-gray-400">Método</span>
+              <span className="font-medium text-gray-800">{order.paymentMethod}</span>
+            </div>
+            <div className="flex justify-between text-sm">
+              <span className="text-gray-400">Total</span>
+              <span className="font-bold text-gray-800 text-lg">${Number(order.total).toLocaleString()}</span>
+            </div>
+          </div>
         </div>
       </div>
 
-      <div className="bg-white rounded-xl shadow-sm border p-5 mb-8">
-        <h2 className="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-3">Productos</h2>
-        <div className="space-y-3">
+      <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 mb-8">
+        <div className="flex items-center gap-3 mb-4 pb-3 border-b border-gray-100">
+          <div className="w-9 h-9 rounded-xl bg-primary/5 flex items-center justify-center">
+            <ShoppingCart size={18} className="text-primary" />
+          </div>
+          <div>
+            <h2 className="text-sm font-semibold text-gray-700">Productos</h2>
+          </div>
+        </div>
+        <div className="divide-y divide-gray-50">
           {order.items?.map((item: any) => (
-            <div key={item.id} className="flex items-center gap-3 py-2">
-              <img src={item.product?.images?.[0]?.url || ''} alt="" className="w-12 h-12 rounded-lg object-cover" />
-              <div className="flex-1">
-                <p className="font-medium text-sm text-gray-800">{item.product?.name}</p>
-                <p className="text-xs text-gray-400">Qty: {item.quantity} x ${Number(item.price).toLocaleString()}</p>
+            <div key={item.id} className="flex items-center gap-4 py-3">
+              <img src={item.product?.images?.[0]?.url || ''} alt="" className="w-14 h-14 rounded-xl object-cover bg-gray-100 shrink-0" />
+              <div className="flex-1 min-w-0">
+                <p className="font-medium text-sm text-gray-800 truncate">{item.product?.name}</p>
+                <p className="text-xs text-gray-400">{item.quantity} x ${Number(item.price).toLocaleString()}</p>
               </div>
-              <p className="font-semibold text-sm text-gray-800">${(Number(item.price) * item.quantity).toLocaleString()}</p>
+              <p className="font-semibold text-sm text-gray-800 shrink-0">${(Number(item.price) * item.quantity).toLocaleString()}</p>
             </div>
           ))}
         </div>
-        <div className="border-t mt-3 pt-3 flex justify-between font-bold text-gray-800">
-          <span>Total</span>
-          <span>${Number(order.total).toLocaleString()}</span>
+        <div className="border-t border-gray-100 mt-3 pt-4 flex justify-between items-center">
+          <span className="text-sm text-gray-500">Total de productos: {order.items?.length || 0}</span>
+          <div className="text-right">
+            <span className="text-xs text-gray-400">Total</span>
+            <p className="text-xl font-bold text-gray-800">${Number(order.total).toLocaleString()}</p>
+          </div>
         </div>
       </div>
 
-      <div className="bg-white rounded-xl shadow-sm border p-5">
-        <h2 className="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-3">Actualizar estado</h2>
+      <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+        <div className="flex items-center gap-3 mb-4 pb-3 border-b border-gray-100">
+          <div className="w-9 h-9 rounded-xl bg-accent/5 flex items-center justify-center">
+            <Clock size={18} className="text-accent" />
+          </div>
+          <div>
+            <h2 className="text-sm font-semibold text-gray-700">Actualizar estado</h2>
+          </div>
+        </div>
         <div className="flex gap-2 flex-wrap">
-          {statuses.map((s) => (
-            <button
-              key={s}
-              onClick={() => handleStatusChange(s)}
-              disabled={s === order.status || updating}
-              className={`px-4 py-2 rounded-lg text-sm font-medium border transition-colors ${
-                s === order.status
-                  ? 'bg-primary text-white border-primary'
-                  : 'border-gray-200 text-gray-600 hover:border-gray-300 disabled:opacity-50'
-              }`}
-            >
-              {s === 'PENDING' ? 'Pendiente' : s === 'PAID' ? 'Pagada' : s === 'CANCELLED' ? 'Cancelada' : 'Reembolsada'}
-            </button>
-          ))}
+          {statuses.map((s) => {
+            const active = s === order.status
+            return (
+              <button
+                key={s}
+                onClick={() => handleStatusChange(s)}
+                disabled={active || updating}
+                className={`px-5 py-2.5 rounded-xl text-sm font-medium border transition-all duration-200 ${
+                  active
+                    ? 'bg-primary text-white border-primary shadow-sm'
+                    : 'border-gray-200 text-gray-600 hover:border-gray-300 hover:bg-gray-50 disabled:opacity-50'
+                }`}
+              >
+                {statusLabels[s]}
+              </button>
+            )
+          })}
         </div>
       </div>
     </div>
