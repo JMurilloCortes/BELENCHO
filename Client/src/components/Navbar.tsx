@@ -1,3 +1,4 @@
+import { useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import { ShoppingCart, Heart, User, LogOut } from 'lucide-react'
 import { useAuthStore } from '../store/auth.store'
@@ -7,8 +8,13 @@ import { useFavoriteStore } from '../store/favorite.store'
 export default function Navbar() {
   const { isAuthenticated, user, logout } = useAuthStore()
   const itemCount = useCartStore((s) => s.itemCount)
+  const loadCart = useCartStore((s) => s.loadCart)
   const clearCart = useCartStore((s) => s.clearCart)
   const resetFavorites = useFavoriteStore((s) => s.reset)
+
+  useEffect(() => {
+    if (isAuthenticated) loadCart()
+  }, [isAuthenticated])
 
   const handleLogout = () => {
     logout()
