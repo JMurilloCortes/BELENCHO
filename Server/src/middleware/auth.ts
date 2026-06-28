@@ -7,10 +7,11 @@ export interface AuthRequest extends Request {
   user?: { id: string; role: string };
 }
 
-export function authenticate(req: AuthRequest, res: Response, next: NextFunction) {
+export function authenticate(req: AuthRequest, res: Response, next: NextFunction): void {
   const header = req.headers.authorization;
   if (!header?.startsWith("Bearer ")) {
-    return res.status(401).json({ error: "Token requerido" });
+    res.status(401).json({ error: "Token requerido" });
+    return;
   }
 
   try {
@@ -19,7 +20,7 @@ export function authenticate(req: AuthRequest, res: Response, next: NextFunction
     req.user = decoded;
     next();
   } catch {
-    return res.status(401).json({ error: "Token inválido" });
+    res.status(401).json({ error: "Token inválido" });
   }
 }
 

@@ -6,6 +6,8 @@ import Catalog from './pages/Catalog'
 import ProductDetail from './pages/ProductDetail'
 import LoginPage from './pages/Login'
 import Register from './pages/Register'
+import CartPage from './pages/CartPage'
+import FavoritesPage from './pages/FavoritesPage'
 import AuthCallback from './pages/AuthCallback'
 import { useAuthStore } from './store/auth.store'
 
@@ -24,6 +26,8 @@ function AppContent() {
         <Route path="/producto/:id" element={<ProductDetail />} />
         <Route path="/login" element={<LoginPage />} />
         <Route path="/registro" element={<Register />} />
+        <Route path="/carrito" element={<CartPage />} />
+        <Route path="/favoritos" element={<FavoritesPage />} />
       </Route>
       <Route path="/auth/callback" element={<AuthCallback />} />
     </Routes>
