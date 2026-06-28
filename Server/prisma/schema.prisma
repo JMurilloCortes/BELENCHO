@@ -13,6 +13,18 @@ enum Role {
   CLIENT
 }
 
+enum OrderStatus {
+  PENDING
+  PAID
+  CANCELLED
+  REFUNDED
+}
+
+enum PaymentMethod {
+  WOMPI
+  MERCADOPAGO
+}
+
 model User {
   id        String   @id @default(cuid())
   email     String   @unique
@@ -27,6 +39,7 @@ model User {
   cart      Cart?
   favorites Favorite[]
   reviews   Review[]
+  orders    Order[]
 }
 
 model Category {
@@ -52,6 +65,7 @@ model Product {
 
   cartItems  CartItem[]
   favoriteBy Favorite[]
+  orderItems OrderItem[]
 }
 
 model ProductImage {
@@ -110,4 +124,28 @@ model Favorite {
   createdAt DateTime @default(now())
 
   @@unique([userId, productId])
+}
+
+model Order {
+  id            String        @id @default(cuid())
+  userId        String
+  user          User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  status        OrderStatus   @default(PENDING)
+  total         Decimal       @db.Decimal(12, 2)
+  paymentMethod PaymentMethod
+  paymentId     String?
+  redirectUrl   String?
+  items         OrderItem[]
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+}
+
+model OrderItem {
+  id        String  @id @default(cuid())
+  orderId   String
+  order     Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  productId String
+  product   Product @relation(fields: [productId], references: [id])
+  quantity  Int     @default(1)
+  price     Decimal @db.Decimal(10, 2)
 }

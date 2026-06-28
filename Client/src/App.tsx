@@ -9,6 +9,8 @@ import Register from './pages/Register'
 import CartPage from './pages/CartPage'
 import FavoritesPage from './pages/FavoritesPage'
 import Profile from './pages/Profile'
+import Checkout from './pages/Checkout'
+import PaymentConfirmation from './pages/PaymentConfirmation'
 import AuthCallback from './pages/AuthCallback'
 import AdminLayout from './pages/admin/AdminLayout'
 import AdminProducts from './pages/admin/AdminProducts'
@@ -34,6 +36,8 @@ function AppContent() {
         <Route path="/carrito" element={<CartPage />} />
         <Route path="/favoritos" element={<FavoritesPage />} />
         <Route path="/perfil" element={<Profile />} />
+        <Route path="/checkout" element={<Checkout />} />
+        <Route path="/pago/confirmacion" element={<PaymentConfirmation />} />
       </Route>
       <Route path="/auth/callback" element={<AuthCallback />} />
       <Route path="/admin" element={<AdminLayout />}>

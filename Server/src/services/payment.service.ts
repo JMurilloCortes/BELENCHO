@@ -1,0 +1,120 @@
+import { prisma } from "../lib/prisma";
+import axios from "axios";
+
+const WOMPI_API = process.env.WOMPI_API || "https://sandbox.wompi.co/v1";
+const WOMPI_PUBLIC_KEY = process.env.WOMPI_PUBLIC_KEY || "";
+const WOMPI_PRIVATE_KEY = process.env.WOMPI_PRIVATE_KEY || "";
+const MP_ACCESS_TOKEN = process.env.MERCADOPAGO_ACCESS_TOKEN || "";
+const SERVER_URL = process.env.SERVER_URL || "http://localhost:4000";
+const CLIENT_URL = process.env.CLIENT_URL || "http://localhost:5173";
+
+export async function createWompiTransaction(orderId: string, total: number) {
+  const totalCents = Math.round(Number(total) * 100);
+  const { data } = await axios.post(
+    `${WOMPI_API}/transactions`,
+    {
+      amount_in_cents: totalCents,
+      currency: "COP",
+      reference: orderId,
+      redirect_url: `${CLIENT_URL}/pago/confirmacion?orderId=${orderId}`,
+    },
+    {
+      headers: {
+        Authorization: `Bearer ${WOMPI_PRIVATE_KEY}`,
+        "Content-Type": "application/json",
+      },
+    }
+  );
+  return {
+    paymentId: data.data.id,
+    redirectUrl: data.data.redirect_url,
+  };
+}
+
+export async function confirmWompiTransaction(transactionId: string) {
+  const { data } = await axios.get(`${WOMPI_API}/transactions/${transactionId}`, {
+    headers: { Authorization: `Bearer ${WOMPI_PRIVATE_KEY}` },
+  });
+  return {
+    status: data.data.status,
+    reference: data.data.reference,
+  };
+}
+
+export async function createMercadoPagoPreference(orderId: string, total: number, items: any[]) {
+  const { data } = await axios.post(
+    "https://api.mercadopago.com/checkout/preferences",
+    {
+      external_reference: orderId,
+      notification_url: `${SERVER_URL}/api/payments/webhook/mercadopago`,
+      back_urls: {
+        success: `${CLIENT_URL}/pago/confirmacion?orderId=${orderId}`,
+        failure: `${CLIENT_URL}/pago/fallido`,
+        pending: `${CLIENT_URL}/pago/pendiente`,
+      },
+      auto_return: "approved",
+      items: items.map((item) => ({
+        id: item.productId,
+        title: item.product.name,
+        quantity: item.quantity,
+        unit_price: Number(item.product.price),
+        currency_id: "COP",
+      })),
+    },
+    {
+      headers: {
+        Authorization: `Bearer ${MP_ACCESS_TOKEN}`,
+        "Content-Type": "application/json",
+      },
+    }
+  );
+  return {
+    paymentId: data.id,
+    redirectUrl: data.init_point,
+  };
+}
+
+export async function createOrderFromCart(userId: string, paymentMethod: "WOMPI" | "MERCADOPAGO") {
+  const cart = await prisma.cart.findUnique({
+    where: { userId },
+    include: { items: { include: { product: true } } },
+  });
+
+  if (!cart || cart.items.length === 0) {
+    throw new Error("El carrito está vacío");
+  }
+
+  for (const item of cart.items) {
+    if (item.quantity > item.product.stock) {
+      throw new Error(`Stock insuficiente para ${item.product.name}`);
+    }
+  }
+
+  const total = cart.items.reduce((sum, item) => sum + Number(item.product.price) * item.quantity, 0);
+
+  const order = await prisma.order.create({
+    data: {
+      userId,
+      total,
+      paymentMethod,
+      items: {
+        create: cart.items.map((item) => ({
+          productId: item.productId,
+          quantity: item.quantity,
+          price: item.product.price,
+        })),
+      },
+    },
+  });
+
+  for (const item of cart.items) {
+    await prisma.product.update({
+      where: { id: item.productId },
+      data: { stock: { decrement: item.quantity } },
+    });
+  }
+
+  await prisma.cartItem.deleteMany({ where: { cartId: cart.id } });
+
+  return order;
+}
