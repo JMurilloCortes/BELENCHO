@@ -101,6 +101,7 @@ export async function createOrderFromCart(
     deliveryDate: string;
     deliveryTimeSlot: string;
     giftFrom?: string;
+    giftTo?: string;
     giftMessage?: string;
   }
 ) {
@@ -133,6 +134,7 @@ export async function createOrderFromCart(
       deliveryDate: customerData.deliveryDate,
       deliveryTimeSlot: customerData.deliveryTimeSlot,
       giftFrom: customerData.giftFrom || null,
+      giftTo: customerData.giftTo || null,
       giftMessage: customerData.giftMessage || null,
       total,
       paymentMethod,

@@ -143,6 +143,7 @@ model Order {
   deliveryDate        String?
   deliveryTimeSlot    String?
   giftFrom            String?
+  giftTo              String?
   giftMessage         String?
   status              OrderStatus   @default(PENDING)
   total               Decimal       @db.Decimal(12, 2)

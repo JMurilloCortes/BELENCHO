@@ -70,6 +70,7 @@ export interface Order {
   deliveryDate?: string
   deliveryTimeSlot?: string
   giftFrom?: string
+  giftTo?: string
   giftMessage?: string
   status: 'PENDING' | 'PAID' | 'CANCELLED' | 'REFUNDED'
   total: number

@@ -10,6 +10,7 @@ interface CustomerData {
   deliveryDate: string
   deliveryTimeSlot: string
   giftFrom?: string
+  giftTo?: string
   giftMessage?: string
 }
 
