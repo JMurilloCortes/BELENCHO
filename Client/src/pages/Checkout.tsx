@@ -10,6 +10,12 @@ import { Link } from 'react-router-dom'
 import type { Neighborhood } from '../types'
 import type { TimeSlot } from '../services/delivery.service'
 
+const formatSlot = (slot: string) => {
+  const [s, e] = slot.split('-').map(Number)
+  const f = (h: number) => `${h % 12 || 12} ${h >= 12 ? 'PM' : 'AM'}`
+  return `${f(s)} - ${f(e)}`
+}
+
 export default function Checkout() {
   const { items, itemCount, clearCart } = useCartStore()
   const user = useAuthStore((s) => s.user)
@@ -260,7 +266,7 @@ export default function Checkout() {
                                 }`}
                               >
                                 <Clock size={14} className={`mb-1 ${isSelected ? 'text-primary' : isDisabled ? 'text-gray-300' : 'text-gray-400'}`} />
-                                <span className="font-semibold">{ts.slot.replace('-', ' - ')}</span>
+                                <span className="font-semibold">{formatSlot(ts.slot)}</span>
                                 <span className={`text-[10px] mt-0.5 ${isDisabled ? 'text-gray-300' : isSelected ? 'text-primary/70' : 'text-gray-400'}`}>
                                   {isDisabled ? 'Completo' : `${ts.available} cupo${ts.available !== 1 ? 's' : ''}`}
                                 </span>

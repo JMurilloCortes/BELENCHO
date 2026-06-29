@@ -4,6 +4,12 @@ import { ArrowLeft, ShoppingCart, User as UserIcon, CreditCard, Clock, MapPin } 
 import { showToast } from '../../lib/sweetalert'
 import { getOrderDetail, updateOrderStatus } from '../../services/admin.service'
 
+const formatSlot = (slot: string) => {
+  const [s, e] = slot.split('-').map(Number)
+  const f = (h: number) => `${h % 12 || 12} ${h >= 12 ? 'PM' : 'AM'}`
+  return `${f(s)} - ${f(e)}`
+}
+
 const statuses = ['PENDING', 'PAID', 'CANCELLED', 'REFUNDED'] as const
 const statusColors: Record<string, string> = {
   PENDING: 'bg-yellow-50 text-yellow-600 border-yellow-200',
@@ -161,7 +167,7 @@ export default function AdminOrderDetail() {
           {order.deliveryTimeSlot && (
             <div>
               <span className="text-gray-400 block mb-0.5">Horario</span>
-              <p className="font-medium text-gray-800">{order.deliveryTimeSlot.replace('-', ' - ')}</p>
+              <p className="font-medium text-gray-800">{formatSlot(order.deliveryTimeSlot)}</p>
             </div>
           )}
           {order.deliveryInstructions && (
