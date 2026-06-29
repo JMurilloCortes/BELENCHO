@@ -1,5 +1,5 @@
 import { Link, Outlet, useLocation } from 'react-router-dom'
-import { Package, Users, Tag, LayoutDashboard, ShoppingCart, ArrowLeft } from 'lucide-react'
+import { Menu, X, Package, Users, Tag, LayoutDashboard, ShoppingCart, ArrowLeft } from 'lucide-react'
 import { useAuthStore } from '../../store/auth.store'
 import { useState } from 'react'
 
@@ -47,13 +47,16 @@ export default function AdminLayout() {
       <aside className={`fixed inset-y-0 left-0 z-40 w-64 bg-gray-900 flex flex-col transition-transform duration-300 lg:translate-x-0 ${
         sidebarOpen ? 'translate-x-0' : '-translate-x-full'
       }`}>
-        <div className="p-5 border-b border-gray-800">
+        <div className="p-5 border-b border-gray-800 flex items-center justify-between">
           <Link to="/admin" className="flex items-center gap-2">
             <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-primary to-accent flex items-center justify-center text-white font-bold text-sm">
               A
             </div>
             <span className="text-white font-semibold text-sm">Admin</span>
           </Link>
+          <button onClick={() => setSidebarOpen(false)} className="lg:hidden p-1.5 text-gray-500 hover:text-white hover:bg-white/5 rounded-lg transition-colors" aria-label="Cerrar menú">
+            <X size={16} />
+          </button>
         </div>
 
         <nav className="flex-1 p-3 space-y-1 overflow-y-auto">
@@ -67,7 +70,16 @@ export default function AdminLayout() {
           )}
         </nav>
 
-        <div className="p-3 border-t border-gray-800">
+        <div className="p-3 border-t border-gray-800 space-y-1">
+          <div className="flex items-center gap-3 px-4 py-2.5">
+            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-primary to-accent flex items-center justify-center text-white text-xs font-bold shrink-0">
+              {user?.name?.[0]?.toUpperCase() || 'A'}
+            </div>
+            <div className="min-w-0">
+              <p className="text-sm font-medium text-gray-200 truncate">{user?.name}</p>
+              <p className="text-xs text-gray-500 truncate">{user?.role}</p>
+            </div>
+          </div>
           <Link to="/" className="flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm text-gray-400 hover:text-gray-200 hover:bg-white/5 transition-all duration-200">
             <ArrowLeft size={16} />
             Volver a la tienda
@@ -82,17 +94,15 @@ export default function AdminLayout() {
       <div className="flex-1 lg:ml-64">
         <header className="sticky top-0 z-20 bg-white/80 backdrop-blur-lg border-b border-gray-100">
           <div className="flex items-center justify-between px-4 lg:px-8 h-16">
-            <button onClick={() => setSidebarOpen(true)} className="lg:hidden p-2 text-gray-600 hover:bg-gray-100 rounded-lg">
-              <LayoutDashboard size={20} />
+            <button onClick={() => setSidebarOpen(true)} className="lg:hidden p-2 text-gray-600 hover:bg-gray-100 rounded-lg" aria-label="Abrir menú">
+              <Menu size={20} />
             </button>
-            <div className="flex items-center gap-3 ml-auto">
-              <div className="flex items-center gap-2.5 text-sm">
-                <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-primary to-accent flex items-center justify-center text-white text-xs font-bold">
-                  {user?.name?.[0]?.toUpperCase() || 'A'}
-                </div>
-                <span className="text-gray-700 font-medium hidden sm:block">{user?.name}</span>
-              </div>
-            </div>
+            <span className="lg:hidden text-sm font-semibold text-gray-800">BELENCHO</span>
+            <img
+              src="https://res.cloudinary.com/dtarklm7p/image/upload/v1782689025/BELENCHO/Logos/Logo_belencho_hm2kbc.jpg"
+              alt="BELENCHO"
+              className="h-8 w-auto ml-auto"
+            />
           </div>
         </header>
 

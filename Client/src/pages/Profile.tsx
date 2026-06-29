@@ -168,8 +168,8 @@ export default function Profile() {
               <label className="block text-sm font-medium text-gray-600 mb-1.5">Contraseña actual</label>
               <div className="relative">
                 <input value={currentPassword} onChange={(e) => setCurrentPassword(e.target.value)} type={showCurrent ? 'text' : 'password'} className={`${inputClass} pr-10`} />
-                <button onClick={() => setShowCurrent(!showCurrent)} className="absolute right-3.5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600">
-                  {showCurrent ? <EyeOff size={16} /> : <Eye size={16} />}
+                <button onClick={() => setShowCurrent(!showCurrent)} className="absolute right-3.5 top-1/2 -translate-y-1/2 p-1.5 rounded-lg border border-primary/20 bg-primary/5 text-primary hover:bg-primary hover:text-white hover:border-primary transition-all duration-200">
+                  {showCurrent ? <EyeOff size={14} /> : <Eye size={14} />}
                 </button>
               </div>
             </div>
@@ -177,8 +177,8 @@ export default function Profile() {
               <label className="block text-sm font-medium text-gray-600 mb-1.5">Nueva contraseña</label>
               <div className="relative">
                 <input value={newPassword} onChange={(e) => setNewPassword(e.target.value)} type={showNew ? 'text' : 'password'} className={`${inputClass} pr-10`} />
-                <button onClick={() => setShowNew(!showNew)} className="absolute right-3.5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600">
-                  {showNew ? <EyeOff size={16} /> : <Eye size={16} />}
+                <button onClick={() => setShowNew(!showNew)} className="absolute right-3.5 top-1/2 -translate-y-1/2 p-1.5 rounded-lg border border-primary/20 bg-primary/5 text-primary hover:bg-primary hover:text-white hover:border-primary transition-all duration-200">
+                  {showNew ? <EyeOff size={14} /> : <Eye size={14} />}
                 </button>
               </div>
             </div>

@@ -41,9 +41,28 @@ export const useCartStore = create<CartState>()(
       },
 
       updateQuantity: async (itemId, quantity) => {
-        const cart = await cartService.updateCartItem(itemId, quantity)
-        const items = cart?.items || []
-        set({ items, itemCount: items.reduce((sum: number, i: CartItem) => sum + i.quantity, 0) })
+        const prev = _get().items
+        if (quantity <= 0) {
+          set((s) => {
+            const items = s.items.filter((i) => i.id !== itemId)
+            return { items, itemCount: items.reduce((sum, i) => sum + i.quantity, 0) }
+          })
+          try {
+            await cartService.removeFromCart(itemId)
+          } catch {
+            set({ items: prev, itemCount: prev.reduce((sum, i) => sum + i.quantity, 0) })
+          }
+        } else {
+          set((s) => {
+            const items = s.items.map((i) => (i.id === itemId ? { ...i, quantity } : i))
+            return { items, itemCount: items.reduce((sum, i) => sum + i.quantity, 0) }
+          })
+          try {
+            await cartService.updateCartItem(itemId, quantity)
+          } catch {
+            set({ items: prev, itemCount: prev.reduce((sum, i) => sum + i.quantity, 0) })
+          }
+        }
       },
 
       removeItem: async (itemId) => {

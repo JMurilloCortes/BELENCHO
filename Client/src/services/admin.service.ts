@@ -15,6 +15,16 @@ export async function updateUserRole(userId: string, role: string) {
   return data
 }
 
+export async function toggleUserActive(userId: string) {
+  const { data } = await api.put(`/admin/users/${userId}/toggle-active`)
+  return data
+}
+
+export async function deleteUser(userId: string) {
+  const { data } = await api.delete(`/admin/users/${userId}`)
+  return data
+}
+
 export async function getAllOrders() {
   const { data } = await api.get('/admin/orders')
   return data
@@ -30,6 +40,11 @@ export async function updateOrderStatus(orderId: string, status: string) {
   return data
 }
 
+export async function getAdminProducts() {
+  const { data } = await api.get('/admin/products')
+  return data
+}
+
 export async function createProduct(product: any) {
   const { data } = await api.post('/admin/products', product)
   return data
@@ -37,6 +52,11 @@ export async function createProduct(product: any) {
 
 export async function updateProduct(id: string, product: any) {
   const { data } = await api.put(`/admin/products/${id}`, product)
+  return data
+}
+
+export async function toggleProductActive(id: string) {
+  const { data } = await api.put(`/admin/products/${id}/toggle-active`)
   return data
 }
 
@@ -52,5 +72,20 @@ export async function getCategories() {
 
 export async function createCategory(name: string) {
   const { data } = await api.post('/admin/categories', { name })
+  return data
+}
+
+export async function updateCategory(id: string, name: string) {
+  const { data } = await api.put(`/admin/categories/${id}`, { name })
+  return data
+}
+
+export async function toggleCategoryActive(id: string) {
+  const { data } = await api.put(`/admin/categories/${id}/toggle-active`)
+  return data
+}
+
+export async function deleteCategory(id: string) {
+  const { data } = await api.delete(`/admin/categories/${id}`)
   return data
 }

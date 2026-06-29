@@ -121,6 +121,18 @@ export async function updateOrderStatus(req: AuthRequest, res: Response) {
   }
 }
 
+export async function getAllProducts(_req: AuthRequest, res: Response) {
+  try {
+    const products = await prisma.product.findMany({
+      orderBy: { createdAt: "desc" },
+      include: { category: true },
+    });
+    res.json(products);
+  } catch {
+    res.status(500).json({ error: "Error al obtener productos" });
+  }
+}
+
 export async function createProduct(req: AuthRequest, res: Response) {
   try {
     const { name, description, price, stock, categoryId, images } = req.body;
@@ -212,5 +224,107 @@ export async function createCategory(req: AuthRequest, res: Response) {
     res.status(201).json(category);
   } catch {
     res.status(500).json({ error: "Error al crear categoría" });
+  }
+}
+
+export async function updateCategory(req: AuthRequest, res: Response) {
+  try {
+    const id = String(req.params.id);
+    const { name } = req.body;
+    if (!name) return res.status(400).json({ error: "Nombre requerido" });
+    const slug = name.toLowerCase().replace(/\s+/g, "-").replace(/[^a-z0-9-]/g, "");
+    const category = await prisma.category.update({
+      where: { id },
+      data: { name, slug },
+      include: { _count: { select: { products: true } } },
+    });
+    res.json(category);
+  } catch {
+    res.status(500).json({ error: "Error al actualizar categoría" });
+  }
+}
+
+export async function deleteCategory(req: AuthRequest, res: Response) {
+  try {
+    const id = String(req.params.id);
+    await prisma.category.delete({ where: { id } });
+    res.json({ message: "Categoría eliminada" });
+  } catch {
+    res.status(500).json({ error: "Error al eliminar categoría" });
+  }
+}
+
+export async function toggleProductActive(req: AuthRequest, res: Response) {
+  try {
+    const id = String(req.params.id);
+    const product = await prisma.product.findUnique({ where: { id } });
+    if (!product) return res.status(404).json({ error: "Producto no encontrado" });
+    const updated = await prisma.product.update({
+      where: { id },
+      data: { active: !product.active },
+    });
+    res.json(updated);
+  } catch {
+    res.status(500).json({ error: "Error al cambiar estado" });
+  }
+}
+
+export async function toggleCategoryActive(req: AuthRequest, res: Response) {
+  try {
+    const id = String(req.params.id);
+    const category = await prisma.category.findUnique({ where: { id } });
+    if (!category) return res.status(404).json({ error: "Categoría no encontrada" });
+    const updated = await prisma.category.update({
+      where: { id },
+      data: { active: !category.active },
+      include: { _count: { select: { products: true } } },
+    });
+    res.json(updated);
+  } catch {
+    res.status(500).json({ error: "Error al cambiar estado" });
+  }
+}
+
+export async function toggleUserActive(req: AuthRequest, res: Response) {
+  try {
+    const id = String(req.params.id);
+    const user = await prisma.user.findUnique({ where: { id } });
+    if (!user) return res.status(404).json({ error: "Usuario no encontrado" });
+    const updated = await prisma.user.update({
+      where: { id },
+      data: { active: !user.active },
+      select: { id: true, email: true, name: true, role: true, active: true },
+    });
+    res.json(updated);
+  } catch {
+    res.status(500).json({ error: "Error al cambiar estado" });
+  }
+}
+
+export async function updateUser(req: AuthRequest, res: Response) {
+  try {
+    const id = String(req.params.id);
+    const { name, email } = req.body;
+    const data: any = {};
+    if (name !== undefined) data.name = name;
+    if (email !== undefined) data.email = email;
+    const updated = await prisma.user.update({
+      where: { id },
+      data,
+      select: { id: true, email: true, name: true, role: true, active: true, createdAt: true, _count: { select: { orders: true, reviews: true } } },
+    });
+    res.json(updated);
+  } catch {
+    res.status(500).json({ error: "Error al actualizar usuario" });
+  }
+}
+
+export async function deleteUser(req: AuthRequest, res: Response) {
+  try {
+    const id = String(req.params.id);
+    await prisma.user.delete({ where: { id } });
+    res.json({ message: "Usuario eliminado" });
+  } catch {
+    res.status(500).json({ error: "Error al eliminar usuario" });
   }
 }

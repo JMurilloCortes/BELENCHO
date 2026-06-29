@@ -31,6 +31,7 @@ model User {
   password  String?
   name      String
   role      Role     @default(CLIENT)
+  active    Boolean  @default(true)
   googleId  String?  @unique
   avatar    String?
   createdAt DateTime @default(now())
@@ -46,6 +47,7 @@ model Category {
   id       String    @id @default(cuid())
   name     String    @unique
   slug     String    @unique
+  active   Boolean   @default(true)
   products Product[]
 }
 
@@ -55,6 +57,7 @@ model Product {
   description String
   price       Decimal  @db.Decimal(10, 2)
   stock       Int      @default(0)
+  active      Boolean  @default(true)
   categoryId  String
   category    Category @relation(fields: [categoryId], references: [id])
   images      ProductImage[]

@@ -5,7 +5,7 @@ export async function getProducts(req: Request, res: Response) {
   try {
     const { search, categoryId, minPrice, maxPrice } = req.query;
 
-    const where: any = {};
+    const where: any = { active: true };
 
     if (search && typeof search === "string") {
       where.OR = [
