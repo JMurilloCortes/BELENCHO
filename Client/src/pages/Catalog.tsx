@@ -7,6 +7,7 @@ import { useFavoriteStore } from '../store/favorite.store'
 import { useAuthStore } from '../store/auth.store'
 import { getProducts, getCategories } from '../services/product.service'
 import type { Product, Category } from '../types'
+import SkeletonCard from '../components/SkeletonCard'
 
 export default function Catalog() {
   const [products, setProducts] = useState<Product[]>([])
@@ -159,12 +160,10 @@ export default function Catalog() {
 
       {/* Content */}
       {loading ? (
-        <div className="flex flex-col items-center justify-center py-32 gap-4">
-          <div className="relative w-12 h-12">
-            <div className="absolute inset-0 border-4 border-gray-100 rounded-full" />
-            <div className="absolute inset-0 border-4 border-t-primary border-r-transparent border-b-transparent border-l-transparent rounded-full animate-spin" />
-          </div>
-          <p className="text-sm text-gray-400">Cargando productos...</p>
+        <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">
+          {Array.from({ length: 8 }).map((_, i) => (
+            <SkeletonCard key={i} />
+          ))}
         </div>
       ) : products.length === 0 ? (
         <div className="text-center py-32">

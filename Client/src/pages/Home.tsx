@@ -7,6 +7,7 @@ import { useCartStore } from '../store/cart.store'
 import { useFavoriteStore } from '../store/favorite.store'
 import { useAuthStore } from '../store/auth.store'
 import type { Product } from '../types'
+import SkeletonCard from '../components/SkeletonCard'
 
 const stats = [
   { value: '500+', label: 'Productos únicos' },
@@ -30,6 +31,7 @@ const testimonials = [
 
 export default function Home() {
   const [products, setProducts] = useState<Product[]>([])
+  const [productsLoading, setProductsLoading] = useState(true)
   const addItem = useCartStore((s) => s.addItem)
   const { toggleFavorite, isFavorite, loadFavorites } = useFavoriteStore()
   const isAuthenticated = useAuthStore((s) => s.isAuthenticated)
@@ -37,7 +39,10 @@ export default function Home() {
   useEffect(() => { if (isAuthenticated) loadFavorites() }, [isAuthenticated])
 
   useEffect(() => {
-    getProducts().then(setProducts).catch(() => {})
+    getProducts()
+      .then(setProducts)
+      .catch(() => {})
+      .finally(() => setProductsLoading(false))
   }, [])
 
   const handleAddToCart = (productId: string) => {
@@ -206,7 +211,7 @@ export default function Home() {
       </section>
 
       {/* ===== FEATURED PRODUCTS ===== */}
-      {products.length > 0 && (
+      {(products.length > 0 || productsLoading) && (
         <section className="bg-gray-50/80 py-24 sm:py-32">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-12">
@@ -223,7 +228,10 @@ export default function Home() {
             </div>
 
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
-              {products.slice(0, 4).map((product) => {
+              {productsLoading ? (
+                Array.from({ length: 4 }).map((_, i) => <SkeletonCard key={i} />)
+              ) : (
+                products.slice(0, 4).map((product) => {
                 const fav = isFavorite(product.id)
                 return (
                 <div
@@ -292,7 +300,7 @@ export default function Home() {
                     </div>
                   </div>
                 </div>
-              )})}
+              )}))}
             </div>
 
             <div className="text-center mt-12">

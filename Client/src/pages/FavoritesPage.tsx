@@ -5,6 +5,7 @@ import { useFavoriteStore } from '../store/favorite.store'
 import { useCartStore } from '../store/cart.store'
 import { useAuthStore } from '../store/auth.store'
 import { showToast } from '../lib/sweetalert'
+import SkeletonCard from '../components/SkeletonCard'
 
 export default function FavoritesPage() {
   const { items, loading, loadFavorites, toggleFavorite } = useFavoriteStore()
@@ -35,12 +36,16 @@ export default function FavoritesPage() {
 
   if (loading) {
     return (
-      <div className="max-w-7xl mx-auto px-4 py-32 text-center">
-        <div className="relative w-12 h-12 mx-auto mb-4">
-          <div className="absolute inset-0 border-4 border-gray-100 rounded-full" />
-          <div className="absolute inset-0 border-4 border-t-primary border-r-transparent border-b-transparent border-l-transparent rounded-full animate-spin" />
+      <div className="max-w-7xl mx-auto px-4 py-12">
+        <div className="mb-8">
+          <div className="h-8 bg-gray-100 rounded-xl w-48 mb-2" />
+          <div className="h-4 bg-gray-100 rounded-lg w-32" />
         </div>
-        <p className="text-sm text-gray-400">Cargando favoritos...</p>
+        <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">
+          {Array.from({ length: 4 }).map((_, i) => (
+            <SkeletonCard key={i} />
+          ))}
+        </div>
       </div>
     )
   }
