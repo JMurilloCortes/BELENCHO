@@ -140,7 +140,7 @@ model Order {
   deliveryInstructions String?
   neighborhoodId      String
   neighborhood        Neighborhood  @relation(fields: [neighborhoodId], references: [id])
-  deliveryDate        DateTime?
+  deliveryDate        String?
   deliveryTimeSlot    String?
   status              OrderStatus   @default(PENDING)
   total               Decimal       @db.Decimal(12, 2)

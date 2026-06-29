@@ -16,12 +16,9 @@ router.get("/slots", async (req, res) => {
       return res.status(400).json({ error: "Fecha requerida (YYYY-MM-DD)" });
     }
 
-    const startDate = new Date(date + "T00:00:00.000Z");
-    const endDate = new Date(date + "T23:59:59.999Z");
-
     const orders = await prisma.order.findMany({
       where: {
-        deliveryDate: { gte: startDate, lte: endDate },
+        deliveryDate: date,
         status: { notIn: ["CANCELLED", "REFUNDED"] },
         deliveryTimeSlot: { not: null },
       },

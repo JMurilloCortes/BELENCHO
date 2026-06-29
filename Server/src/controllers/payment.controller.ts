@@ -27,11 +27,9 @@ export async function createPayment(req: AuthRequest, res: Response) {
     }
 
     // Validate delivery slot availability
-    const startDate = new Date(deliveryDate + "T00:00:00.000Z");
-    const endDate = new Date(deliveryDate + "T23:59:59.999Z");
     const bookedCount = await prisma.order.count({
       where: {
-        deliveryDate: { gte: startDate, lte: endDate },
+        deliveryDate,
         deliveryTimeSlot,
         status: { notIn: ["CANCELLED", "REFUNDED"] },
       },

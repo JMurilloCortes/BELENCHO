@@ -128,7 +128,7 @@ export async function createOrderFromCart(
       deliveryAddress: customerData.deliveryAddress,
       deliveryInstructions: customerData.deliveryInstructions || null,
       neighborhoodId: customerData.neighborhoodId,
-      deliveryDate: new Date(customerData.deliveryDate + "T00:00:00.000Z"),
+      deliveryDate: customerData.deliveryDate,
       deliveryTimeSlot: customerData.deliveryTimeSlot,
       total,
       paymentMethod,
