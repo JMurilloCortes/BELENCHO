@@ -155,7 +155,7 @@ export default function AdminOrderDetail() {
           {order.deliveryDate && (
             <div>
               <span className="text-gray-400 block mb-0.5">Fecha de entrega</span>
-              <p className="font-medium text-gray-800">{order.deliveryDate ? order.deliveryDate.split('-').reverse().join('/') : '—'}</p>
+              <p className="font-medium text-gray-800">{order.deliveryDate ? order.deliveryDate.split('T')[0].split('-').reverse().join('/') : '—'}</p>
             </div>
           )}
           {order.deliveryTimeSlot && (
