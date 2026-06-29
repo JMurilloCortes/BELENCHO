@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { Search, ChevronRight, ShoppingCart } from 'lucide-react'
-import toast from 'react-hot-toast'
+import { showToast } from '../../lib/sweetalert'
 import { getAllOrders } from '../../services/admin.service'
 
 const statusColors: Record<string, string> = {
@@ -33,7 +33,7 @@ export default function AdminOrders() {
   useEffect(() => {
     getAllOrders()
       .then(setOrders)
-      .catch(() => toast.error('Error al cargar órdenes'))
+      .catch(() => showToast('error', 'Error al cargar órdenes'))
       .finally(() => setLoading(false))
   }, [])
 

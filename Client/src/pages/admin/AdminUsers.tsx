@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Edit2, Trash2, Power, PowerOff, Save, Search, Users as UsersIcon, X } from 'lucide-react'
-import toast from 'react-hot-toast'
+import { showToast, showConfirm } from '../../lib/sweetalert'
 import api from '../../services/api'
 import { getUsers, updateUserRole, toggleUserActive, deleteUser } from '../../services/admin.service'
 
@@ -29,31 +29,36 @@ export default function AdminUsers() {
   const handleRoleChange = async (userId: string, role: string) => {
     try {
       await updateUserRole(userId, role)
-      toast.success('Rol actualizado')
+      showToast('success', 'Rol actualizado')
       load()
     } catch {
-      toast.error('Error al actualizar rol')
+      showToast('error', 'Error al actualizar rol')
     }
   }
 
   const handleToggleActive = async (id: string) => {
+    const target = users.find((u) => u.id === id)
+    const currentlyActive = (target as any)?.active !== false
+    const newActive = !currentlyActive
+    setUsers((prev) => prev.map((u) => (u.id === id ? { ...u, active: newActive } : u)))
+    showToast('success', newActive ? 'Usuario activado' : 'Usuario desactivado')
     try {
-      const updated = await toggleUserActive(id)
-      setUsers((prev) => prev.map((u) => (u.id === id ? { ...u, active: updated.active } : u)))
-      toast.success(updated.active ? 'Usuario activado' : 'Usuario desactivado')
+      await toggleUserActive(id)
     } catch {
-      toast.error('Error al cambiar estado')
+      setUsers((prev) => prev.map((u) => (u.id === id ? { ...u, active: currentlyActive } : u)))
+      showToast('error', 'Error al cambiar estado')
     }
   }
 
   const handleDelete = async (id: string) => {
-    if (!confirm('¿Eliminar usuario permanentemente?')) return
+    const result = await showConfirm({ title: '¿Eliminar usuario?', text: 'Esta acción no se puede deshacer', confirmText: 'Sí, eliminar' })
+    if (!result.isConfirmed) return
     try {
       await deleteUser(id)
-      toast.success('Usuario eliminado')
+      showToast('success', 'Usuario eliminado')
       load()
     } catch {
-      toast.error('Error al eliminar')
+      showToast('error', 'Error al eliminar')
     }
   }
 
@@ -61,11 +66,11 @@ export default function AdminUsers() {
     if (!editUser) return
     try {
       await api.put(`/admin/users/${editUser.id}`, { name: editUser.name, email: editUser.email })
-      toast.success('Usuario actualizado')
+      showToast('success', 'Usuario actualizado')
       setEditUser(null)
       load()
     } catch {
-      toast.error('Error al actualizar')
+      showToast('error', 'Error al actualizar')
     }
   }
 

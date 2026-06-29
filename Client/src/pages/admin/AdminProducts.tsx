@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Plus, Edit2, Trash2, Power, PowerOff, Search, Package, X } from 'lucide-react'
-import toast from 'react-hot-toast'
+import { showToast, showConfirm } from '../../lib/sweetalert'
 import { getAdminProducts, createProduct, updateProduct, deleteProduct, toggleProductActive, getCategories } from '../../services/admin.service'
 import type { Product, Category } from '../../types'
 
@@ -43,7 +43,7 @@ export default function AdminProducts() {
 
   const handleSave = async () => {
     if (!form.name || !form.price || !form.categoryId) {
-      toast.error('Nombre, precio y categoría son requeridos')
+      showToast('error', 'Nombre, precio y categoría son requeridos')
       return
     }
     try {
@@ -57,36 +57,41 @@ export default function AdminProducts() {
       }
       if (editing) {
         await updateProduct(editing.id, data)
-        toast.success('Producto actualizado')
+        showToast('success', 'Producto actualizado')
       } else {
         await createProduct(data)
-        toast.success('Producto creado')
+        showToast('success', 'Producto creado')
       }
       setShowForm(false)
       load()
     } catch {
-      toast.error('Error al guardar producto')
+      showToast('error', 'Error al guardar producto')
     }
   }
 
   const handleToggleActive = async (id: string) => {
+    const target = products.find((p) => p.id === id)
+    const currentlyActive = (target as any)?.active !== false
+    const newActive = !currentlyActive
+    setProducts((prev) => prev.map((p) => (p.id === id ? { ...p, active: newActive } : p)))
+    showToast('success', newActive ? 'Producto activado' : 'Producto desactivado')
     try {
-      const updated = await toggleProductActive(id)
-      setProducts((prev) => prev.map((p) => (p.id === id ? { ...p, active: updated.active } : p)))
-      toast.success(updated.active ? 'Producto activado' : 'Producto desactivado')
+      await toggleProductActive(id)
     } catch {
-      toast.error('Error al cambiar estado')
+      setProducts((prev) => prev.map((p) => (p.id === id ? { ...p, active: currentlyActive } : p)))
+      showToast('error', 'Error al cambiar estado')
     }
   }
 
   const handleDelete = async (id: string) => {
-    if (!confirm('¿Eliminar producto permanentemente?')) return
+    const result = await showConfirm({ title: '¿Eliminar producto?', text: 'Esta acción no se puede deshacer', confirmText: 'Sí, eliminar' })
+    if (!result.isConfirmed) return
     try {
       await deleteProduct(id)
-      toast.success('Producto eliminado')
+      showToast('success', 'Producto eliminado')
       load()
     } catch {
-      toast.error('Error al eliminar')
+      showToast('error', 'Error al eliminar')
     }
   }
 

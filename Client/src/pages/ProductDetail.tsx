@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useParams, Link, useNavigate } from 'react-router-dom'
 import { ShoppingCart, Heart, Star, ChevronLeft, ChevronRight, ArrowLeft, Send, Check, BadgeCheck, Shield, Award, Share2, Zap } from 'lucide-react'
-import toast from 'react-hot-toast'
+import { showToast } from '../lib/sweetalert'
 import { getProduct } from '../services/product.service'
 import { createReview } from '../services/review.service'
 import { useCartStore } from '../store/cart.store'
@@ -30,7 +30,7 @@ export default function ProductDetail() {
     if (!id) return
     getProduct(id)
       .then(setProduct)
-      .catch(() => toast.error('Error al cargar el producto'))
+      .catch(() => showToast('error', 'Error al cargar el producto'))
       .finally(() => setLoading(false))
   }, [id])
 
@@ -41,9 +41,9 @@ export default function ProductDetail() {
       await addItem(product.id)
       setAddedToCart(true)
       setTimeout(() => setAddedToCart(false), 2000)
-      toast.success('Agregado al carrito')
+      showToast('success', 'Agregado al carrito')
     } catch {
-      toast.error('Error al agregar al carrito')
+      showToast('error', 'Error al agregar al carrito')
     }
   }
 
@@ -53,9 +53,9 @@ export default function ProductDetail() {
     try {
       const wasFavorite = isFavorite(product.id)
       await toggleFavorite(product.id)
-      toast.success(wasFavorite ? 'Eliminado de favoritos' : 'Agregado a favoritos')
+      showToast('success', wasFavorite ? 'Eliminado de favoritos' : 'Agregado a favoritos')
     } catch {
-      toast.error('Error al actualizar favoritos')
+      showToast('error', 'Error al actualizar favoritos')
     }
   }
 
@@ -66,7 +66,7 @@ export default function ProductDetail() {
       await addItem(product.id)
       navigate('/checkout')
     } catch {
-      toast.error('Error al procesar la compra')
+      showToast('error', 'Error al procesar la compra')
     }
   }
 
@@ -80,13 +80,13 @@ export default function ProductDetail() {
     setSubmittingReview(true)
     try {
       await createReview(product.id, reviewRating, reviewComment || undefined)
-      toast.success('Reseña publicada')
+      showToast('success', 'Reseña publicada')
       setReviewRating(0)
       setReviewComment('')
       const updated = await getProduct(product.id)
       setProduct(updated)
     } catch (err: any) {
-      toast.error(err.response?.data?.error || 'Error al publicar reseña')
+      showToast('error', err.response?.data?.error || 'Error al publicar reseña')
     } finally {
       setSubmittingReview(false)
     }
@@ -309,7 +309,7 @@ export default function ProductDetail() {
                   if (navigator.share) {
                     navigator.share({ title: product.name, url: window.location.href }).catch(() => {})
                   } else {
-                    navigator.clipboard.writeText(window.location.href).then(() => toast.success('Enlace copiado')).catch(() => {})
+                    navigator.clipboard.writeText(window.location.href).then(() => showToast('success', 'Enlace copiado')).catch(() => {})
                   }
                 }}
                 className="p-3.5 rounded-xl border-2 border-primary/20 bg-primary/5 text-primary hover:bg-primary hover:text-white hover:border-primary hover:shadow-lg hover:shadow-primary/20 transition-all duration-300 hover:scale-105 active:scale-95"

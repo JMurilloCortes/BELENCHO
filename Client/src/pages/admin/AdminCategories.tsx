@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Plus, Edit2, Trash2, Power, PowerOff, FolderOpen, X, Search } from 'lucide-react'
-import toast from 'react-hot-toast'
+import { showToast, showConfirm } from '../../lib/sweetalert'
 import { getCategories, createCategory, updateCategory, deleteCategory, toggleCategoryActive } from '../../services/admin.service'
 import type { Category } from '../../types'
 
@@ -33,40 +33,45 @@ export default function AdminCategories() {
   }
 
   const handleSave = async () => {
-    if (!name.trim()) return toast.error('El nombre es requerido')
+    if (!name.trim()) return showToast('error', 'El nombre es requerido')
     try {
       if (editing) {
         await updateCategory(editing.id, name.trim())
-        toast.success('Categoría actualizada')
+        showToast('success', 'Categoría actualizada')
       } else {
         await createCategory(name.trim())
-        toast.success('Categoría creada')
+        showToast('success', 'Categoría creada')
       }
       setShowForm(false)
       load()
     } catch {
-      toast.error('Error al guardar categoría')
+      showToast('error', 'Error al guardar categoría')
     }
   }
 
   const handleToggleActive = async (id: string) => {
+    const target = categories.find((c) => c.id === id)
+    const currentlyActive = (target as any)?.active !== false
+    const newActive = !currentlyActive
+    setCategories((prev) => prev.map((c) => (c.id === id ? { ...c, active: newActive } : c)))
+    showToast('success', newActive ? 'Categoría activada' : 'Categoría desactivada')
     try {
-      const updated = await toggleCategoryActive(id)
-      setCategories((prev) => prev.map((c) => (c.id === id ? { ...c, active: updated.active } : c)))
-      toast.success(updated.active ? 'Categoría activada' : 'Categoría desactivada')
+      await toggleCategoryActive(id)
     } catch {
-      toast.error('Error al cambiar estado')
+      setCategories((prev) => prev.map((c) => (c.id === id ? { ...c, active: currentlyActive } : c)))
+      showToast('error', 'Error al cambiar estado')
     }
   }
 
   const handleDelete = async (id: string) => {
-    if (!confirm('¿Eliminar categoría permanentemente?')) return
+    const result = await showConfirm({ title: '¿Eliminar categoría?', text: 'Esta acción no se puede deshacer', confirmText: 'Sí, eliminar' })
+    if (!result.isConfirmed) return
     try {
       await deleteCategory(id)
-      toast.success('Categoría eliminada')
+      showToast('success', 'Categoría eliminada')
       load()
     } catch {
-      toast.error('Error al eliminar')
+      showToast('error', 'Error al eliminar')
     }
   }
 

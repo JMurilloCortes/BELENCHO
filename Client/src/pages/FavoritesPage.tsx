@@ -4,7 +4,7 @@ import { Heart, ShoppingCart, ArrowLeft } from 'lucide-react'
 import { useFavoriteStore } from '../store/favorite.store'
 import { useCartStore } from '../store/cart.store'
 import { useAuthStore } from '../store/auth.store'
-import toast from 'react-hot-toast'
+import { showToast } from '../lib/sweetalert'
 
 export default function FavoritesPage() {
   const { items, loading, loadFavorites, toggleFavorite } = useFavoriteStore()
@@ -112,7 +112,7 @@ export default function FavoritesPage() {
                   onClick={(e) => {
                     e.preventDefault()
                     if (!isAuthenticated) { window.location.href = '/login'; return }
-                    addItem(product.id).then(() => toast.success('Agregado al carrito')).catch(() => toast.error('Error'))
+                    addItem(product.id).then(() => showToast('success', 'Agregado al carrito')).catch(() => showToast('error', 'Error'))
                   }}
                   className="px-4 py-2.5 rounded-xl text-xs font-bold border border-primary/20 bg-primary/5 text-primary hover:bg-primary hover:text-white hover:border-primary hover:shadow-lg hover:shadow-primary/20 transition-all duration-300 flex items-center gap-1.5"
                 >

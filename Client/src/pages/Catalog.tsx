@@ -1,7 +1,7 @@
 import { useEffect, useState, useCallback } from 'react'
 import { Heart, ShoppingCart, Search, X, SlidersHorizontal, Sparkles } from 'lucide-react'
 import { Link } from 'react-router-dom'
-import toast from 'react-hot-toast'
+import { showToast } from '../lib/sweetalert'
 import { useCartStore } from '../store/cart.store'
 import { useFavoriteStore } from '../store/favorite.store'
 import { useAuthStore } from '../store/auth.store'
@@ -33,7 +33,7 @@ export default function Catalog() {
       setProducts(p)
       setCategories(c)
     } catch {
-      toast.error('Error al cargar productos')
+      showToast('error', 'Error al cargar productos')
     } finally {
       setLoading(false)
     }
@@ -51,9 +51,9 @@ export default function Catalog() {
     if (!isAuthenticated) { window.location.href = '/login'; return }
     try {
       await addItem(productId)
-      toast.success('Agregado al carrito')
+      showToast('success', 'Agregado al carrito')
     } catch {
-      toast.error('Error al agregar al carrito')
+      showToast('error', 'Error al agregar al carrito')
     }
   }
 
@@ -62,9 +62,9 @@ export default function Catalog() {
     try {
       const wasFavorite = isFavorite(productId)
       await toggleFavorite(productId)
-      toast.success(wasFavorite ? 'Eliminado de favoritos' : 'Agregado a favoritos')
+      showToast('success', wasFavorite ? 'Eliminado de favoritos' : 'Agregado a favoritos')
     } catch {
-      toast.error('Error al actualizar favoritos')
+      showToast('error', 'Error al actualizar favoritos')
     }
   }
 

@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useParams, Link } from 'react-router-dom'
 import { ArrowLeft, ShoppingCart, User as UserIcon, CreditCard, Clock } from 'lucide-react'
-import toast from 'react-hot-toast'
+import { showToast } from '../../lib/sweetalert'
 import { getOrderDetail, updateOrderStatus } from '../../services/admin.service'
 
 const statuses = ['PENDING', 'PAID', 'CANCELLED', 'REFUNDED'] as const
@@ -30,7 +30,7 @@ export default function AdminOrderDetail() {
     try {
       setOrder(await getOrderDetail(id))
     } catch {
-      toast.error('Error al cargar orden')
+      showToast('error', 'Error al cargar orden')
     } finally {
       setLoading(false)
     }
@@ -44,9 +44,9 @@ export default function AdminOrderDetail() {
     try {
       const updated = await updateOrderStatus(id, newStatus)
       setOrder(updated)
-      toast.success('Estado actualizado')
+      showToast('success', 'Estado actualizado')
     } catch {
-      toast.error('Error al actualizar estado')
+      showToast('error', 'Error al actualizar estado')
     } finally {
       setUpdating(false)
     }

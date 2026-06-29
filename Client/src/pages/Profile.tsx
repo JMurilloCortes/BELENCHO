@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
-import toast from 'react-hot-toast'
 import { User, Lock, Save, Mail, Calendar, Shield, Eye, EyeOff, Check, X } from 'lucide-react'
+import { showToast } from '../lib/sweetalert'
 import { useAuthStore } from '../store/auth.store'
 import { getProfile, updateProfile, changePassword } from '../services/user.service'
 
@@ -22,36 +22,36 @@ export default function Profile() {
         setName(u.name)
         setEmail(u.email)
       })
-      .catch(() => toast.error('Error al cargar perfil'))
+      .catch(() => showToast('error', 'Error al cargar perfil'))
       .finally(() => setLoading(false))
   }, [isAuthenticated])
 
   const handleSaveProfile = async () => {
-    if (!name) { toast.error('El nombre es requerido'); return }
+    if (!name) { showToast('error', 'El nombre es requerido'); return }
     setSaving(true)
     try {
       const updated = await updateProfile({ name, email })
       const storedUser = JSON.parse(localStorage.getItem('user') || '{}')
       login({ ...storedUser, ...updated }, localStorage.getItem('token') || '')
-      toast.success('Perfil actualizado')
+      showToast('success', 'Perfil actualizado')
     } catch {
-      toast.error('Error al actualizar perfil')
+      showToast('error', 'Error al actualizar perfil')
     } finally {
       setSaving(false)
     }
   }
 
   const handleChangePassword = async () => {
-    if (!currentPassword || !newPassword) { toast.error('Ambos campos son requeridos'); return }
-    if (newPassword.length < 6) { toast.error('La nueva contraseña debe tener al menos 6 caracteres'); return }
+    if (!currentPassword || !newPassword) { showToast('error', 'Ambos campos son requeridos'); return }
+    if (newPassword.length < 6) { showToast('error', 'La nueva contraseña debe tener al menos 6 caracteres'); return }
     setSaving(true)
     try {
       await changePassword(currentPassword, newPassword)
-      toast.success('Contraseña actualizada')
+      showToast('success', 'Contraseña actualizada')
       setCurrentPassword('')
       setNewPassword('')
     } catch (e: any) {
-      toast.error(e.response?.data?.error || 'Error al cambiar contraseña')
+      showToast('error', e.response?.data?.error || 'Error al cambiar contraseña')
     } finally {
       setSaving(false)
     }

@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { CreditCard, ChevronRight } from 'lucide-react'
-import toast from 'react-hot-toast'
+import { showToast } from '../lib/sweetalert'
 import { createPayment } from '../services/payment.service'
 import { useCartStore } from '../store/cart.store'
 
@@ -12,14 +12,14 @@ export default function Checkout() {
   const total = items.reduce((sum, item) => sum + Number(item.product.price) * item.quantity, 0)
 
   const handlePay = async () => {
-    if (!selectedMethod) { toast.error('Selecciona un método de pago'); return }
+    if (!selectedMethod) { showToast('error', 'Selecciona un método de pago'); return }
     setLoading(true)
     try {
       const { redirectUrl } = await createPayment(selectedMethod)
       clearCart()
       window.location.href = redirectUrl
     } catch (e: any) {
-      toast.error(e.response?.data?.error || 'Error al procesar pago')
+      showToast('error', e.response?.data?.error || 'Error al procesar pago')
     } finally {
       setLoading(false)
     }
