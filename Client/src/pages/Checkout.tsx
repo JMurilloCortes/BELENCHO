@@ -35,6 +35,7 @@ export default function Checkout() {
     deliveryAddress: '',
     deliveryInstructions: '',
     giftFrom: '',
+    giftTo: '',
     giftMessage: '',
   })
 

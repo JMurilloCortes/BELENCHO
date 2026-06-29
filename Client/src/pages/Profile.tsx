@@ -1,25 +1,8 @@
 import { useEffect, useState } from 'react'
-import { User, Lock, Save, Mail, Calendar, Shield, Eye, EyeOff, Check, X, ShoppingBag, Package, ChevronRight } from 'lucide-react'
+import { User, Lock, Save, Mail, Calendar, Shield, Eye, EyeOff, Check, X } from 'lucide-react'
 import { showToast } from '../lib/sweetalert'
 import { useAuthStore } from '../store/auth.store'
 import { getProfile, updateProfile, changePassword } from '../services/user.service'
-import { getUserOrders } from '../services/payment.service'
-import { Link } from 'react-router-dom'
-import type { Order } from '../types'
-
-const statusLabels: Record<string, string> = {
-  PENDING: 'Pendiente',
-  PAID: 'Pagada',
-  CANCELLED: 'Cancelada',
-  REFUNDED: 'Reembolsada',
-}
-
-const statusColors: Record<string, string> = {
-  PENDING: 'bg-yellow-50 text-yellow-600',
-  PAID: 'bg-green-50 text-green-600',
-  CANCELLED: 'bg-red-50 text-red-600',
-  REFUNDED: 'bg-gray-100 text-gray-500',
-}
 
 export default function Profile() {
   const { user, login, isAuthenticated } = useAuthStore()
@@ -31,8 +14,6 @@ export default function Profile() {
   const [saving, setSaving] = useState(false)
   const [showCurrent, setShowCurrent] = useState(false)
   const [showNew, setShowNew] = useState(false)
-  const [orders, setOrders] = useState<Order[]>([])
-  const [ordersLoading, setOrdersLoading] = useState(true)
 
   useEffect(() => {
     if (!isAuthenticated) return
@@ -43,10 +24,6 @@ export default function Profile() {
       })
       .catch(() => showToast('error', 'Error al cargar perfil'))
       .finally(() => setLoading(false))
-    getUserOrders()
-      .then(setOrders)
-      .catch(() => {})
-      .finally(() => setOrdersLoading(false))
   }, [isAuthenticated])
 
   const handleSaveProfile = async () => {
@@ -228,55 +205,6 @@ export default function Profile() {
           </div>
         </div>
       )}
-
-      {/* Orders */}
-      <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 sm:p-8">
-        <div className="flex items-center gap-3 mb-6 pb-4 border-b border-gray-100">
-          <div className="w-10 h-10 rounded-xl bg-highlight/10 flex items-center justify-center">
-            <Package size={20} className="text-yellow-700" />
-          </div>
-          <div>
-            <h2 className="text-lg font-semibold text-gray-800">Mis pedidos</h2>
-            <p className="text-xs text-gray-400">{orders.length} pedido{orders.length !== 1 ? 's' : ''}</p>
-          </div>
-        </div>
-
-        {ordersLoading ? (
-          <div className="flex items-center justify-center py-12">
-            <div className="w-8 h-8 border-3 border-primary/30 border-t-primary rounded-full animate-spin" />
-          </div>
-        ) : orders.length === 0 ? (
-          <div className="text-center py-12">
-            <ShoppingBag size={36} className="mx-auto text-gray-200 mb-3" />
-            <p className="text-gray-400 text-sm">No tienes pedidos aún</p>
-            <Link to="/catalogo" className="inline-block mt-3 text-primary hover:underline text-sm font-medium">Ir al catálogo</Link>
-          </div>
-        ) : (
-          <div className="space-y-3">
-            {orders.map((order) => (
-              <div key={order.id} className="flex items-center gap-4 p-4 rounded-xl bg-gray-50/50 border border-gray-100 hover:border-gray-200 transition-all duration-200">
-                <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-primary/10 to-accent/10 flex items-center justify-center shrink-0">
-                  <ShoppingBag size={18} className="text-primary" />
-                </div>
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2 flex-wrap">
-                    <span className="text-sm font-semibold text-gray-800">#{order.id.slice(0, 8)}</span>
-                    <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full ${statusColors[order.status] || 'bg-gray-100'}`}>
-                      {statusLabels[order.status] || order.status}
-                    </span>
-                  </div>
-                  <div className="flex items-center gap-3 mt-1 text-xs text-gray-400">
-                    <span>{new Date(order.createdAt).toLocaleDateString()}</span>
-                    <span className="font-semibold text-gray-700">${Number(order.total).toLocaleString()}</span>
-                    {order.deliveryDate && <span>{order.deliveryDate.split('-').reverse().join('/')}</span>}
-                  </div>
-                </div>
-                <ChevronRight size={16} className="text-gray-300 shrink-0" />
-              </div>
-            ))}
-          </div>
-        )}
-      </div>
     </div>
   )
 }

@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { Link, useLocation } from 'react-router-dom'
-import { ShoppingCart, Heart, User, LogOut, ChevronDown, LayoutDashboard, UserCircle, Menu, X, Sparkles, Search } from 'lucide-react'
+import { ShoppingCart, Heart, User, LogOut, ChevronDown, LayoutDashboard, UserCircle, Menu, X, Sparkles, Search, Package } from 'lucide-react'
 import { useAuthStore } from '../store/auth.store'
 import { useCartStore } from '../store/cart.store'
 import { useFavoriteStore } from '../store/favorite.store'
@@ -181,6 +181,16 @@ export default function Navbar() {
                         </div>
                         <span className="font-medium">Mi perfil</span>
                       </Link>
+                      <Link
+                        to="/pedidos"
+                        onClick={() => setMenuOpen(false)}
+                        className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm text-gray-600 hover:bg-gray-50 hover:text-primary transition-all duration-200 group"
+                      >
+                        <div className="w-8 h-8 rounded-lg bg-highlight/5 flex items-center justify-center group-hover:bg-highlight/10 transition-colors">
+                          <Package size={16} className="text-yellow-700" />
+                        </div>
+                        <span className="font-medium">Mis pedidos</span>
+                      </Link>
                       {isAdmin && (
                         <Link
                           to="/admin"
@@ -319,6 +329,14 @@ export default function Navbar() {
                   >
                     <UserCircle size={18} className="text-primary" />
                     Mi perfil
+                  </Link>
+                  <Link
+                    to="/pedidos"
+                    onClick={() => setDrawerOpen(false)}
+                    className="flex items-center gap-3 px-3 py-3 rounded-xl text-sm font-medium text-gray-600 hover:bg-gray-50 hover:text-primary transition-all duration-200"
+                  >
+                    <Package size={18} className="text-yellow-700" />
+                    Mis pedidos
                   </Link>
                   {isAdmin && (
                     <Link

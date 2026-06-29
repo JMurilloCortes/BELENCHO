@@ -9,6 +9,8 @@ import Register from './pages/Register'
 import CartPage from './pages/CartPage'
 import FavoritesPage from './pages/FavoritesPage'
 import Profile from './pages/Profile'
+import MyOrders from './pages/MyOrders'
+import OrderDetail from './pages/OrderDetail'
 import Checkout from './pages/Checkout'
 import PaymentConfirmation from './pages/PaymentConfirmation'
 import AuthCallback from './pages/AuthCallback'
@@ -40,6 +42,8 @@ function AppContent() {
         <Route path="/carrito" element={<CartPage />} />
         <Route path="/favoritos" element={<FavoritesPage />} />
         <Route path="/perfil" element={<Profile />} />
+        <Route path="/pedidos" element={<MyOrders />} />
+        <Route path="/pedidos/:id" element={<OrderDetail />} />
         <Route path="/checkout" element={<Checkout />} />
         <Route path="/pago/confirmacion" element={<PaymentConfirmation />} />
       </Route>

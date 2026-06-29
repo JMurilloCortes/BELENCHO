@@ -147,7 +147,10 @@ export async function getOrder(req: AuthRequest, res: Response) {
   try {
     const order = await prisma.order.findUnique({
       where: { id: String(req.params.id) },
-      include: { items: { include: { product: { include: { images: true } } } } },
+      include: {
+        neighborhood: { select: { id: true, name: true } },
+        items: { include: { product: { include: { images: true } } } },
+      },
     });
     if (!order) return res.status(404).json({ error: "Orden no encontrada" });
     if (order.userId !== req.user!.id) return res.status(403).json({ error: "No autorizado" });
@@ -161,7 +164,10 @@ export async function getUserOrders(req: AuthRequest, res: Response) {
   try {
     const orders = await prisma.order.findMany({
       where: { userId: req.user!.id },
-      include: { items: { include: { product: { include: { images: true } } } } },
+      include: {
+        neighborhood: { select: { id: true, name: true } },
+        items: { include: { product: { include: { images: true } } } },
+      },
       orderBy: { createdAt: "desc" },
     });
     res.json(orders);
