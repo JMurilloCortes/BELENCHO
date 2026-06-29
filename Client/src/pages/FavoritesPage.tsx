@@ -108,15 +108,16 @@ export default function FavoritesPage() {
           {items.map((product) => (
             <div
               key={product.id}
-              className="group bg-white rounded-2xl sm:rounded-3xl overflow-hidden shadow-lg shadow-gray-200/50 hover:shadow-2xl hover:shadow-gray-200/60 transition-all duration-500 hover:-translate-y-2 border border-gray-100 hover:border-transparent"
+              className="group relative bg-white rounded-2xl sm:rounded-3xl overflow-hidden shadow-sm hover:shadow-2xl transition-all duration-500 hover:-translate-y-2 border border-gray-100"
             >
-              {/* Image */}
-              <Link to={`/producto/${product.id}`} className="block relative aspect-[4/5] overflow-hidden">
+              <div className="absolute top-0 left-0 right-0 h-0.5 bg-gradient-to-r from-primary via-accent to-highlight opacity-0 group-hover:opacity-100 transition-opacity duration-500 z-20" />
+              <Link to={`/producto/${product.id}`} className="block relative aspect-[4/5] overflow-hidden bg-gray-50">
                 <img
                   src={product.images?.[0]?.url || 'https://placehold.co/400x500/e2e8f0/94a3b8?text=No'}
                   alt={product.name}
                   className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
                 />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/5 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
                 <span className="absolute top-3 left-3 bg-white/90 backdrop-blur-sm text-gray-700 text-[10px] sm:text-xs font-semibold px-2.5 py-1 rounded-full shadow-sm z-10">
                   {product.category?.name}
                 </span>
@@ -131,7 +132,7 @@ export default function FavoritesPage() {
                   }}
                   className="absolute top-3 right-3 z-10 p-2.5 rounded-full bg-accent text-white shadow-lg shadow-accent/30 transition-all duration-300 hover:scale-110 hover:shadow-xl hover:shadow-accent/40"
                 >
-                  <Heart size={16} fill="currentColor" />
+                  <Heart size={15} fill="currentColor" />
                 </button>
                 {product.stock <= 3 && product.stock > 0 && (
                   <span className="absolute bottom-3 left-3 bg-accent text-white text-[10px] font-semibold px-2.5 py-1 rounded-full shadow-lg shadow-accent/30 z-10">

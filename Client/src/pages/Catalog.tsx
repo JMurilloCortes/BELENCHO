@@ -198,73 +198,74 @@ export default function Catalog() {
               return (
                 <div
                   key={product.id}
-                  className="group bg-white rounded-2xl sm:rounded-3xl overflow-hidden shadow-lg shadow-gray-200/50 hover:shadow-2xl hover:shadow-gray-200/60 transition-all duration-500 hover:-translate-y-2 border border-gray-100 hover:border-transparent"
+                  className="group relative bg-white rounded-2xl sm:rounded-3xl overflow-hidden shadow-sm hover:shadow-2xl transition-all duration-500 hover:-translate-y-2 border border-gray-100"
                 >
-                {/* Image */}
-                <Link to={`/producto/${product.id}`} className="block relative aspect-[4/5] overflow-hidden">
-                  <img
-                    src={product.images?.[0]?.url || 'https://placehold.co/400x500/e2e8f0/94a3b8?text=No'}
-                    alt={product.name}
-                    className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
-                  />
-                  {/* Category badge */}
-                  <span className="absolute top-3 left-3 bg-white/90 backdrop-blur-sm text-gray-700 text-[10px] sm:text-xs font-semibold px-2.5 py-1 rounded-full shadow-sm z-10">
-                    {product.category?.name}
-                  </span>
-                  {/* Favorite button */}
-                  <button
-                    onClick={(e) => { e.preventDefault(); handleToggleFavorite(product.id) }}
-                    className={`absolute top-3 right-3 z-10 p-2 rounded-full transition-all duration-300 ${
-                      fav
-                        ? 'bg-accent text-white shadow-lg shadow-accent/30'
-                        : 'bg-white/80 backdrop-blur-sm text-gray-400 hover:bg-accent hover:text-white hover:shadow-lg hover:shadow-accent/30'
-                    }`}
-                  >
-                    <Heart size={16} fill={fav ? 'currentColor' : 'none'} />
-                  </button>
-                  {/* Stock badges */}
-                  {product.stock <= 3 && product.stock > 0 && (
-                    <span className="absolute bottom-3 left-3 bg-accent text-white text-[10px] font-semibold px-2.5 py-1 rounded-full shadow-lg shadow-accent/30 z-10">
-                      Últimas {product.stock}
+                  <div className="absolute top-0 left-0 right-0 h-0.5 bg-gradient-to-r from-primary via-accent to-highlight opacity-0 group-hover:opacity-100 transition-opacity duration-500 z-20" />
+                  <Link to={`/producto/${product.id}`} className="block relative aspect-[4/5] overflow-hidden bg-gray-50">
+                    <img
+                      src={product.images?.[0]?.url || 'https://placehold.co/400x500/e2e8f0/94a3b8?text=No'}
+                      alt={product.name}
+                      className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/5 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+                    {/* Category badge */}
+                    <span className="absolute top-3 left-3 bg-white/90 backdrop-blur-sm text-gray-700 text-[10px] sm:text-xs font-semibold px-2.5 py-1 rounded-full shadow-sm z-10">
+                      {product.category?.name}
                     </span>
-                  )}
-                  {product.stock === 0 && (
-                    <span className="absolute bottom-3 left-3 bg-gray-900/90 text-white text-[10px] font-semibold px-2.5 py-1 rounded-full backdrop-blur-sm z-10">
-                      Agotado
-                    </span>
-                  )}
-                </Link>
-
-                {/* Info */}
-                <div className="p-3 sm:p-5">
-                  <Link to={`/producto/${product.id}`}>
-                    <h3 className="font-semibold text-gray-800 text-sm sm:text-base leading-snug group-hover:text-primary transition-colors line-clamp-2">
-                      {product.name}
-                    </h3>
-                  </Link>
-                  {product.description && (
-                    <p className="text-xs sm:text-sm text-gray-400 mt-1.5 line-clamp-2 leading-relaxed">
-                      {product.description}
-                    </p>
-                  )}
-                  <div className="flex items-center justify-between mt-3 sm:mt-4">
-                    <span className="text-lg sm:text-xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
-                      ${Number(product.price).toLocaleString()}
-                    </span>
+                    {/* Favorite button */}
                     <button
-                      onClick={() => handleAddToCart(product.id)}
-                      disabled={product.stock === 0}
-                      className={`p-2.5 rounded-xl transition-all duration-300 ${
-                        product.stock === 0
-                          ? 'bg-gray-100 text-gray-300 cursor-not-allowed'
-                          : 'bg-primary/10 text-primary hover:bg-primary hover:text-white hover:shadow-lg hover:shadow-primary/20'
+                      onClick={(e) => { e.preventDefault(); handleToggleFavorite(product.id) }}
+                      className={`absolute top-3 right-3 z-10 p-2.5 rounded-full transition-all duration-300 ${
+                        fav
+                          ? 'bg-accent text-white shadow-lg shadow-accent/30'
+                          : 'bg-white/80 backdrop-blur-sm text-gray-400 hover:bg-accent hover:text-white hover:shadow-lg hover:shadow-accent/30'
                       }`}
                     >
-                      <ShoppingCart size={16} />
+                      <Heart size={15} fill={fav ? 'currentColor' : 'none'} />
                     </button>
+                    {/* Stock badges */}
+                    {product.stock <= 3 && product.stock > 0 && (
+                      <span className="absolute bottom-3 left-3 bg-accent text-white text-[10px] font-semibold px-2.5 py-1 rounded-full shadow-lg shadow-accent/30 z-10">
+                        Últimas {product.stock}
+                      </span>
+                    )}
+                    {product.stock === 0 && (
+                      <span className="absolute bottom-3 left-3 bg-gray-900/90 text-white text-[10px] font-semibold px-2.5 py-1 rounded-full backdrop-blur-sm z-10">
+                        Agotado
+                      </span>
+                    )}
+                  </Link>
+
+                  {/* Info */}
+                  <div className="p-3 sm:p-5">
+                    <Link to={`/producto/${product.id}`}>
+                      <h3 className="font-semibold text-gray-800 text-sm sm:text-base leading-snug group-hover:text-primary transition-colors line-clamp-2">
+                        {product.name}
+                      </h3>
+                    </Link>
+                    {product.description && (
+                      <p className="text-xs sm:text-sm text-gray-400 mt-1.5 line-clamp-2 leading-relaxed">
+                        {product.description}
+                      </p>
+                    )}
+                    <div className="flex items-center justify-between mt-3 sm:mt-4">
+                      <span className="text-lg sm:text-xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
+                        ${Number(product.price).toLocaleString()}
+                      </span>
+                      <button
+                        onClick={() => handleAddToCart(product.id)}
+                        disabled={product.stock === 0}
+                        className={`p-2.5 rounded-xl transition-all duration-300 ${
+                          product.stock === 0
+                            ? 'bg-gray-100 text-gray-300 cursor-not-allowed'
+                            : 'bg-primary/10 text-primary hover:bg-primary hover:text-white hover:shadow-lg hover:shadow-primary/20'
+                        }`}
+                      >
+                        <ShoppingCart size={16} />
+                      </button>
+                    </div>
                   </div>
                 </div>
-              </div>
             )
           })}
         </div>
