@@ -1,7 +1,16 @@
 import api from './api'
 
-export async function createPayment(paymentMethod: 'WOMPI' | 'MERCADOPAGO') {
-  const { data } = await api.post('/payments/create', { paymentMethod })
+interface CustomerData {
+  customerName: string
+  customerEmail: string
+  customerPhone: string
+  deliveryAddress: string
+  deliveryInstructions?: string
+  neighborhoodId: string
+}
+
+export async function createPayment(paymentMethod: 'WOMPI' | 'MERCADOPAGO', customerData: CustomerData) {
+  const { data } = await api.post('/payments/create', { paymentMethod, ...customerData })
   return data as { orderId: string; redirectUrl: string }
 }
 

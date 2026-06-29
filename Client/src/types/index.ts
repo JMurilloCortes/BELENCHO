@@ -60,6 +60,13 @@ export interface Order {
   id: string
   userId: string
   user: { id: string; name: string; email: string }
+  customerName: string
+  customerEmail: string
+  customerPhone: string
+  deliveryAddress: string
+  deliveryInstructions?: string
+  neighborhood?: { id: string; name: string }
+  neighborhoodId: string
   status: 'PENDING' | 'PAID' | 'CANCELLED' | 'REFUNDED'
   total: number
   paymentMethod: 'WOMPI' | 'MERCADOPAGO'
@@ -77,6 +84,13 @@ export interface OrderItem {
   product: Product
   quantity: number
   price: number
+}
+
+export interface Neighborhood {
+  id: string
+  name: string
+  active?: boolean
+  _count?: { orders: number }
 }
 
 export interface Favorite {

@@ -88,7 +88,18 @@ export async function createMercadoPagoPreference(orderId: string, total: number
   };
 }
 
-export async function createOrderFromCart(userId: string, paymentMethod: "WOMPI" | "MERCADOPAGO") {
+export async function createOrderFromCart(
+  userId: string,
+  paymentMethod: "WOMPI" | "MERCADOPAGO",
+  customerData: {
+    customerName: string;
+    customerEmail: string;
+    customerPhone: string;
+    deliveryAddress: string;
+    deliveryInstructions?: string;
+    neighborhoodId: string;
+  }
+) {
   const cart = await prisma.cart.findUnique({
     where: { userId },
     include: { items: { include: { product: true } } },
@@ -109,6 +120,12 @@ export async function createOrderFromCart(userId: string, paymentMethod: "WOMPI"
   const order = await prisma.order.create({
     data: {
       userId,
+      customerName: customerData.customerName,
+      customerEmail: customerData.customerEmail,
+      customerPhone: customerData.customerPhone,
+      deliveryAddress: customerData.deliveryAddress,
+      deliveryInstructions: customerData.deliveryInstructions || null,
+      neighborhoodId: customerData.neighborhoodId,
       total,
       paymentMethod,
       items: {

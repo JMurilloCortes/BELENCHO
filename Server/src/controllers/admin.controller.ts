@@ -66,6 +66,7 @@ export async function getAllOrders(_req: AuthRequest, res: Response) {
     const orders = await prisma.order.findMany({
       include: {
         user: { select: { id: true, name: true, email: true } },
+        neighborhood: { select: { id: true, name: true } },
         items: { include: { product: { select: { name: true, images: { take: 1, orderBy: { order: "asc" } } } } } },
       },
       orderBy: { createdAt: "desc" },
@@ -82,6 +83,7 @@ export async function getOrderDetail(req: AuthRequest, res: Response) {
       where: { id: String(req.params.id) },
       include: {
         user: { select: { id: true, name: true, email: true } },
+        neighborhood: { select: { id: true, name: true } },
         items: { include: { product: { include: { images: { orderBy: { order: "asc" } } } } } },
       },
     });
@@ -393,5 +395,65 @@ export async function resetAll(_req: AuthRequest, res: Response) {
     res.json({ message: "Restablecimiento completo exitoso" });
   } catch {
     res.status(500).json({ error: "Error al restablecer" });
+  }
+}
+
+export async function getNeighborhoods(_req: AuthRequest, res: Response) {
+  try {
+    const neighborhoods = await prisma.neighborhood.findMany({
+      orderBy: { name: "asc" },
+      include: { _count: { select: { orders: true } } },
+    });
+    res.json(neighborhoods);
+  } catch {
+    res.status(500).json({ error: "Error al obtener barrios" });
+  }
+}
+
+export async function createNeighborhood(req: AuthRequest, res: Response) {
+  try {
+    const { name } = req.body;
+    if (!name) return res.status(400).json({ error: "Nombre requerido" });
+    const neighborhood = await prisma.neighborhood.create({ data: { name } });
+    res.status(201).json(neighborhood);
+  } catch {
+    res.status(500).json({ error: "Error al crear barrio" });
+  }
+}
+
+export async function updateNeighborhood(req: AuthRequest, res: Response) {
+  try {
+    const id = String(req.params.id);
+    const { name } = req.body;
+    if (!name) return res.status(400).json({ error: "Nombre requerido" });
+    const neighborhood = await prisma.neighborhood.update({ where: { id }, data: { name } });
+    res.json(neighborhood);
+  } catch {
+    res.status(500).json({ error: "Error al actualizar barrio" });
+  }
+}
+
+export async function toggleNeighborhoodActive(req: AuthRequest, res: Response) {
+  try {
+    const id = String(req.params.id);
+    const current = await prisma.neighborhood.findUnique({ where: { id } });
+    if (!current) return res.status(404).json({ error: "Barrio no encontrado" });
+    const updated = await prisma.neighborhood.update({
+      where: { id },
+      data: { active: !current.active },
+    });
+    res.json(updated);
+  } catch {
+    res.status(500).json({ error: "Error al cambiar estado" });
+  }
+}
+
+export async function deleteNeighborhood(req: AuthRequest, res: Response) {
+  try {
+    const id = String(req.params.id);
+    await prisma.neighborhood.delete({ where: { id } });
+    res.json({ message: "Barrio eliminado" });
+  } catch {
+    res.status(500).json({ error: "Error al eliminar barrio" });
   }
 }

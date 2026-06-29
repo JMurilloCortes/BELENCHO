@@ -72,7 +72,7 @@ export default function Home() {
     <div className="overflow-hidden">
 
       {/* ===== HERO - CENTERED SPOTLIGHT ===== */}
-      <section className="relative min-h-[75vh] flex items-center justify-center overflow-hidden bg-gray-900">
+      <section className="relative flex items-center justify-center overflow-hidden bg-gray-900" style={{ borderRadius: '0 0 50% 50% / 0 0 50px 50px', minHeight: '50vh' }}>
         {/* Animated gradient mesh background */}
         <div className="absolute inset-0 overflow-hidden">
           <div className="absolute -top-1/2 -left-1/2 w-[200%] h-[200%] opacity-30 animate-[mesh_20s_ease-in-out_infinite]" style={{
@@ -105,57 +105,51 @@ export default function Home() {
           }
         `}</style>
 
-        <div className="relative w-full max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-20 text-center">
+        <div className="relative w-full max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-12 lg:py-14 text-center">
           {/* Badge */}
-          <div className="inline-flex items-center gap-2 bg-white/10 backdrop-blur-sm border border-white/20 rounded-full px-4 py-1.5 mb-8">
+          <div className="inline-flex items-center gap-2 bg-white/10 backdrop-blur-sm border border-white/20 rounded-full px-3 py-1 sm:px-4 sm:py-1.5 mb-3 sm:mb-6">
             <span className="w-1.5 h-1.5 rounded-full bg-accent animate-pulse" />
-            <span className="text-xs text-white/60 font-medium">Nueva colección 2026</span>
+            <span className="text-[10px] sm:text-xs text-white/60 font-medium">Nueva colección 2026</span>
           </div>
 
           {/* Title */}
-          <h1 className="text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-bold text-white leading-[0.85] mb-6 tracking-tight">
-            Regalos
-            <br />
-            <span className="inline-block mt-2 relative">
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary via-accent to-highlight">que enamoran</span>
-              <svg className="absolute -bottom-3 left-0 w-full" viewBox="0 0 300 16" fill="none">
-                <path d="M0 8 C50 14, 100 2, 150 8 C200 14, 250 2, 300 8" stroke="#49b8a7" strokeWidth="1.5" strokeLinecap="round" opacity="0.6" />
-              </svg>
-            </span>
+          <h1 className="text-3xl sm:text-5xl md:text-6xl lg:text-7xl font-bold text-white leading-[0.85] mb-3 sm:mb-5 tracking-tight">
+            Regalos{' '}
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary via-accent to-highlight">que enamoran</span>
           </h1>
 
-          <p className="text-base sm:text-lg text-white/60 mb-10 max-w-lg mx-auto leading-relaxed">
+          <p className="text-xs sm:text-base lg:text-base text-white/60 mb-4 sm:mb-8 max-w-lg mx-auto leading-relaxed">
             En BELENCHO creamos experiencias únicas a través de regalos creativos y personalizados. 
             Encuentra el detalle perfecto para cada ocasión.
           </p>
 
           {/* Buttons */}
-          <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center">
+          <div className="flex flex-row gap-2 sm:gap-3 justify-center">
             <Link
               to="/catalogo"
-              className="group inline-flex items-center justify-center gap-2.5 bg-white text-gray-900 px-10 py-4 rounded-xl text-sm sm:text-base font-semibold transition-all duration-300 hover:bg-primary hover:text-white hover:scale-105 hover:shadow-xl hover:shadow-primary/20"
+              className="group inline-flex items-center justify-center gap-1.5 sm:gap-2.5 bg-white text-gray-900 px-5 sm:px-8 py-2 sm:py-3 rounded-lg sm:rounded-xl text-[11px] sm:text-sm font-semibold transition-all duration-300 hover:bg-primary hover:text-white hover:scale-105 hover:shadow-xl hover:shadow-primary/20"
             >
-              Explorar catálogo
-              <ArrowRight size={18} className="group-hover:translate-x-1.5 transition-transform" />
+              Explorar
+              <ArrowRight size={13} className="group-hover:translate-x-1.5 transition-transform" />
             </Link>
             <Link
               to="/catalogo"
-              className="group inline-flex items-center justify-center gap-2.5 bg-white/10 text-white/80 border-2 border-white/20 px-10 py-4 rounded-xl text-sm sm:text-base font-semibold transition-all duration-300 hover:bg-white/20 hover:border-white/40 hover:text-white hover:scale-105"
+              className="group inline-flex items-center justify-center gap-1.5 sm:gap-2.5 bg-white/10 text-white/80 border border-white/20 sm:border-2 px-5 sm:px-8 py-2 sm:py-3 rounded-lg sm:rounded-xl text-[11px] sm:text-sm font-semibold transition-all duration-300 hover:bg-white/20 hover:border-white/40 hover:text-white hover:scale-105"
             >
-              <Sparkles size={16} />
-              Ver ofertas
+              <Sparkles size={12} />
+              Ofertas
             </Link>
           </div>
 
           {/* Bottom trust indicators */}
-          <div className="flex items-center justify-center gap-6 sm:gap-10 mt-12 pt-8 border-t border-white/10">
+          <div className="hidden sm:flex items-center justify-center gap-8 mt-10 pt-6 border-t border-white/10">
             {[
               { icon: Shield, text: 'Pago seguro' },
               { icon: BadgeCheck, text: 'Calidad premium' },
               { icon: Clock, text: 'Entrega rápida' },
             ].map(({ icon: Icon, text }) => (
-              <div key={text} className="flex items-center gap-2 text-xs sm:text-sm text-white/50">
-                <Icon size={13} className="text-primary" />
+              <div key={text} className="flex items-center gap-1.5 sm:gap-2 text-[10px] sm:text-xs lg:text-sm text-white/50">
+                <Icon size={11} className="text-primary" />
                 {text}
               </div>
             ))}
@@ -350,9 +344,9 @@ export default function Home() {
                 Ver catálogo completo
                 <ArrowRight size={18} className="group-hover:translate-x-1.5 transition-transform" />
               </Link>
-            </div>
           </div>
-        </section>
+        </div>
+      </section>
       )}
 
       {/* ===== FEATURES - NUMBERED ===== */}

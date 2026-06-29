@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useParams, Link } from 'react-router-dom'
-import { ArrowLeft, ShoppingCart, User as UserIcon, CreditCard, Clock } from 'lucide-react'
+import { ArrowLeft, ShoppingCart, User as UserIcon, CreditCard, Clock, MapPin } from 'lucide-react'
 import { showToast } from '../../lib/sweetalert'
 import { getOrderDetail, updateOrderStatus } from '../../services/admin.service'
 
@@ -90,13 +90,15 @@ export default function AdminOrderDetail() {
             </div>
             <h2 className="text-sm font-semibold text-gray-700">Cliente</h2>
           </div>
-          <div className="flex items-center gap-3">
-            <div className="w-9 h-9 lg:w-10 lg:h-10 rounded-xl bg-gradient-to-br from-primary to-accent flex items-center justify-center text-white font-bold text-sm">
-              {order.user?.name?.[0] || '?'}
-            </div>
-            <div className="min-w-0">
-              <p className="font-medium text-gray-800 text-sm truncate">{order.user?.name}</p>
-              <p className="text-xs lg:text-sm text-gray-400 truncate">{order.user?.email}</p>
+          <div className="space-y-3">
+            <div className="flex items-center gap-3">
+              <div className="w-9 h-9 lg:w-10 lg:h-10 rounded-xl bg-gradient-to-br from-primary to-accent flex items-center justify-center text-white font-bold text-sm">
+                {order.user?.name?.[0] || '?'}
+              </div>
+              <div className="min-w-0">
+                <p className="font-medium text-gray-800 text-sm truncate">{order.user?.name}</p>
+                <p className="text-xs lg:text-sm text-gray-400 truncate">{order.user?.email}</p>
+              </div>
             </div>
           </div>
         </div>
@@ -118,6 +120,44 @@ export default function AdminOrderDetail() {
               <span className="font-bold text-gray-800 text-base lg:text-lg">${Number(order.total).toLocaleString()}</span>
             </div>
           </div>
+        </div>
+      </div>
+
+      {/* Delivery info */}
+      <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-4 lg:p-6 mb-6 lg:mb-8">
+        <div className="flex items-center gap-3 mb-3 lg:mb-4 pb-3 border-b border-gray-100">
+          <div className="w-8 h-8 lg:w-9 lg:h-9 rounded-xl bg-highlight/10 flex items-center justify-center">
+            <MapPin size={16} className="text-yellow-700" />
+          </div>
+          <h2 className="text-sm font-semibold text-gray-700">Entrega</h2>
+        </div>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs lg:text-sm">
+          <div>
+            <span className="text-gray-400 block mb-0.5">Nombre</span>
+            <p className="font-medium text-gray-800">{order.customerName}</p>
+          </div>
+          <div>
+            <span className="text-gray-400 block mb-0.5">Teléfono</span>
+            <p className="font-medium text-gray-800">{order.customerPhone}</p>
+          </div>
+          <div>
+            <span className="text-gray-400 block mb-0.5">Email</span>
+            <p className="font-medium text-gray-800">{order.customerEmail}</p>
+          </div>
+          <div>
+            <span className="text-gray-400 block mb-0.5">Barrio</span>
+            <p className="font-medium text-gray-800">{order.neighborhood?.name || '—'}</p>
+          </div>
+          <div>
+            <span className="text-gray-400 block mb-0.5">Dirección</span>
+            <p className="font-medium text-gray-800">{order.deliveryAddress}</p>
+          </div>
+          {order.deliveryInstructions && (
+            <div className="sm:col-span-2">
+              <span className="text-gray-400 block mb-0.5">Instrucciones</span>
+              <p className="font-medium text-gray-800">{order.deliveryInstructions}</p>
+            </div>
+          )}
         </div>
       </div>
 

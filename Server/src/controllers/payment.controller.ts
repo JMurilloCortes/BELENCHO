@@ -10,12 +10,22 @@ import { prisma } from "../lib/prisma";
 
 export async function createPayment(req: AuthRequest, res: Response) {
   try {
-    const { paymentMethod } = req.body;
+    const { paymentMethod, customerName, customerEmail, customerPhone, deliveryAddress, deliveryInstructions, neighborhoodId } = req.body;
     if (!["WOMPI", "MERCADOPAGO"].includes(paymentMethod)) {
       return res.status(400).json({ error: "Método de pago inválido" });
     }
+    if (!customerName || !customerEmail || !customerPhone || !deliveryAddress || !neighborhoodId) {
+      return res.status(400).json({ error: "Completa todos los datos de entrega" });
+    }
 
-    const order = await createOrderFromCart(req.user!.id, paymentMethod);
+    const neighborhood = await prisma.neighborhood.findUnique({ where: { id: neighborhoodId } });
+    if (!neighborhood || !neighborhood.active) {
+      return res.status(400).json({ error: "Barrio no disponible para entregas" });
+    }
+
+    const order = await createOrderFromCart(req.user!.id, paymentMethod, {
+      customerName, customerEmail, customerPhone, deliveryAddress, deliveryInstructions, neighborhoodId,
+    });
 
     let result;
     if (paymentMethod === "WOMPI") {

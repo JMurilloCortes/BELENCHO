@@ -18,6 +18,7 @@ import AdminProducts from './pages/admin/AdminProducts'
 import AdminOrders from './pages/admin/AdminOrders'
 import AdminOrderDetail from './pages/admin/AdminOrderDetail'
 import AdminCategories from './pages/admin/AdminCategories'
+import AdminNeighborhoods from './pages/admin/AdminNeighborhoods'
 import AdminUsers from './pages/admin/AdminUsers'
 import { useAuthStore } from './store/auth.store'
 
@@ -49,6 +50,7 @@ function AppContent() {
         <Route path="ordenes" element={<AdminOrders />} />
         <Route path="ordenes/:id" element={<AdminOrderDetail />} />
         <Route path="categorias" element={<AdminCategories />} />
+        <Route path="barrios" element={<AdminNeighborhoods />} />
         <Route path="usuarios" element={<AdminUsers />} />
       </Route>
     </Routes>

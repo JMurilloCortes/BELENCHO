@@ -99,3 +99,28 @@ export async function deleteCategory(id: string) {
   const { data } = await api.delete(`/admin/categories/${id}`)
   return data
 }
+
+export async function getNeighborhoods() {
+  const { data } = await api.get('/admin/neighborhoods')
+  return data
+}
+
+export async function createNeighborhood(name: string) {
+  const { data } = await api.post('/admin/neighborhoods', { name })
+  return data
+}
+
+export async function updateNeighborhood(id: string, name: string) {
+  const { data } = await api.put(`/admin/neighborhoods/${id}`, { name })
+  return data
+}
+
+export async function toggleNeighborhoodActive(id: string) {
+  const { data } = await api.put(`/admin/neighborhoods/${id}/toggle-active`)
+  return data
+}
+
+export async function deleteNeighborhood(id: string) {
+  const { data } = await api.delete(`/admin/neighborhoods/${id}`)
+  return data
+}

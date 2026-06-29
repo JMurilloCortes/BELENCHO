@@ -1,5 +1,5 @@
 import { Link, Outlet, useLocation } from 'react-router-dom'
-import { Menu, X, Package, Users, Tag, LayoutDashboard, ShoppingCart, ArrowLeft } from 'lucide-react'
+import { Menu, X, Package, Users, Tag, LayoutDashboard, ShoppingCart, ArrowLeft, MapPin } from 'lucide-react'
 import { useAuthStore } from '../../store/auth.store'
 import { useState } from 'react'
 
@@ -8,6 +8,7 @@ const navItems = [
   { path: '/admin/productos', icon: Package, label: 'Productos' },
   { path: '/admin/ordenes', icon: ShoppingCart, label: 'Órdenes' },
   { path: '/admin/categorias', icon: Tag, label: 'Categorías' },
+  { path: '/admin/barrios', icon: MapPin, label: 'Barrios' },
 ]
 
 const adminNavItems = [

@@ -7,6 +7,8 @@ import {
   createProduct, updateProduct, deleteProduct,
   getCategories, createCategory, updateCategory, deleteCategory,
   toggleProductActive, toggleCategoryActive, toggleUserActive, deleteUser,
+  getNeighborhoods, createNeighborhood, updateNeighborhood,
+  toggleNeighborhoodActive, deleteNeighborhood,
 } from "../controllers/admin.controller";
 
 const router = Router();
@@ -40,5 +42,11 @@ router.post("/categories", createCategory as any);
 router.put("/categories/:id", updateCategory as any);
 router.put("/categories/:id/toggle-active", toggleCategoryActive as any);
 router.delete("/categories/:id", deleteCategory as any);
+
+router.get("/neighborhoods", getNeighborhoods as any);
+router.post("/neighborhoods", authorize("ADMINISTRADOR") as any, createNeighborhood as any);
+router.put("/neighborhoods/:id", authorize("ADMINISTRADOR") as any, updateNeighborhood as any);
+router.put("/neighborhoods/:id/toggle-active", authorize("ADMINISTRADOR") as any, toggleNeighborhoodActive as any);
+router.delete("/neighborhoods/:id", authorize("ADMINISTRADOR") as any, deleteNeighborhood as any);
 
 export default router;
