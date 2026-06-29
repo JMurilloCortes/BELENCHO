@@ -176,6 +176,25 @@ export default function AdminOrderDetail() {
               <p className="font-medium text-gray-800">{order.deliveryInstructions}</p>
             </div>
           )}
+          {(order.giftFrom || order.giftMessage) && (
+            <div className="sm:col-span-2 border-t border-gray-50 pt-4 mt-2">
+              <span className="text-gray-400 block mb-2 text-xs font-medium uppercase tracking-wider">Detalles del regalo</span>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                {order.giftFrom && (
+                  <div>
+                    <span className="text-gray-400 block mb-0.5">De parte de</span>
+                    <p className="font-medium text-gray-800">{order.giftFrom}</p>
+                  </div>
+                )}
+                {order.giftMessage && (
+                  <div className="sm:col-span-2">
+                    <span className="text-gray-400 block mb-0.5">Mensaje</span>
+                    <p className="font-medium text-gray-800 italic">"{order.giftMessage}"</p>
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
         </div>
       </div>
 

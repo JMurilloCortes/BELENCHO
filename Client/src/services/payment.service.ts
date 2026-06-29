@@ -9,6 +9,8 @@ interface CustomerData {
   neighborhoodId: string
   deliveryDate: string
   deliveryTimeSlot: string
+  giftFrom?: string
+  giftMessage?: string
 }
 
 export async function createPayment(paymentMethod: 'WOMPI' | 'MERCADOPAGO', customerData: CustomerData) {

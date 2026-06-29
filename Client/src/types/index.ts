@@ -69,6 +69,8 @@ export interface Order {
   neighborhoodId: string
   deliveryDate?: string
   deliveryTimeSlot?: string
+  giftFrom?: string
+  giftMessage?: string
   status: 'PENDING' | 'PAID' | 'CANCELLED' | 'REFUNDED'
   total: number
   paymentMethod: 'WOMPI' | 'MERCADOPAGO'

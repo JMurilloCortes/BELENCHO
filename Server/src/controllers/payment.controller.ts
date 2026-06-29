@@ -10,7 +10,7 @@ import { prisma } from "../lib/prisma";
 
 export async function createPayment(req: AuthRequest, res: Response) {
   try {
-    const { paymentMethod, customerName, customerEmail, customerPhone, deliveryAddress, deliveryInstructions, neighborhoodId, deliveryDate, deliveryTimeSlot } = req.body;
+    const { paymentMethod, customerName, customerEmail, customerPhone, deliveryAddress, deliveryInstructions, neighborhoodId, deliveryDate, deliveryTimeSlot, giftFrom, giftMessage } = req.body;
     if (!["WOMPI", "MERCADOPAGO"].includes(paymentMethod)) {
       return res.status(400).json({ error: "Método de pago inválido" });
     }
@@ -39,7 +39,7 @@ export async function createPayment(req: AuthRequest, res: Response) {
     }
 
     const order = await createOrderFromCart(req.user!.id, paymentMethod, {
-      customerName, customerEmail, customerPhone, deliveryAddress, deliveryInstructions, neighborhoodId, deliveryDate, deliveryTimeSlot,
+      customerName, customerEmail, customerPhone, deliveryAddress, deliveryInstructions, neighborhoodId, deliveryDate, deliveryTimeSlot, giftFrom, giftMessage,
     });
 
     let result;

@@ -100,6 +100,8 @@ export async function createOrderFromCart(
     neighborhoodId: string;
     deliveryDate: string;
     deliveryTimeSlot: string;
+    giftFrom?: string;
+    giftMessage?: string;
   }
 ) {
   const cart = await prisma.cart.findUnique({
@@ -130,6 +132,8 @@ export async function createOrderFromCart(
       neighborhoodId: customerData.neighborhoodId,
       deliveryDate: customerData.deliveryDate,
       deliveryTimeSlot: customerData.deliveryTimeSlot,
+      giftFrom: customerData.giftFrom || null,
+      giftMessage: customerData.giftMessage || null,
       total,
       paymentMethod,
       items: {

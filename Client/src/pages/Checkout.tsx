@@ -33,6 +33,8 @@ export default function Checkout() {
     customerPhone: '',
     deliveryAddress: '',
     deliveryInstructions: '',
+    giftFrom: '',
+    giftMessage: '',
   })
 
   useEffect(() => {
@@ -277,6 +279,48 @@ export default function Checkout() {
                       )}
                     </div>
                   )}
+                </div>
+              </div>
+            </div>
+
+            {/* Gift details */}
+            <div className="bg-white rounded-2xl sm:rounded-3xl shadow-lg shadow-gray-200/50 border border-gray-100 overflow-hidden">
+              <div className="p-5 sm:p-7 lg:p-8">
+                <div className="flex items-center gap-3 mb-6 pb-5 border-b border-gray-50">
+                  <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-accent to-highlight flex items-center justify-center shadow-lg shadow-accent/20">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-white"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+                  </div>
+                  <div>
+                    <h2 className="text-base sm:text-lg font-bold text-gray-800">Detalles del regalo</h2>
+                    <p className="text-xs text-gray-400">De parte de quién es y un mensaje para la tarjeta</p>
+                  </div>
+                </div>
+
+                <div className="space-y-4">
+                  <div className="relative group">
+                    <User size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-300 group-focus-within:text-primary transition-colors duration-300" />
+                    <input
+                      type="text"
+                      placeholder="De parte de (ej. María, Juan, etc.)"
+                      value={form.giftFrom}
+                      onChange={(e) => updateField('giftFrom', e.target.value)}
+                      className={inputBase}
+                    />
+                  </div>
+                  <div className="relative group">
+                    <MessageSquare size={16} className="absolute left-4 top-6 text-gray-300 group-focus-within:text-primary transition-colors duration-300" />
+                    <textarea
+                      placeholder="Mensaje para la tarjeta (máximo 200 caracteres)"
+                      value={form.giftMessage}
+                      onChange={(e) => {
+                        if (e.target.value.length <= 200) updateField('giftMessage', e.target.value)
+                      }}
+                      rows={3}
+                      maxLength={200}
+                      className="w-full pl-11 pr-4 py-3.5 bg-white border-2 border-gray-100 rounded-xl text-sm text-gray-800 placeholder-gray-300 focus:outline-none focus:border-primary focus:bg-white focus:ring-4 focus:ring-primary/5 transition-all duration-300 hover:border-gray-200 resize-none"
+                    />
+                    <span className="absolute right-3 bottom-3 text-[10px] text-gray-300">{form.giftMessage.length}/200</span>
+                  </div>
                 </div>
               </div>
             </div>
