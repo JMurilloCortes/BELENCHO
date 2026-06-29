@@ -5,7 +5,10 @@ export async function getProfile() {
   return data
 }
 
-export async function updateProfile(body: { name?: string; email?: string; avatar?: string }) {
+export async function updateProfile(body: {
+  name?: string; email?: string; avatar?: string;
+  phone?: string; defaultAddress?: string; defaultNeighborhoodId?: string;
+}) {
   const { data } = await api.put('/users/profile', body)
   return data
 }

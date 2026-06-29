@@ -22,7 +22,7 @@ export async function registerUser(email: string, password: string, name: string
   });
 
   const token = generateToken(user.id, user.role);
-  return { token, user: { id: user.id, email: user.email, name: user.name, role: user.role } };
+  return { token, user: { id: user.id, email: user.email, name: user.name, role: user.role, createdAt: user.createdAt } };
 }
 
 export async function loginUser(email: string, password: string) {
@@ -37,7 +37,7 @@ export async function loginUser(email: string, password: string) {
   }
 
   const token = generateToken(user.id, user.role);
-  return { token, user: { id: user.id, email: user.email, name: user.name, role: user.role, avatar: user.avatar } };
+  return { token, user: { id: user.id, email: user.email, name: user.name, role: user.role, avatar: user.avatar, createdAt: user.createdAt } };
 }
 
 export async function findOrCreateGoogleUser(profile: { id: string; email: string; name: string; avatar?: string }) {
@@ -64,5 +64,5 @@ export async function findOrCreateGoogleUser(profile: { id: string; email: strin
   }
 
   const token = generateToken(user.id, user.role);
-  return { token, user: { id: user.id, email: user.email, name: user.name, role: user.role, avatar: user.avatar } };
+  return { token, user: { id: user.id, email: user.email, name: user.name, role: user.role, avatar: user.avatar, createdAt: user.createdAt } };
 }

@@ -26,16 +26,20 @@ enum PaymentMethod {
 }
 
 model User {
-  id        String   @id @default(cuid())
-  email     String   @unique
-  password  String?
-  name      String
-  role      Role     @default(CLIENTE)
-  active    Boolean  @default(true)
-  googleId  String?  @unique
-  avatar    String?
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id                   String        @id @default(cuid())
+  email                String        @unique
+  password             String?
+  name                 String
+  role                 Role          @default(CLIENTE)
+  active               Boolean       @default(true)
+  googleId             String?       @unique
+  avatar               String?
+  phone                String?
+  defaultAddress       String?
+  defaultNeighborhoodId String?
+  defaultNeighborhood  Neighborhood? @relation("DefaultNeighborhood", fields: [defaultNeighborhoodId], references: [id])
+  createdAt            DateTime      @default(now())
+  updatedAt            DateTime      @updatedAt
 
   cart      Cart?
   favorites Favorite[]
@@ -166,8 +170,9 @@ model OrderItem {
 }
 
 model Neighborhood {
-  id      String  @id @default(cuid())
-  name    String  @unique
-  active  Boolean @default(true)
-  orders  Order[]
+  id     String  @id @default(cuid())
+  name   String  @unique
+  active Boolean @default(true)
+  orders Order[]
+  users  User[]  @relation("DefaultNeighborhood")
 }

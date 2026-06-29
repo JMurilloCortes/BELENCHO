@@ -7,7 +7,11 @@ export async function getProfile(req: AuthRequest, res: Response) {
   try {
     const user = await prisma.user.findUnique({
       where: { id: req.user!.id },
-      select: { id: true, email: true, name: true, role: true, avatar: true, createdAt: true },
+      select: {
+        id: true, email: true, name: true, role: true, avatar: true, createdAt: true,
+        phone: true, defaultAddress: true, defaultNeighborhoodId: true,
+        defaultNeighborhood: { select: { id: true, name: true } },
+      },
     });
     if (!user) return res.status(404).json({ error: "Usuario no encontrado" });
     res.json(user);
@@ -18,7 +22,7 @@ export async function getProfile(req: AuthRequest, res: Response) {
 
 export async function updateProfile(req: AuthRequest, res: Response) {
   try {
-    const { name, email, avatar } = req.body;
+    const { name, email, avatar, phone, defaultAddress, defaultNeighborhoodId } = req.body;
     const data: any = {};
     if (name) data.name = name;
     if (email) {
@@ -29,11 +33,18 @@ export async function updateProfile(req: AuthRequest, res: Response) {
       data.email = email;
     }
     if (avatar !== undefined) data.avatar = avatar;
+    if (phone !== undefined) data.phone = phone;
+    if (defaultAddress !== undefined) data.defaultAddress = defaultAddress;
+    if (defaultNeighborhoodId !== undefined) data.defaultNeighborhoodId = defaultNeighborhoodId;
 
     const user = await prisma.user.update({
       where: { id: req.user!.id },
       data,
-      select: { id: true, email: true, name: true, role: true, avatar: true },
+      select: {
+        id: true, email: true, name: true, role: true, avatar: true,
+        phone: true, defaultAddress: true, defaultNeighborhoodId: true,
+        defaultNeighborhood: { select: { id: true, name: true } },
+      },
     });
     res.json(user);
   } catch {

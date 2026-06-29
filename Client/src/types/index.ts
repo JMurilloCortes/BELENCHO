@@ -5,6 +5,10 @@ export interface User {
   role: string
   avatar?: string
   createdAt?: string
+  phone?: string
+  defaultAddress?: string
+  defaultNeighborhoodId?: string
+  defaultNeighborhood?: { id: string; name: string }
 }
 
 export interface Category {

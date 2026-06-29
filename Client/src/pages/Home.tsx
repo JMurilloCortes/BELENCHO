@@ -106,12 +106,6 @@ export default function Home() {
         `}</style>
 
         <div className="relative w-full max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-12 lg:py-14 text-center">
-          {/* Badge */}
-          <div className="inline-flex items-center gap-2 bg-white/10 backdrop-blur-sm border border-white/20 rounded-full px-3 py-1 sm:px-4 sm:py-1.5 mb-3 sm:mb-6">
-            <span className="w-1.5 h-1.5 rounded-full bg-accent animate-pulse" />
-            <span className="text-[10px] sm:text-xs text-white/60 font-medium">Nueva colección 2026</span>
-          </div>
-
           {/* Title */}
           <h1 className="text-3xl sm:text-5xl md:text-6xl lg:text-7xl font-bold text-white leading-[0.85] mb-3 sm:mb-5 tracking-tight">
             Regalos{' '}
