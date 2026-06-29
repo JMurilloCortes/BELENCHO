@@ -57,7 +57,7 @@ export default function Home() {
   return (
     <div className="overflow-hidden">
       {/* ===== HERO ===== */}
-      <section className="relative min-h-screen flex items-center overflow-hidden">
+      <section className="relative min-h-[55vh] sm:min-h-[65vh] flex items-center overflow-hidden">
         {/* Background */}
         <div className="absolute inset-0 bg-gray-950" />
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-primary/20 via-transparent to-transparent" />
@@ -87,10 +87,17 @@ export default function Home() {
           ))}
         </div>
 
+        {/* Curved bottom wave */}
+        <div className="absolute bottom-0 left-0 w-full overflow-hidden leading-none z-10">
+          <svg viewBox="0 0 1440 120" preserveAspectRatio="none" className="relative block w-full h-[60px] sm:h-[80px]">
+            <path d="M0,120 C360,0 720,0 1440,120 L1440,120 L0,120 Z" fill="#f9fafb" />
+          </svg>
+        </div>
+
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
           <div className="max-w-3xl mx-auto lg:mx-0 text-center lg:text-left">
             {/* Badge */}
-            <div className="inline-flex items-center gap-2 bg-white/5 backdrop-blur-sm border border-white/10 rounded-full px-4 py-1.5 mb-8 animate-fadeIn">
+            <div className="inline-flex items-center gap-2 bg-white/5 backdrop-blur-sm border border-white/10 rounded-full px-4 py-1.5 mb-6 sm:mb-8 animate-fadeIn">
               <span className="relative flex h-2 w-2">
                 <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-75" />
                 <span className="relative inline-flex rounded-full h-2 w-2 bg-primary" />
@@ -99,7 +106,7 @@ export default function Home() {
             </div>
 
             {/* Title */}
-            <h1 className="text-5xl sm:text-6xl md:text-8xl font-bold text-white leading-[0.9] mb-8 animate-fadeIn">
+            <h1 className="text-3xl sm:text-4xl md:text-6xl font-bold text-white leading-[0.9] mb-4 sm:mb-6 animate-fadeIn">
               Regalos que
               <span className="block text-transparent bg-clip-text bg-gradient-to-r from-primary via-accent to-highlight mt-2">
                 enamoran
@@ -107,33 +114,33 @@ export default function Home() {
             </h1>
 
             {/* Description */}
-            <p className="text-base sm:text-lg md:text-xl text-gray-400 mb-10 max-w-xl mx-auto lg:mx-0 leading-relaxed animate-fadeIn">
+            <p className="text-sm sm:text-base md:text-lg text-gray-400 mb-8 max-w-xl mx-auto lg:mx-0 leading-relaxed animate-fadeIn">
               En BELENCHO creamos experiencias únicas a través de regalos creativos y personalizados. 
               Encuentra el detalle perfecto para cada ocasión.
             </p>
 
             {/* CTA Buttons */}
-            <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start animate-fadeIn">
+            <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center lg:justify-start animate-fadeIn">
               <Link
                 to="/catalogo"
-                className="group relative inline-flex items-center justify-center gap-2 bg-gradient-to-r from-primary to-accent text-white px-8 py-4 rounded-xl text-base font-semibold transition-all duration-300 hover:scale-105 hover:shadow-2xl hover:shadow-primary/40 overflow-hidden"
+                className="group relative inline-flex items-center justify-center gap-2 bg-gradient-to-r from-primary to-accent text-white px-6 sm:px-8 py-3 sm:py-4 rounded-xl text-sm sm:text-base font-semibold transition-all duration-300 hover:scale-105 hover:shadow-2xl hover:shadow-primary/40 overflow-hidden"
               >
                 <span className="absolute inset-0 bg-white/0 group-hover:bg-white/10 transition-colors" />
                 <span className="relative flex items-center gap-2">
-                  Explorar catálogo <ArrowRight size={20} className="group-hover:translate-x-1 transition-transform" />
+                  Explorar catálogo <ArrowRight size={18} className="group-hover:translate-x-1 transition-transform" />
                 </span>
               </Link>
               <Link
                 to="/catalogo"
-                className="inline-flex items-center justify-center gap-2 bg-white/5 backdrop-blur-sm border border-white/10 hover:bg-white/10 text-white px-8 py-4 rounded-xl text-base font-semibold transition-all duration-300 hover:scale-105"
+                className="inline-flex items-center justify-center gap-2 bg-white/5 backdrop-blur-sm border border-white/10 hover:bg-white/10 text-white px-6 sm:px-8 py-3 sm:py-4 rounded-xl text-sm sm:text-base font-semibold transition-all duration-300 hover:scale-105"
               >
-                <Sparkles size={18} className="text-highlight" />
+                <Sparkles size={16} className="text-highlight" />
                 Ver ofertas
               </Link>
             </div>
 
             {/* Trust indicators */}
-            <div className="flex flex-wrap gap-6 mt-12 justify-center lg:justify-start animate-fadeIn">
+            <div className="flex flex-wrap gap-5 mt-10 justify-center lg:justify-start animate-fadeIn">
               {[
                 { icon: Shield, text: 'Pago seguro' },
                 { icon: Award, text: 'Calidad premium' },
@@ -147,25 +154,17 @@ export default function Home() {
             </div>
           </div>
         </div>
-
-        {/* Scroll indicator */}
-        <div className="absolute bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 animate-bounce">
-          <span className="text-[10px] text-gray-600 uppercase tracking-[0.2em]">Scroll</span>
-          <div className="w-5 h-8 border-2 border-gray-700 rounded-full flex justify-center">
-            <div className="w-1 h-2 bg-gray-500 rounded-full mt-2 animate-pulse" />
-          </div>
-        </div>
       </section>
 
       {/* ===== STATS ===== */}
-      <section className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 -mt-20">
-        <div className="bg-gray-900/80 backdrop-blur-xl border border-white/5 rounded-3xl p-8 sm:p-10 grid grid-cols-2 md:grid-cols-4 gap-6 sm:gap-8 shadow-2xl shadow-black/50">
+      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 sm:py-20">
+        <div className="grid grid-cols-2 md:grid-cols-4 divide-x divide-gray-100">
           {stats.map((stat, i) => (
-            <div key={stat.label} className="text-center group">
-              <p className="text-3xl sm:text-4xl lg:text-5xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent mb-2">
+            <div key={stat.label} className="text-center px-4 sm:px-8 py-4">
+              <p className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-800 mb-1">
                 {stat.value}
               </p>
-              <p className="text-sm text-gray-500 group-hover:text-gray-300 transition-colors">{stat.label}</p>
+              <p className="text-sm text-gray-400">{stat.label}</p>
             </div>
           ))}
         </div>

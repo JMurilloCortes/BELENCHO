@@ -61,132 +61,132 @@ export default function Footer() {
       <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
 
         {/* Main content */}
-        <div className="pt-16 pb-12">
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-12 gap-10 lg:gap-8">
+          <div className="pt-12 sm:pt-16 pb-10 sm:pb-12">
+            <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-12 gap-8 sm:gap-10 lg:gap-8">
 
-            {/* Brand column */}
-            <div className="sm:col-span-2 lg:col-span-4">
-              <Link to="/" className="inline-block mb-5 group">
-                <div className="flex items-center gap-2">
-                  <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary to-accent flex items-center justify-center text-white font-bold text-sm shadow-lg shadow-primary/20 group-hover:shadow-primary/40 transition-shadow">
-                    B
+              {/* Brand column - full width on mobile */}
+              <div className="col-span-2 sm:col-span-2 lg:col-span-4">
+                <Link to="/" className="inline-block mb-4 group">
+                  <div className="flex items-center gap-2">
+                    <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-gradient-to-br from-primary to-accent flex items-center justify-center text-white font-bold text-sm shadow-lg shadow-primary/20 group-hover:shadow-primary/40 transition-shadow">
+                      B
+                    </div>
+                    <div>
+                      <span className="text-white font-bold text-base sm:text-lg tracking-tight">BELENCHO</span>
+                      <span className="block text-[9px] sm:text-[10px] text-gray-500 uppercase tracking-[0.2em] font-medium">Regalos Creativos</span>
+                    </div>
                   </div>
-                  <div>
-                    <span className="text-white font-bold text-lg tracking-tight">BELENCHO</span>
-                    <span className="block text-[10px] text-gray-500 uppercase tracking-[0.2em] font-medium">Regalos Creativos</span>
-                  </div>
-                </div>
-              </Link>
-              <p className="text-sm text-gray-400 leading-relaxed mb-6 max-w-xs">
-                Transformamos momentos especiales en recuerdos inolvidables con regalos únicos y personalizados.
-              </p>
+                </Link>
+                <p className="text-xs sm:text-sm text-gray-400 leading-relaxed mb-5 max-w-xs">
+                  Transformamos momentos especiales en recuerdos inolvidables con regalos únicos y personalizados.
+                </p>
 
-              {/* Social icons */}
-              <div className="flex gap-2.5">
-                {socialLinks.map(({ icon: Icon, href, label, color }) => (
-                  <a
-                    key={label}
-                    href={href}
-                    aria-label={label}
-                    className={`w-10 h-10 rounded-xl bg-white/5 border border-white/10 text-gray-400 flex items-center justify-center transition-all duration-300 hover:scale-110 hover:border-transparent hover:text-white ${color}`}
-                  >
-                    <Icon size={16} />
-                  </a>
-                ))}
-              </div>
-            </div>
-
-            {/* Quick links */}
-            <div className="lg:col-span-2">
-              <h4 className="text-white font-semibold mb-6 text-sm uppercase tracking-[0.15em]">
-                <span className="inline-block bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">Enlaces</span>
-              </h4>
-              <ul className="space-y-3">
-                {quickLinks.map(({ to, label }) => (
-                  <li key={to}>
-                    <Link
-                      to={to}
-                      className="text-sm text-gray-400 hover:text-white transition-all duration-300 flex items-center gap-2 group"
-                    >
-                      <span className="w-1.5 h-1.5 rounded-full bg-primary/50 group-hover:bg-primary group-hover:scale-125 transition-all duration-300" />
-                      {label}
-                    </Link>
-                  </li>
-                ))}
-              </ul>
-            </div>
-
-            {/* Contact */}
-            <div className="lg:col-span-3">
-              <h4 className="text-white font-semibold mb-6 text-sm uppercase tracking-[0.15em]">
-                <span className="inline-block bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">Contacto</span>
-              </h4>
-              <ul className="space-y-4">
-                {contactInfo.map(({ icon: Icon, label, href }) => (
-                  <li key={label}>
-                    {href ? (
-                      <a href={href} className="flex items-center gap-3 text-sm text-gray-400 hover:text-white transition-all duration-300 group">
-                        <span className="w-9 h-9 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center shrink-0 group-hover:bg-primary/20 group-hover:border-primary/30 group-hover:text-primary transition-all duration-300">
-                          <Icon size={15} />
-                        </span>
-                        {label}
-                      </a>
-                    ) : (
-                      <span className="flex items-center gap-3 text-sm text-gray-400">
-                        <span className="w-9 h-9 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center shrink-0">
-                          <Icon size={15} className="text-primary" />
-                        </span>
-                        {label}
-                      </span>
-                    )}
-                  </li>
-                ))}
-              </ul>
-            </div>
-
-            {/* Newsletter */}
-            <div className="lg:col-span-3">
-              <h4 className="text-white font-semibold mb-6 text-sm uppercase tracking-[0.15em]">
-                <span className="inline-block bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">Newsletter</span>
-              </h4>
-              <p className="text-sm text-gray-400 mb-5 leading-relaxed">
-                Suscríbete y recibe novedades, lanzamientos y ofertas exclusivas directamente en tu correo.
-              </p>
-              <form onSubmit={handleSubmit} className="relative">
+                {/* Social icons */}
                 <div className="flex gap-2">
-                  <div className="relative flex-1">
-                    <Mail size={15} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-500" />
-                    <input
-                      type="email"
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
-                      placeholder="tu@email.com"
-                      required
-                      className="w-full pl-10 pr-4 py-3 bg-white/5 border border-white/10 rounded-xl text-sm text-white placeholder-gray-500 focus:outline-none focus:border-primary focus:bg-white/10 focus:ring-1 focus:ring-primary/30 transition-all duration-300"
-                    />
-                  </div>
-                  <button
-                    type="submit"
-                    className="px-4 py-3 bg-gradient-to-r from-primary to-accent text-white rounded-xl text-sm font-medium transition-all duration-300 hover:shadow-lg hover:shadow-primary/30 hover:scale-105 shrink-0"
-                  >
-                    <Send size={16} />
-                  </button>
+                  {socialLinks.map(({ icon: Icon, href, label, color }) => (
+                    <a
+                      key={label}
+                      href={href}
+                      aria-label={label}
+                      className={`w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-white/5 border border-white/10 text-gray-400 flex items-center justify-center transition-all duration-300 hover:scale-110 hover:border-transparent hover:text-white ${color}`}
+                    >
+                      <Icon size={15} />
+                    </a>
+                  ))}
                 </div>
-              </form>
-              <div className="mt-6 flex items-center gap-2 text-sm text-gray-500">
-                <Sparkles size={14} className="text-highlight" />
-                <span>Hecho con <Heart size={12} className="inline text-accent mx-0.5" /> en Quibdó</span>
+              </div>
+
+              {/* Quick links - side by side with contact on mobile */}
+              <div className="lg:col-span-2">
+                <h4 className="text-white font-semibold mb-5 text-xs sm:text-sm uppercase tracking-[0.15em]">
+                  <span className="inline-block bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">Enlaces</span>
+                </h4>
+                <ul className="space-y-2.5 sm:space-y-3">
+                  {quickLinks.map(({ to, label }) => (
+                    <li key={to}>
+                      <Link
+                        to={to}
+                        className="text-xs sm:text-sm text-gray-400 hover:text-white transition-all duration-300 flex items-center gap-2 group"
+                      >
+                        <span className="w-1.5 h-1.5 rounded-full bg-primary/50 group-hover:bg-primary group-hover:scale-125 transition-all duration-300" />
+                        {label}
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+
+              {/* Contact */}
+              <div className="lg:col-span-3">
+                <h4 className="text-white font-semibold mb-5 text-xs sm:text-sm uppercase tracking-[0.15em]">
+                  <span className="inline-block bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">Contacto</span>
+                </h4>
+                <ul className="space-y-3 sm:space-y-4">
+                  {contactInfo.map(({ icon: Icon, label, href }) => (
+                    <li key={label}>
+                      {href ? (
+                        <a href={href} className="flex items-center gap-2.5 sm:gap-3 text-xs sm:text-sm text-gray-400 hover:text-white transition-all duration-300 group">
+                          <span className="w-8 h-8 sm:w-9 sm:h-9 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center shrink-0 group-hover:bg-primary/20 group-hover:border-primary/30 group-hover:text-primary transition-all duration-300">
+                            <Icon size={13} />
+                          </span>
+                          {label}
+                        </a>
+                      ) : (
+                        <span className="flex items-center gap-2.5 sm:gap-3 text-xs sm:text-sm text-gray-400">
+                          <span className="w-8 h-8 sm:w-9 sm:h-9 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center shrink-0">
+                            <Icon size={13} className="text-primary" />
+                          </span>
+                          {label}
+                        </span>
+                      )}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+
+              {/* Newsletter - full width on mobile */}
+              <div className="col-span-2 lg:col-span-3">
+                <h4 className="text-white font-semibold mb-5 text-xs sm:text-sm uppercase tracking-[0.15em]">
+                  <span className="inline-block bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">Newsletter</span>
+                </h4>
+                <p className="text-xs sm:text-sm text-gray-400 mb-4 leading-relaxed">
+                  Suscríbete y recibe novedades, lanzamientos y ofertas exclusivas directamente en tu correo.
+                </p>
+                <form onSubmit={handleSubmit} className="relative">
+                  <div className="flex gap-2">
+                    <div className="relative flex-1">
+                      <Mail size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500" />
+                      <input
+                        type="email"
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
+                        placeholder="tu@email.com"
+                        required
+                        className="w-full pl-9 pr-3 py-2.5 sm:py-3 bg-white/5 border border-white/10 rounded-xl text-xs sm:text-sm text-white placeholder-gray-500 focus:outline-none focus:border-primary focus:bg-white/10 focus:ring-1 focus:ring-primary/30 transition-all duration-300"
+                      />
+                    </div>
+                    <button
+                      type="submit"
+                      className="px-3 sm:px-4 py-2.5 sm:py-3 bg-gradient-to-r from-primary to-accent text-white rounded-xl text-sm font-medium transition-all duration-300 hover:shadow-lg hover:shadow-primary/30 hover:scale-105 shrink-0"
+                    >
+                      <Send size={15} />
+                    </button>
+                  </div>
+                </form>
+                <div className="mt-5 flex items-center gap-2 text-xs sm:text-sm text-gray-500">
+                  <Sparkles size={13} className="text-highlight" />
+                  <span>Hecho con <Heart size={11} className="inline text-accent mx-0.5" /> en Quibdó</span>
+                </div>
               </div>
             </div>
           </div>
-        </div>
 
         {/* Bottom bar */}
-        <div className="border-t border-white/5 py-6 flex flex-col sm:flex-row items-center justify-between gap-4">
-          <p className="text-sm text-gray-500">
+        <div className="border-t border-white/5 py-5 sm:py-6 flex flex-col sm:flex-row items-center justify-between gap-3 sm:gap-4">
+          <p className="text-xs sm:text-sm text-gray-500 text-center sm:text-left">
             &copy; {new Date().getFullYear()} BELENCHO Regalos Creativos. Todos los derechos reservados.
           </p>
-          <div className="flex items-center gap-6 text-sm text-gray-500">
+          <div className="flex items-center gap-5 text-xs sm:text-sm text-gray-500">
             <a href="#" className="hover:text-white transition-colors duration-300 relative after:absolute after:-bottom-0.5 after:left-0 after:w-0 after:h-px after:bg-primary after:transition-all after:duration-300 hover:after:w-full">Términos</a>
             <a href="#" className="hover:text-white transition-colors duration-300 relative after:absolute after:-bottom-0.5 after:left-0 after:w-0 after:h-px after:bg-primary after:transition-all after:duration-300 hover:after:w-full">Privacidad</a>
           </div>
