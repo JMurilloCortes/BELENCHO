@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useParams, Link, useNavigate } from 'react-router-dom'
-import { ShoppingCart, Heart, Star, ChevronLeft, ChevronRight, ArrowLeft, Send, Check, BadgeCheck, Shield, Award, Share2, Zap } from 'lucide-react'
+import { ShoppingCart, Heart, Star, ChevronLeft, ChevronRight, ArrowLeft, Send, Check, BadgeCheck, Shield, Award, Share2, Zap, Sparkles } from 'lucide-react'
 import { showToast } from '../lib/sweetalert'
 import { getProduct } from '../services/product.service'
 import { createReview } from '../services/review.service'
@@ -89,7 +89,7 @@ export default function ProductDetail() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
+      <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-50 flex items-center justify-center">
         <div className="text-center">
           <div className="relative w-16 h-16 mx-auto mb-6">
             <div className="absolute inset-0 border-4 border-gray-100 rounded-full" />
@@ -103,16 +103,16 @@ export default function ProductDetail() {
 
   if (!product) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-center max-w-md mx-auto px-4">
-          <div className="w-24 h-24 bg-gray-50 rounded-3xl flex items-center justify-center mx-auto mb-8">
-            <ShoppingCart size={40} className="text-gray-300" />
+      <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-50 flex items-center justify-center px-4">
+        <div className="text-center max-w-md">
+          <div className="w-24 h-24 mx-auto mb-6 rounded-3xl bg-gradient-to-br from-primary/10 to-accent/10 flex items-center justify-center">
+            <ShoppingCart size={40} className="text-primary" />
           </div>
-          <h2 className="text-2xl font-bold text-gray-800 mb-3">Producto no encontrado</h2>
+          <h2 className="text-2xl font-bold text-gray-900 mb-2">Producto no encontrado</h2>
           <p className="text-gray-400 text-sm mb-8">El producto que buscas no existe o ha sido eliminado</p>
           <Link
             to="/catalogo"
-            className="inline-flex items-center gap-2 bg-gradient-to-r from-primary to-accent text-white px-6 py-2.5 rounded-xl text-sm font-semibold hover:shadow-lg hover:shadow-primary/30 transition-all duration-300 hover:scale-105 active:scale-95"
+            className="inline-flex items-center gap-2 bg-gradient-to-r from-primary to-accent text-white px-6 py-3 rounded-xl text-sm font-semibold hover:shadow-lg hover:shadow-primary/30 transition-all duration-300 hover:scale-105 active:scale-95"
           >
             <ArrowLeft size={16} />
             Volver al catálogo
@@ -129,26 +129,34 @@ export default function ProductDetail() {
   const fav = isFavorite(product.id)
 
   return (
-    <div className="min-h-screen">
-      {/* Back link */}
-      <div className="max-w-7xl mx-auto px-4 pt-8">
-        <Link
-          to="/catalogo"
-          className="inline-flex items-center gap-2 text-sm text-gray-400 hover:text-primary transition-colors group"
-        >
-          <div className="w-8 h-8 rounded-xl bg-gray-50 flex items-center justify-center group-hover:bg-primary/5 transition-colors">
-            <ArrowLeft size={16} />
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-50">
+      {/* Top bar */}
+      <div className="border-b border-gray-100 bg-white/80 backdrop-blur-md sticky top-0 z-40">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex items-center justify-between">
+          <Link to="/catalogo" className="flex items-center gap-2 group">
+            <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-primary to-accent flex items-center justify-center text-white font-bold text-sm shadow-lg shadow-primary/20 group-hover:shadow-primary/40 transition-all duration-300">
+              <Sparkles size={17} />
+            </div>
+            <span className="font-bold text-gray-800 text-lg hidden sm:block">Catálogo</span>
+          </Link>
+          <div className="flex items-center gap-4">
+            <Link to="/catalogo" className="text-xs text-gray-400 hover:text-primary transition-colors hidden sm:flex items-center gap-1">
+              <ArrowLeft size={14} /> Volver
+            </Link>
+            <div className="flex items-center gap-2 text-xs text-gray-400">
+              <Sparkles size={12} />
+              {product.category?.name}
+            </div>
           </div>
-          Volver al catálogo
-        </Link>
+        </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-4 py-8 lg:py-12">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 lg:py-12">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-16">
           {/* ===== LEFT: Image Gallery ===== */}
           <div>
             {/* Main image */}
-            <div className="relative rounded-3xl overflow-hidden bg-gradient-to-br from-gray-50 to-gray-100/50 group">
+            <div className="relative rounded-3xl overflow-hidden bg-gradient-to-br from-gray-50 to-gray-100/50 shadow-lg shadow-gray-200/50 group">
               <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_50%_0%,_transparent_0%,_rgba(0,0,0,0.02)_100%)]" />
               <img
                 src={images[currentImage]?.url}
@@ -235,7 +243,7 @@ export default function ProductDetail() {
             </div>
 
             {/* Name */}
-            <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-gray-800 leading-tight mb-4">
+            <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-gray-900 leading-tight mb-4">
               {product.name}
             </h1>
 
@@ -326,7 +334,7 @@ export default function ProductDetail() {
 
             {/* ===== REVIEWS SECTION ===== */}
             <div className="border-t border-gray-100 pt-10 mt-4">
-              <h2 className="text-2xl font-bold text-gray-800 mb-8">
+              <h2 className="text-2xl font-bold text-gray-900 mb-8">
                 Reseñas{' '}
                 <span className="text-gray-400 font-normal text-lg">
                   ({product.reviews?.length || 0})
@@ -335,7 +343,7 @@ export default function ProductDetail() {
 
               {/* Review form */}
               {isAuthenticated && (
-                <div className="bg-gradient-to-br from-primary/[0.03] to-accent/[0.03] rounded-2xl border border-primary/10 p-6 mb-8">
+                <div className="bg-gradient-to-br from-primary/[0.03] to-accent/[0.03] rounded-2xl sm:rounded-3xl border border-primary/10 p-6 mb-8">
                   <h3 className="font-semibold text-gray-800 mb-4 flex items-center gap-2">
                     <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-primary to-accent flex items-center justify-center">
                       <Send size={14} className="text-white" />
@@ -361,7 +369,7 @@ export default function ProductDetail() {
                     value={reviewComment}
                     onChange={(e) => setReviewComment(e.target.value)}
                     placeholder="Comparte tu experiencia con este producto (opcional)..."
-                    className="w-full p-4 border border-gray-200 rounded-xl resize-none h-24 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all bg-white"
+                    className="w-full p-4 border-2 border-gray-100 rounded-xl resize-none h-24 text-sm focus:outline-none focus:ring-4 focus:ring-primary/10 focus:border-primary transition-all bg-white"
                   />
                   <div className="flex justify-end mt-3">
                     <button
@@ -390,7 +398,7 @@ export default function ProductDetail() {
                   {product.reviews.map((review) => (
                     <div
                       key={review.id}
-                      className="bg-white border border-gray-100 rounded-2xl p-5 hover:shadow-md hover:border-gray-200 transition-all duration-300"
+                      className="bg-white rounded-2xl sm:rounded-3xl shadow-lg shadow-gray-200/50 border border-gray-100 p-5 sm:p-6 hover:shadow-xl hover:shadow-gray-200/60 transition-all duration-300"
                     >
                       <div className="flex items-center justify-between mb-3">
                         <div className="flex items-center gap-3">
