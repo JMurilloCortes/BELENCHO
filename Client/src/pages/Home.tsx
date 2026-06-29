@@ -1,6 +1,11 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useRef } from 'react'
 import { Link } from 'react-router-dom'
-import { ArrowRight, Star, Shield, Award, Gift, Package, Sparkles, HeartHandshake, ChevronRight, Zap, Quote, Heart, ShoppingCart } from 'lucide-react'
+import {
+  ArrowRight, Star, Shield, Gift, Sparkles, HeartHandshake,
+  ChevronRight, Zap, Quote, Heart, ShoppingCart, Truck, Clock,
+  BadgeCheck, Palette, Gem, ArrowUpRight, Users, Smile,
+  Leaf, Eye, Package, ChevronLeft, Play, Circle,
+} from 'lucide-react'
 import { getProducts } from '../services/product.service'
 import { showToast } from '../lib/sweetalert'
 import { useCartStore } from '../store/cart.store'
@@ -9,18 +14,18 @@ import { useAuthStore } from '../store/auth.store'
 import type { Product } from '../types'
 import SkeletonCard from '../components/SkeletonCard'
 
-const stats = [
-  { value: '500+', label: 'Productos únicos' },
-  { value: '98%', label: 'Clientes felices' },
-  { value: '30min', label: 'Entrega local' },
-  { value: '4.9', label: 'Calificación' },
+const categories = [
+  { name: 'Flores', slug: 'flores', color: '#f43f5e', count: '12', desc: 'Ramos eternos y arreglos florales preservados' },
+  { name: 'Hogar', slug: 'hogar', color: '#f97316', count: '8', desc: 'Decoración y detalles para tu espacio' },
+  { name: 'Kits', slug: 'kits', color: '#a855f7', count: '5', desc: 'Cajas sorpresa y combos especiales' },
+  { name: 'Accesorios', slug: 'accesorios', color: '#14b8a6', count: '20', desc: 'Complementos únicos con personalidad' },
 ]
 
-const categories = [
-  { name: 'Flores', slug: 'flores', gradient: 'from-pink-400 to-rose-500', icon: '🌸', count: '12' },
-  { name: 'Hogar', slug: 'hogar', gradient: 'from-amber-400 to-orange-500', icon: '🏠', count: '8' },
-  { name: 'Kits', slug: 'kits', gradient: 'from-violet-400 to-purple-500', icon: '🎁', count: '5' },
-  { name: 'Accesorios', slug: 'accesorios', gradient: 'from-cyan-400 to-teal-500', icon: '✨', count: '20' },
+const features = [
+  { icon: Gift, title: 'Regalos Únicos', desc: 'Productos creativos que no encontrarás en otro lugar', number: '01' },
+  { icon: Gem, title: 'Calidad Superior', desc: 'Seleccionamos los mejores materiales para cada producto', number: '02' },
+  { icon: Palette, title: 'Diseño Exclusivo', desc: 'Cada pieza es diseñada con dedicación para ofrecerte algo especial', number: '03' },
+  { icon: Truck, title: 'Envío Local', desc: 'Entrega rápida en Quibdó y alrededores sin demora', number: '04' },
 ]
 
 const testimonials = [
@@ -32,9 +37,11 @@ const testimonials = [
 export default function Home() {
   const [products, setProducts] = useState<Product[]>([])
   const [productsLoading, setProductsLoading] = useState(true)
+  const [activeTestimonial, setActiveTestimonial] = useState(0)
   const addItem = useCartStore((s) => s.addItem)
   const { toggleFavorite, isFavorite, loadFavorites } = useFavoriteStore()
   const isAuthenticated = useAuthStore((s) => s.isAuthenticated)
+  const testimonialInterval = useRef<ReturnType<typeof setInterval>>()
 
   useEffect(() => { if (isAuthenticated) loadFavorites() }, [isAuthenticated])
 
@@ -43,6 +50,13 @@ export default function Home() {
       .then(setProducts)
       .catch(() => {})
       .finally(() => setProductsLoading(false))
+  }, [])
+
+  useEffect(() => {
+    testimonialInterval.current = setInterval(() => {
+      setActiveTestimonial((prev) => (prev + 1) % testimonials.length)
+    }, 4000)
+    return () => clearInterval(testimonialInterval.current)
   }, [])
 
   const handleAddToCart = (productId: string) => {
@@ -56,131 +70,137 @@ export default function Home() {
 
   return (
     <div className="overflow-hidden">
-      {/* ===== HERO ===== */}
-      <section className="relative min-h-[55vh] sm:min-h-[65vh] flex items-center overflow-hidden">
-        {/* Background */}
-        <div className="absolute inset-0 bg-gray-950" />
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-primary/20 via-transparent to-transparent" />
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_bottom_right,_var(--tw-gradient-stops))] from-accent/10 via-transparent to-transparent" />
 
-        {/* Animated gradient orbs */}
-        <div className="absolute top-1/4 -left-32 w-[500px] h-[500px] bg-primary/10 rounded-full blur-3xl animate-pulse" />
-        <div className="absolute bottom-1/4 -right-32 w-[400px] h-[400px] bg-accent/10 rounded-full blur-3xl animate-pulse [animation-delay:1s]" />
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-highlight/5 rounded-full blur-3xl animate-pulse [animation-delay:2s]" />
-
-        {/* Grid overlay */}
-        <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGRlZnM+PHBhdHRlcm4gaWQ9ImdyaWQiIHdpZHRoPSI2MCIgaGVpZ2h0PSI2MCIgcGF0dGVyblVuaXRzPSJ1c2VyU3BhY2VPblVzZSI+PHBhdGggZD0iTSA2MCAwIEwgMCAwIDAgNjAiIGZpbGw9Im5vbmUiIHN0cm9rZT0icmdiKDI1NSwyNTUsMjU1LDAuMDMpIiBzdHJva2Utd2lkdGg9IjEiLz48L3BhdHRlcm4+PC9kZWZzPjxyZWN0IHdpZHRoPSIxMDAlIiBoZWlnaHQ9IjEwMCUiIGZpbGw9InVybCgjZ3JpZCkiLz48L3N2Zz4=')] opacity-60" />
-
-        {/* Floating particles */}
-        <div className="absolute inset-0 overflow-hidden pointer-events-none">
-          {[...Array(6)].map((_, i) => (
-            <div
-              key={i}
-              className="absolute w-1 h-1 bg-primary/40 rounded-full"
-              style={{
-                top: `${15 + i * 15}%`,
-                left: `${10 + i * 16}%`,
-                animation: `float ${3 + i * 0.5}s ease-in-out infinite`,
-                animationDelay: `${i * 0.4}s`,
-              }}
-            />
-          ))}
+      {/* ===== HERO - CENTERED SPOTLIGHT ===== */}
+      <section className="relative min-h-[75vh] flex items-center justify-center overflow-hidden bg-gray-900">
+        {/* Animated gradient mesh background */}
+        <div className="absolute inset-0 overflow-hidden">
+          <div className="absolute -top-1/2 -left-1/2 w-[200%] h-[200%] opacity-30 animate-[mesh_20s_ease-in-out_infinite]" style={{
+            background: 'conic-gradient(from 0deg at 50% 50%, #49b8a7 0deg, #fc8a80 90deg, #f8e694 180deg, #49b8a7 270deg, #49b8a7 360deg)',
+            filter: 'blur(120px)',
+          }} />
+          <div className="absolute -top-1/2 -right-1/2 w-[200%] h-[200%] opacity-20 animate-[mesh_25s_ease-in-out_infinite_reverse]" style={{
+            background: 'conic-gradient(from 180deg at 50% 50%, #fc8a80 0deg, #f8e694 120deg, #49b8a7 240deg, #fc8a80 360deg)',
+            filter: 'blur(100px)',
+          }} />
         </div>
 
-        {/* Curved bottom wave */}
-        <div className="absolute bottom-0 left-0 w-full overflow-hidden leading-none z-10">
-          <svg viewBox="0 0 1440 120" preserveAspectRatio="none" className="relative block w-full h-[60px] sm:h-[80px]">
-            <path d="M0,120 C360,0 720,0 1440,120 L1440,120 L0,120 Z" fill="#f9fafb" />
-          </svg>
-        </div>
+        {/* Particle grid overlay */}
+        <div className="absolute inset-0 opacity-[0.03]" style={{
+          backgroundImage: 'radial-gradient(circle at 1px 1px, white 1px, transparent 0)',
+          backgroundSize: '40px 40px',
+        }} />
 
-        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
-          <div className="max-w-3xl mx-auto lg:mx-0 text-center lg:text-left">
-            {/* Badge */}
-            <div className="inline-flex items-center gap-2 bg-white/5 backdrop-blur-sm border border-white/10 rounded-full px-4 py-1.5 mb-6 sm:mb-8 animate-fadeIn">
-              <span className="relative flex h-2 w-2">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-75" />
-                <span className="relative inline-flex rounded-full h-2 w-2 bg-primary" />
-              </span>
-              <span className="text-sm text-gray-400">Nueva colección <span className="text-white font-medium">2026</span></span>
-            </div>
+        {/* Vignette */}
+        <div className="absolute inset-0" style={{
+          background: 'radial-gradient(ellipse at center, transparent 40%, rgba(17,24,39,0.6) 100%)',
+        }} />
 
-            {/* Title */}
-            <h1 className="text-3xl sm:text-4xl md:text-6xl font-bold text-white leading-[0.9] mb-4 sm:mb-6 animate-fadeIn">
-              Regalos que
-              <span className="block text-transparent bg-clip-text bg-gradient-to-r from-primary via-accent to-highlight mt-2">
-                enamoran
-              </span>
-            </h1>
+        <style>{`
+          @keyframes mesh {
+            0%, 100% { transform: translate(0, 0) rotate(0deg) scale(1); }
+            25% { transform: translate(5%, 5%) rotate(90deg) scale(1.1); }
+            50% { transform: translate(-5%, 10%) rotate(180deg) scale(0.9); }
+            75% { transform: translate(10%, -5%) rotate(270deg) scale(1.05); }
+          }
+        `}</style>
 
-            {/* Description */}
-            <p className="text-sm sm:text-base md:text-lg text-gray-400 mb-8 max-w-xl mx-auto lg:mx-0 leading-relaxed animate-fadeIn">
-              En BELENCHO creamos experiencias únicas a través de regalos creativos y personalizados. 
-              Encuentra el detalle perfecto para cada ocasión.
-            </p>
+        <div className="relative w-full max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-20 text-center">
+          {/* Badge */}
+          <div className="inline-flex items-center gap-2 bg-white/10 backdrop-blur-sm border border-white/20 rounded-full px-4 py-1.5 mb-8">
+            <span className="w-1.5 h-1.5 rounded-full bg-accent animate-pulse" />
+            <span className="text-xs text-white/60 font-medium">Nueva colección 2026</span>
+          </div>
 
-            {/* CTA Buttons */}
-            <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center lg:justify-start animate-fadeIn">
-              <Link
-                to="/catalogo"
-                className="group relative inline-flex items-center justify-center gap-2 bg-gradient-to-r from-primary to-accent text-white px-6 sm:px-8 py-3 sm:py-4 rounded-xl text-sm sm:text-base font-semibold transition-all duration-300 hover:scale-105 hover:shadow-2xl hover:shadow-primary/40 overflow-hidden"
-              >
-                <span className="absolute inset-0 bg-white/0 group-hover:bg-white/10 transition-colors" />
-                <span className="relative flex items-center gap-2">
-                  Explorar catálogo <ArrowRight size={18} className="group-hover:translate-x-1 transition-transform" />
-                </span>
-              </Link>
-              <Link
-                to="/catalogo"
-                className="inline-flex items-center justify-center gap-2 bg-white/5 backdrop-blur-sm border border-white/10 hover:bg-white/10 text-white px-6 sm:px-8 py-3 sm:py-4 rounded-xl text-sm sm:text-base font-semibold transition-all duration-300 hover:scale-105"
-              >
-                <Sparkles size={16} className="text-highlight" />
-                Ver ofertas
-              </Link>
-            </div>
+          {/* Title */}
+          <h1 className="text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-bold text-white leading-[0.85] mb-6 tracking-tight">
+            Regalos
+            <br />
+            <span className="inline-block mt-2 relative">
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary via-accent to-highlight">que enamoran</span>
+              <svg className="absolute -bottom-3 left-0 w-full" viewBox="0 0 300 16" fill="none">
+                <path d="M0 8 C50 14, 100 2, 150 8 C200 14, 250 2, 300 8" stroke="#49b8a7" strokeWidth="1.5" strokeLinecap="round" opacity="0.6" />
+              </svg>
+            </span>
+          </h1>
 
-            {/* Trust indicators */}
-            <div className="flex flex-wrap gap-5 mt-10 justify-center lg:justify-start animate-fadeIn">
-              {[
-                { icon: Shield, text: 'Pago seguro' },
-                { icon: Award, text: 'Calidad premium' },
-                { icon: Gift, text: 'Regalos únicos' },
-              ].map(({ icon: Icon, text }) => (
-                <div key={text} className="flex items-center gap-2 text-sm text-gray-500">
-                  <Icon size={14} className="text-primary" />
-                  {text}
-                </div>
-              ))}
-            </div>
+          <p className="text-base sm:text-lg text-white/60 mb-10 max-w-lg mx-auto leading-relaxed">
+            En BELENCHO creamos experiencias únicas a través de regalos creativos y personalizados. 
+            Encuentra el detalle perfecto para cada ocasión.
+          </p>
+
+          {/* Buttons */}
+          <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center">
+            <Link
+              to="/catalogo"
+              className="group inline-flex items-center justify-center gap-2.5 bg-white text-gray-900 px-10 py-4 rounded-xl text-sm sm:text-base font-semibold transition-all duration-300 hover:bg-primary hover:text-white hover:scale-105 hover:shadow-xl hover:shadow-primary/20"
+            >
+              Explorar catálogo
+              <ArrowRight size={18} className="group-hover:translate-x-1.5 transition-transform" />
+            </Link>
+            <Link
+              to="/catalogo"
+              className="group inline-flex items-center justify-center gap-2.5 bg-white/10 text-white/80 border-2 border-white/20 px-10 py-4 rounded-xl text-sm sm:text-base font-semibold transition-all duration-300 hover:bg-white/20 hover:border-white/40 hover:text-white hover:scale-105"
+            >
+              <Sparkles size={16} />
+              Ver ofertas
+            </Link>
+          </div>
+
+          {/* Bottom trust indicators */}
+          <div className="flex items-center justify-center gap-6 sm:gap-10 mt-12 pt-8 border-t border-white/10">
+            {[
+              { icon: Shield, text: 'Pago seguro' },
+              { icon: BadgeCheck, text: 'Calidad premium' },
+              { icon: Clock, text: 'Entrega rápida' },
+            ].map(({ icon: Icon, text }) => (
+              <div key={text} className="flex items-center gap-2 text-xs sm:text-sm text-white/50">
+                <Icon size={13} className="text-primary" />
+                {text}
+              </div>
+            ))}
           </div>
         </div>
       </section>
 
-      {/* ===== STATS ===== */}
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 sm:py-20">
-        <div className="grid grid-cols-2 md:grid-cols-4 divide-x divide-gray-100">
-          {stats.map((stat, i) => (
-            <div key={stat.label} className="text-center px-4 sm:px-8 py-4">
-              <p className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-800 mb-1">
-                {stat.value}
-              </p>
-              <p className="text-sm text-gray-400">{stat.label}</p>
-            </div>
-          ))}
+      {/* ===== BRAND STRIP ===== */}
+      <section className="py-12 bg-gray-50/50 border-y border-gray-100">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
+            {[
+              { value: '500+', label: 'Productos únicos', icon: Package },
+              { value: '98%', label: 'Clientes felices', icon: Smile },
+              { value: '30min', label: 'Entrega local', icon: Truck },
+              { value: '4.9', label: 'Calificación', icon: Star },
+            ].map(({ value, label, icon: Icon }) => (
+              <div key={label} className="flex items-center gap-4">
+                <div className="w-12 h-12 rounded-2xl bg-white shadow-sm border border-gray-100 flex items-center justify-center shrink-0">
+                  <Icon size={20} className="text-primary" />
+                </div>
+                <div>
+                  <p className="text-xl font-bold text-gray-900">{value}</p>
+                  <p className="text-xs text-gray-400">{label}</p>
+                </div>
+              </div>
+            ))}
+          </div>
         </div>
       </section>
 
-      {/* ===== CATEGORIES ===== */}
+      {/* ===== CATEGORIES - GRID WITH OVERLAY ===== */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24 sm:py-32">
         <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-12">
           <div>
-            <span className="text-primary text-sm font-semibold uppercase tracking-[0.2em]">Categorías</span>
-            <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-gray-800 mt-3">
+            <div className="inline-flex items-center gap-2 bg-primary/5 text-primary rounded-full px-4 py-1.5 text-xs font-semibold uppercase tracking-[0.15em] mb-4">
+              <Leaf size={12} />
+              Categorías
+            </div>
+            <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-gray-900 leading-tight">
               Explora por{' '}
               <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-accent">categoría</span>
             </h2>
           </div>
-          <Link to="/catalogo" className="hidden sm:inline-flex items-center gap-1 text-sm font-medium text-gray-400 hover:text-primary transition-colors group">
+          <Link to="/catalogo" className="hidden sm:inline-flex items-center gap-1.5 text-sm font-medium text-gray-400 hover:text-primary transition-colors group">
             Ver todo <ChevronRight size={16} className="group-hover:translate-x-1 transition-transform" />
           </Link>
         </div>
@@ -190,38 +210,55 @@ export default function Home() {
             <Link
               key={cat.slug}
               to={`/catalogo?categoria=${cat.slug}`}
-              className="group relative rounded-3xl overflow-hidden aspect-[3/4] bg-gray-100"
+              className="group relative rounded-3xl overflow-hidden aspect-[4/5] bg-gray-100 hover:shadow-2xl transition-all duration-500 hover:-translate-y-1.5"
             >
-              <div className={`absolute inset-0 bg-gradient-to-br ${cat.gradient} opacity-90 group-hover:scale-110 transition-transform duration-700`} />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/10 to-transparent" />
-              <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_120%,_white_0%,_transparent_60%)] opacity-20" />
-              <div className="relative h-full flex flex-col items-center justify-center p-6 text-center">
-                <span className="text-5xl mb-4 group-hover:scale-125 transition-transform duration-500">{cat.icon}</span>
-                <h3 className="text-white font-bold text-xl sm:text-2xl">{cat.name}</h3>
-                <p className="text-white/70 text-sm mt-1">{cat.count} productos</p>
+              <div
+                className="absolute inset-0 transition-all duration-700 group-hover:scale-110"
+                style={{ backgroundColor: cat.color, opacity: 0.85 }}
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
+              <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_120%,_white_0%,_transparent_60%)] opacity-10" />
+              <div className="absolute top-5 left-5 right-5 flex items-start justify-between z-10">
+                <span className="bg-white/20 backdrop-blur-sm text-white text-xs font-semibold px-3 py-1 rounded-full">
+                  {cat.count} productos
+                </span>
               </div>
-              <div className="absolute bottom-4 left-4 right-4 h-px bg-gradient-to-r from-transparent via-white/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+              <div className="relative h-full flex flex-col items-center justify-center p-6 text-center">
+                <div className="w-16 h-16 rounded-2xl bg-white/20 backdrop-blur-sm flex items-center justify-center mb-5 group-hover:scale-110 group-hover:bg-white/30 transition-all duration-500">
+                  <span className="text-3xl">{cat.slug === 'flores' ? '🌸' : cat.slug === 'hogar' ? '🏠' : cat.slug === 'kits' ? '🎁' : '✨'}</span>
+                </div>
+                <h3 className="text-white font-bold text-2xl mb-1.5">{cat.name}</h3>
+                <p className="text-white/60 text-sm max-w-[160px]">{cat.desc}</p>
+              </div>
+              <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-transparent via-white/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
             </Link>
           ))}
         </div>
-        <Link to="/catalogo" className="sm:hidden flex items-center justify-center gap-1 mt-6 text-sm font-medium text-primary">
+
+        <Link to="/catalogo" className="sm:hidden flex items-center justify-center gap-1.5 mt-6 text-sm font-medium text-white bg-primary rounded-xl px-4 py-3 hover:bg-primary-dark transition-colors">
           Ver todas las categorías <ChevronRight size={16} />
         </Link>
       </section>
 
       {/* ===== FEATURED PRODUCTS ===== */}
       {(products.length > 0 || productsLoading) && (
-        <section className="bg-gray-50/80 py-24 sm:py-32">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <section className="py-24 sm:py-32 relative">
+          <div className="absolute inset-0 bg-gradient-to-b from-gray-50/80 via-white to-gray-50/30" />
+          <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-gray-200 to-transparent" />
+
+          <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-12">
               <div>
-                <span className="text-primary text-sm font-semibold uppercase tracking-[0.2em]">Destacados</span>
-                <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-gray-800 mt-3">
+                <div className="inline-flex items-center gap-2 bg-accent/5 text-accent rounded-full px-4 py-1.5 text-xs font-semibold uppercase tracking-[0.15em] mb-4">
+                  <Sparkles size={12} />
+                  Destacados
+                </div>
+                <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-gray-900 leading-tight">
                   Productos{' '}
                   <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-accent">populares</span>
                 </h2>
               </div>
-              <Link to="/catalogo" className="hidden sm:inline-flex items-center gap-1 text-sm font-medium text-gray-400 hover:text-primary transition-colors group">
+              <Link to="/catalogo" className="hidden sm:inline-flex items-center gap-1.5 text-sm font-medium text-gray-400 hover:text-primary transition-colors group">
                 Ver todo <ChevronRight size={16} className="group-hover:translate-x-1 transition-transform" />
               </Link>
             </div>
@@ -230,19 +267,22 @@ export default function Home() {
               {productsLoading ? (
                 Array.from({ length: 4 }).map((_, i) => <SkeletonCard key={i} />)
               ) : (
-                products.slice(0, 4).map((product) => {
-                const fav = isFavorite(product.id)
-                return (
+                products.slice(0, 4).map((product, idx) => {
+                  const fav = isFavorite(product.id)
+                  return (
                 <div
                   key={product.id}
-                  className="group relative bg-white rounded-2xl sm:rounded-3xl overflow-hidden shadow-sm hover:shadow-2xl transition-all duration-500 hover:-translate-y-2 border border-gray-100 hover:border-transparent"
+                  className="group relative bg-white rounded-2xl sm:rounded-3xl overflow-hidden shadow-sm hover:shadow-2xl transition-all duration-500 hover:-translate-y-2 border border-gray-100"
+                  style={{ animationDelay: `${idx * 0.1}s` }}
                 >
-                  <Link to={`/producto/${product.id}`} className="block relative aspect-[4/5] overflow-hidden">
+                  <div className="absolute top-0 left-0 right-0 h-0.5 bg-gradient-to-r from-primary via-accent to-highlight opacity-0 group-hover:opacity-100 transition-opacity duration-500 z-20" />
+                  <Link to={`/producto/${product.id}`} className="block relative aspect-[4/5] overflow-hidden bg-gray-50">
                     <img
                       src={product.images?.[0]?.url || 'https://placehold.co/400x500/e2e8f0/94a3b8?text=No'}
                       alt={product.name}
                       className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
                     />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/5 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
                     <span className="absolute top-3 left-3 bg-white/90 backdrop-blur-sm text-gray-700 text-[10px] sm:text-xs font-semibold px-2.5 py-1 rounded-full shadow-sm z-10">
                       {product.category?.name}
                     </span>
@@ -256,13 +296,13 @@ export default function Home() {
                           showToast('error', 'Error al actualizar favoritos')
                         })
                       }}
-                      className={`absolute top-3 right-3 z-10 p-2 rounded-full transition-all duration-300 ${
+                      className={`absolute top-3 right-3 z-10 p-2.5 rounded-full transition-all duration-300 ${
                         fav
                           ? 'bg-accent text-white shadow-lg shadow-accent/30'
                           : 'bg-white/80 backdrop-blur-sm text-gray-400 hover:bg-accent hover:text-white hover:shadow-lg hover:shadow-accent/30'
                       }`}
                     >
-                      <Heart size={16} fill={fav ? 'currentColor' : 'none'} />
+                      <Heart size={15} fill={fav ? 'currentColor' : 'none'} />
                     </button>
                     {product.stock <= 3 && product.stock > 0 && (
                       <span className="absolute bottom-3 left-3 bg-accent text-white text-[10px] font-semibold px-2.5 py-1 rounded-full shadow-lg shadow-accent/30 z-10">
@@ -302,124 +342,184 @@ export default function Home() {
               )}))}
             </div>
 
-            <div className="text-center mt-12">
+            <div className="text-center mt-14">
               <Link
                 to="/catalogo"
-                className="group inline-flex items-center gap-2 bg-gradient-to-r from-primary to-accent text-white px-8 py-3.5 rounded-xl font-semibold transition-all duration-300 hover:shadow-2xl hover:shadow-primary/30 hover:scale-105"
+                className="group inline-flex items-center gap-2.5 bg-gradient-to-r from-primary to-accent text-white px-8 py-3.5 rounded-xl font-semibold transition-all duration-300 hover:shadow-2xl hover:shadow-primary/30 hover:scale-105"
               >
-                Ver catálogo completo <ArrowRight size={18} className="group-hover:translate-x-1 transition-transform" />
+                Ver catálogo completo
+                <ArrowRight size={18} className="group-hover:translate-x-1.5 transition-transform" />
               </Link>
             </div>
           </div>
         </section>
       )}
 
-      {/* ===== FEATURES ===== */}
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24 sm:py-32">
+      {/* ===== FEATURES - NUMBERED ===== */}
+      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-24 sm:pb-32">
         <div className="text-center mb-16">
-          <span className="text-primary text-sm font-semibold uppercase tracking-[0.2em]">Por qué elegirnos</span>
-          <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-gray-800 mt-3">
+          <div className="inline-flex items-center gap-2 bg-primary/5 text-primary rounded-full px-4 py-1.5 text-xs font-semibold uppercase tracking-[0.15em] mb-4">
+            <Gem size={12} />
+            Por qué elegirnos
+          </div>
+          <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-gray-900 leading-tight mb-4">
             La mejor{' '}
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-accent">experiencia</span>
           </h2>
+          <p className="text-gray-400 text-sm sm:text-base max-w-lg mx-auto">
+            Cada detalle está pensado para que tu experiencia de compra sea inolvidable
+          </p>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-8">
-          {[
-            { icon: Gift, title: 'Regalos Únicos', desc: 'Productos creativos y originales que no encontrarás en otro lugar', gradient: 'from-primary/20 to-primary/5' },
-            { icon: Star, title: 'Calidad Superior', desc: 'Seleccionamos los mejores materiales para cada producto', gradient: 'from-accent/20 to-accent/5' },
-            { icon: Sparkles, title: 'Diseño Exclusivo', desc: 'Cada producto con diseños originales y creativos que marcan la diferencia', gradient: 'from-highlight/20 to-highlight/5' },
-            { icon: Shield, title: 'Compra Segura', desc: 'Pagos protegidos y atención al cliente personalizada', gradient: 'from-primary/20 to-accent/5' },
-          ].map(({ icon: Icon, title, desc, gradient }) => (
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 sm:gap-8">
+          {features.map(({ icon: Icon, title, desc, number }) => (
             <div
               key={title}
-              className="group relative bg-white rounded-3xl border border-gray-100 p-8 hover:border-transparent transition-all duration-500 hover:shadow-2xl hover:-translate-y-2"
+              className="group relative bg-white rounded-3xl border border-gray-100 p-8 sm:p-10 hover:border-transparent transition-all duration-500 hover:shadow-2xl hover:-translate-y-1.5 overflow-hidden"
             >
-              <div className={`absolute inset-0 rounded-3xl bg-gradient-to-br ${gradient} opacity-0 group-hover:opacity-100 transition-opacity duration-500`} />
-              <div className="relative">
-                <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-primary/10 to-accent/10 flex items-center justify-center mb-5 group-hover:scale-110 group-hover:from-primary group-hover:to-accent transition-all duration-500">
+              <div className="absolute inset-0 bg-gradient-to-br from-primary/[0.02] to-accent/[0.02] opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+              <div className="absolute -top-6 -right-6 text-8xl font-bold text-gray-100/50 group-hover:text-primary/[0.03] transition-colors duration-500 select-none">
+                {number}
+              </div>
+              <div className="relative flex items-start gap-5">
+                <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-primary/10 to-accent/10 flex items-center justify-center shrink-0 group-hover:scale-110 group-hover:from-primary group-hover:to-accent transition-all duration-500">
                   <Icon size={26} className="text-primary group-hover:text-white transition-colors duration-500" />
                 </div>
-                <h3 className="text-lg font-semibold text-gray-800 mb-3 group-hover:text-gray-900">{title}</h3>
-                <p className="text-sm text-gray-500 leading-relaxed">{desc}</p>
+                <div>
+                  <h3 className="text-lg font-semibold text-gray-800 mb-2">{title}</h3>
+                  <p className="text-sm text-gray-500 leading-relaxed">{desc}</p>
+                </div>
               </div>
             </div>
           ))}
         </div>
       </section>
 
-      {/* ===== TESTIMONIALS ===== */}
+      {/* ===== TESTIMONIALS - CAROUSEL ===== */}
       <section className="relative py-24 sm:py-32 overflow-hidden">
-        <div className="absolute inset-0 bg-gray-950" />
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-primary/5 via-transparent to-transparent" />
-        <div className="absolute top-20 left-20 w-64 h-64 bg-accent/5 rounded-full blur-3xl" />
-        <div className="absolute bottom-20 right-20 w-64 h-64 bg-primary/5 rounded-full blur-3xl" />
+        <div className="absolute inset-0 bg-gradient-to-br from-gray-900 via-gray-950 to-gray-900" />
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_center,_var(--tw-gradient-stops))] from-primary/5 via-transparent to-transparent" />
+        <div className="absolute top-10 left-10 w-80 h-80 bg-primary/5 rounded-full blur-3xl" />
+        <div className="absolute bottom-10 right-10 w-80 h-80 bg-accent/5 rounded-full blur-3xl" />
 
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
-            <span className="text-primary text-sm font-semibold uppercase tracking-[0.2em]">Testimonios</span>
-            <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-white mt-3">
+            <div className="inline-flex items-center gap-2 bg-white/5 border border-white/[0.06] rounded-full px-4 py-1.5 text-xs font-semibold uppercase tracking-[0.15em] mb-4">
+              <Users size={12} className="text-white/60" />
+              <span className="text-white/60">Testimonios</span>
+            </div>
+            <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-white leading-tight">
               Lo que dicen{' '}
               <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-accent">nuestros clientes</span>
             </h2>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 sm:gap-8">
-            {testimonials.map((t, i) => (
+          <div className="relative max-w-2xl mx-auto">
+            <div className="relative overflow-hidden rounded-3xl">
               <div
-                key={t.name}
-                className="group relative bg-white/5 backdrop-blur-sm border border-white/10 rounded-3xl p-8 hover:bg-white/10 transition-all duration-500 hover:-translate-y-2 hover:shadow-2xl hover:shadow-primary/10"
+                className="flex transition-transform duration-500 ease-out"
+                style={{ transform: `translateX(-${activeTestimonial * 100}%)` }}
               >
-                <Quote size={24} className="text-primary/30 mb-4" />
-                <div className="flex gap-1 mb-4">
-                  {Array.from({ length: t.rating }).map((_, i) => (
-                    <Star key={i} size={15} className="fill-highlight text-highlight" />
-                  ))}
-                </div>
-                <p className="text-gray-300 text-sm leading-relaxed mb-8 italic">"{t.text}"</p>
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-full bg-gradient-to-br from-primary to-accent flex items-center justify-center text-white font-bold text-sm">
-                    {t.name[0]}
+                {testimonials.map((t) => (
+                  <div key={t.name} className="w-full shrink-0 px-2">
+                    <div className="bg-white/[0.03] backdrop-blur-sm border border-white/[0.06] rounded-3xl p-10 sm:p-12 text-center">
+                      <div className="w-16 h-16 rounded-full bg-gradient-to-br from-primary to-accent flex items-center justify-center text-white font-bold text-xl mx-auto mb-6 shadow-lg shadow-primary/20">
+                        {t.name[0]}
+                      </div>
+                      <Quote size={28} className="text-primary/20 mx-auto mb-6" />
+                      <div className="flex gap-1 justify-center mb-5">
+                        {Array.from({ length: t.rating }).map((_, i) => (
+                          <Star key={i} size={16} className="fill-highlight text-highlight" />
+                        ))}
+                      </div>
+                      <p className="text-gray-300 text-base sm:text-lg leading-relaxed mb-8 italic">"{t.text}"</p>
+                      <div>
+                        <p className="font-semibold text-white text-base">{t.name}</p>
+                        <p className="text-sm text-gray-500">{t.role}</p>
+                      </div>
+                    </div>
                   </div>
-                  <div>
-                    <p className="font-semibold text-sm text-white">{t.name}</p>
-                    <p className="text-xs text-gray-500">{t.role}</p>
-                  </div>
-                </div>
+                ))}
               </div>
-            ))}
+            </div>
+
+            <div className="flex items-center justify-center gap-3 mt-8">
+              {testimonials.map((_, i) => (
+                <button
+                  key={i}
+                  onClick={() => setActiveTestimonial(i)}
+                  className={`transition-all duration-300 rounded-full ${
+                    i === activeTestimonial
+                      ? 'w-8 h-2.5 bg-gradient-to-r from-primary to-accent'
+                      : 'w-2.5 h-2.5 bg-white/20 hover:bg-white/40'
+                  }`}
+                />
+              ))}
+            </div>
           </div>
         </div>
       </section>
 
-      {/* ===== CTA ===== */}
+      {/* ===== CTA - DUAL ===== */}
       <section className="relative py-24 sm:py-32 overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-r from-primary via-primary-dark to-accent" />
-        <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGRlZnM+PHBhdHRlcm4gaWQ9ImdyaWQiIHdpZHRoPSI2MCIgaGVpZ2h0PSI2MCIgcGF0dGVyblVuaXRzPSJ1c2VyU3BhY2VPblVzZSI+PHBhdGggZD0iTSA2MCAwIEwgMCAwIDAgNjAiIGZpbGw9Im5vbmUiIHN0cm9rZT0icmdiKDI1NSwyNTUsMjU1LDAuMDUpIiBzdHJva2Utd2lkdGg9IjEiLz48L3BhdHRlcm4+PC9kZWZzPjxyZWN0IHdpZHRoPSIxMDAlIiBoZWlnaHQ9IjEwMCUiIGZpbGw9InVybCgjZ3JpZCkiLz48L3N2Zz4=')] opacity-50" />
+        <div className="absolute inset-0 bg-gradient-to-r from-primary via-primary/90 to-accent" />
+        <div className="absolute inset-0">
+          <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-white/5 rounded-full -translate-y-1/2 translate-x-1/3" />
+          <div className="absolute bottom-0 left-0 w-[600px] h-[600px] bg-white/5 rounded-full translate-y-1/2 -translate-x-1/3" />
+          <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGRlZnM+PHBhdHRlcm4gaWQ9ImdyaWQiIHdpZHRoPSI2MCIgaGVpZ2h0PSI2MCIgcGF0dGVyblVuaXRzPSJ1c2VyU3BhY2VPblVzZSI+PHBhdGggZD0iTSA2MCAwIEwgMCAwIDAgNjAiIGZpbGw9Im5vbmUiIHN0cm9rZT0icmdiKDI1NSwyNTUsMjU1LDAuMDUpIiBzdHJva2Utd2lkdGg9IjAiLz48L3BhdHRlcm4+PC9kZWZzPjxyZWN0IHdpZHRoPSIxMDAlIiBoZWlnaHQ9IjEwMCUiIGZpbGw9InVybCgjZ3JpZCkiLz48L3N2Zz4=')] opacity-30" />
+        </div>
 
-        {/* Decorative circles */}
-        <div className="absolute top-0 right-0 w-72 h-72 bg-white/5 rounded-full -translate-y-1/3 translate-x-1/3" />
-        <div className="absolute bottom-0 left-0 w-96 h-96 bg-white/5 rounded-full translate-y-1/3 -translate-x-1/3" />
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-white/5 rounded-full blur-3xl" />
+        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="grid lg:grid-cols-2 gap-12 lg:gap-16 items-center">
+            <div className="text-center lg:text-left">
+              <div className="inline-flex items-center gap-2 bg-white/10 backdrop-blur-sm border border-white/20 rounded-full px-5 py-1.5 mb-8">
+                <Zap size={14} className="text-highlight" />
+                <span className="text-sm text-white/80">Únete a miles de clientes felices</span>
+              </div>
+              <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-white mb-6 leading-tight">
+                ¿Listo para encontrar el{' '}
+                <span className="text-highlight">regalo perfecto</span>?
+              </h2>
+              <p className="text-base sm:text-lg text-white/70 mb-8 max-w-md mx-auto lg:mx-0">
+                Descubre nuestra colección y haz de cada ocasión un momento inolvidable
+              </p>
+              <div className="flex flex-col sm:flex-row gap-3 justify-center lg:justify-start">
+                <Link
+                  to="/catalogo"
+                  className="group inline-flex items-center justify-center gap-2 bg-white text-primary px-8 py-4 rounded-xl font-bold text-base transition-all duration-300 hover:bg-highlight hover:text-gray-900 hover:scale-105 hover:shadow-2xl"
+                >
+                  Comprar ahora
+                  <HeartHandshake size={20} className="group-hover:scale-110 transition-transform" />
+                </Link>
+                <Link
+                  to="/catalogo"
+                  className="group inline-flex items-center justify-center gap-2 bg-white/10 backdrop-blur-sm border border-white/20 text-white px-6 py-4 rounded-xl font-semibold text-sm transition-all duration-300 hover:bg-white/20 hover:scale-105"
+                >
+                  Ver colección
+                  <ArrowUpRight size={16} className="group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
+                </Link>
+              </div>
+            </div>
 
-        <div className="relative max-w-3xl mx-auto px-4 text-center">
-          <div className="inline-flex items-center gap-2 bg-white/10 backdrop-blur-sm border border-white/20 rounded-full px-5 py-1.5 mb-8">
-            <Zap size={14} className="text-highlight" />
-            <span className="text-sm text-white/80">Únete a miles de clientes felices</span>
+            <div className="hidden lg:block">
+              <div className="grid grid-cols-2 gap-4">
+                {[
+                  { icon: Gift, title: 'Envío gratis', desc: 'En Quibdó' },
+                  { icon: Sparkles, title: 'Personalizable', desc: 'A tu gusto' },
+                  { icon: Shield, title: 'Pago seguro', desc: 'Wompi + MercadoPago' },
+                  { icon: BadgeCheck, title: 'Calidad premium', desc: 'Garantizada' },
+                ].map(({ icon: Icon, title, desc }) => (
+                  <div key={title} className="bg-white/10 backdrop-blur-sm rounded-3xl p-6 text-center border border-white/10 hover:bg-white/15 transition-all duration-300">
+                    <div className="w-14 h-14 mx-auto mb-3 rounded-2xl bg-white/20 flex items-center justify-center">
+                      <Icon size={24} className="text-white" />
+                    </div>
+                    <p className="text-white font-semibold text-sm">{title}</p>
+                    <p className="text-white/50 text-xs mt-1">{desc}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
           </div>
-          <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-white mb-6 leading-tight">
-            ¿Listo para encontrar el{' '}
-            <span className="text-highlight">regalo perfecto</span>?
-          </h2>
-          <p className="text-lg sm:text-xl text-white/70 mb-10 max-w-xl mx-auto">
-            Descubre nuestra colección y haz de cada ocasión un momento inolvidable
-          </p>
-          <Link
-            to="/catalogo"
-            className="group inline-flex items-center gap-2 bg-white text-primary px-10 py-4 rounded-xl font-bold text-lg transition-all duration-300 hover:bg-highlight hover:text-gray-900 hover:scale-105 hover:shadow-2xl"
-          >
-            Comprar ahora <HeartHandshake size={22} className="group-hover:scale-110 transition-transform" />
-          </Link>
         </div>
       </section>
     </div>

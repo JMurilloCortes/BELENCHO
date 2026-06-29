@@ -65,9 +65,9 @@ export default function Footer() {
             <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-12 gap-8 sm:gap-10 lg:gap-8">
 
               {/* Brand column - full width on mobile */}
-              <div className="col-span-2 sm:col-span-2 lg:col-span-4">
+              <div className="col-span-2 sm:col-span-2 lg:col-span-4 order-1 lg:order-none text-center sm:text-left">
                 <Link to="/" className="inline-block mb-4 group">
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-2 justify-center sm:justify-start">
                     <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-gradient-to-br from-primary to-accent flex items-center justify-center text-white font-bold text-sm shadow-lg shadow-primary/20 group-hover:shadow-primary/40 transition-shadow">
                       B
                     </div>
@@ -82,7 +82,7 @@ export default function Footer() {
                 </p>
 
                 {/* Social icons */}
-                <div className="flex gap-2">
+                <div className="flex gap-2 justify-center sm:justify-start">
                   {socialLinks.map(({ icon: Icon, href, label, color }) => (
                     <a
                       key={label}
@@ -97,7 +97,7 @@ export default function Footer() {
               </div>
 
               {/* Quick links - side by side with contact on mobile */}
-              <div className="lg:col-span-2">
+              <div className="order-3 lg:order-none lg:col-span-2 pl-10 lg:pl-0">
                 <h4 className="text-white font-semibold mb-5 text-xs sm:text-sm uppercase tracking-[0.15em]">
                   <span className="inline-block bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">Enlaces</span>
                 </h4>
@@ -117,7 +117,7 @@ export default function Footer() {
               </div>
 
               {/* Contact */}
-              <div className="lg:col-span-3">
+              <div className="order-2 lg:order-none lg:col-span-3">
                 <h4 className="text-white font-semibold mb-5 text-xs sm:text-sm uppercase tracking-[0.15em]">
                   <span className="inline-block bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">Contacto</span>
                 </h4>
@@ -145,15 +145,15 @@ export default function Footer() {
               </div>
 
               {/* Newsletter - full width on mobile */}
-              <div className="col-span-2 lg:col-span-3">
+              <div className="col-span-2 lg:col-span-3 order-4 lg:order-none text-center sm:text-left">
                 <h4 className="text-white font-semibold mb-5 text-xs sm:text-sm uppercase tracking-[0.15em]">
                   <span className="inline-block bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">Newsletter</span>
                 </h4>
                 <p className="text-xs sm:text-sm text-gray-400 mb-4 leading-relaxed">
                   Suscríbete y recibe novedades, lanzamientos y ofertas exclusivas directamente en tu correo.
                 </p>
-                <form onSubmit={handleSubmit} className="relative">
-                  <div className="flex gap-2">
+                <form onSubmit={handleSubmit} className="relative max-w-xs sm:max-w-none mx-auto sm:mx-0">
+                  <div className="flex gap-2 justify-center sm:justify-start">
                     <div className="relative flex-1">
                       <Mail size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500" />
                       <input
@@ -173,7 +173,7 @@ export default function Footer() {
                     </button>
                   </div>
                 </form>
-                <div className="mt-5 flex items-center gap-2 text-xs sm:text-sm text-gray-500">
+                <div className="mt-5 flex items-center gap-2 text-xs sm:text-sm text-gray-500 justify-center sm:justify-start">
                   <Sparkles size={13} className="text-highlight" />
                   <span>Hecho con <Heart size={11} className="inline text-accent mx-0.5" /> en Quibdó</span>
                 </div>
