@@ -58,7 +58,7 @@ export default function Navbar() {
     setMenuOpen(false)
   }
 
-  const isAdmin = user?.role === 'ADMIN' || user?.role === 'COLLABORATOR'
+  const isAdmin = user?.role === 'ADMINISTRADOR' || user?.role === 'COLABORADOR'
 
   const navLinks = [
     { to: '/', label: 'Inicio' },

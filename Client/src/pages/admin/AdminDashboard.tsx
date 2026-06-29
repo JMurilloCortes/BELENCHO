@@ -1,7 +1,9 @@
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { Package, Users, ShoppingCart, DollarSign, TrendingUp, Clock, ArrowUpRight, ArrowRight } from 'lucide-react'
+import { Package, Users, ShoppingCart, DollarSign, TrendingUp, Clock, ArrowUpRight, ArrowRight, Trash2 } from 'lucide-react'
 import { getDashboardStats } from '../../services/admin.service'
+import { showToast, showConfirm } from '../../lib/sweetalert'
+import api from '../../services/api'
 
 interface Stats {
   totalProducts: number
@@ -23,6 +25,24 @@ export default function AdminDashboard() {
       .finally(() => setLoading(false))
   }, [])
 
+  const handleReset = async () => {
+    const result = await showConfirm({
+      title: '¿Restablecer todo?',
+      text: 'Se eliminarán todos los productos, categorías, órdenes, reseñas, favoritos, carritos y usuarios (excepto el administrador principal). Esta acción no se puede deshacer.',
+      confirmText: 'Sí, restablecer',
+      confirmColor: '#ef4444',
+    })
+    if (!result.isConfirmed) return
+    try {
+      await api.post('/admin/reset')
+      showToast('success', 'Todo restablecido correctamente')
+      const updated = await getDashboardStats()
+      setStats(updated)
+    } catch {
+      showToast('error', 'Error al restablecer')
+    }
+  }
+
   if (loading) return (
     <div className="flex items-center justify-center min-h-[60vh]">
       <div className="w-10 h-10 border-4 border-primary/30 border-t-primary rounded-full animate-spin" />
@@ -40,9 +60,14 @@ export default function AdminDashboard() {
 
   return (
     <div>
-      <div className="mb-8">
-        <h1 className="text-2xl font-bold text-gray-800">Dashboard</h1>
-        <p className="text-sm text-gray-400 mt-1">Resumen general de tu tienda</p>
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 mb-8">
+        <div>
+          <h1 className="text-2xl font-bold text-gray-800">Dashboard</h1>
+          <p className="text-sm text-gray-400 mt-1">Resumen general de tu tienda</p>
+        </div>
+        <button onClick={handleReset} className="flex items-center gap-1.5 px-4 py-2.5 text-sm font-medium text-red-600 bg-red-50 border border-red-200 rounded-xl hover:text-white hover:bg-red-500 hover:border-red-400 hover:shadow-lg hover:shadow-red-500/20 transition-all duration-200">
+          <Trash2 size={16} /> Restablecer todo
+        </button>
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-6 mb-8">

@@ -1,6 +1,7 @@
 import { Response } from "express";
 import { AuthRequest } from "../middleware/auth";
 import { prisma } from "../lib/prisma";
+import bcrypt from "bcryptjs";
 
 export async function getDashboardStats(_req: AuthRequest, res: Response) {
   try {
@@ -46,7 +47,7 @@ export async function getUsers(_req: AuthRequest, res: Response) {
 export async function updateUserRole(req: AuthRequest, res: Response) {
   try {
     const { role } = req.body;
-    if (!["ADMIN", "COLLABORATOR", "CLIENT"].includes(role)) {
+    if (!["ADMINISTRADOR", "COLABORADOR", "CLIENTE"].includes(role)) {
       return res.status(400).json({ error: "Rol inválido" });
     }
     const user = await prisma.user.update({
@@ -304,10 +305,11 @@ export async function toggleUserActive(req: AuthRequest, res: Response) {
 export async function updateUser(req: AuthRequest, res: Response) {
   try {
     const id = String(req.params.id);
-    const { name, email } = req.body;
+    const { name, email, role } = req.body;
     const data: any = {};
     if (name !== undefined) data.name = name;
     if (email !== undefined) data.email = email;
+    if (role !== undefined) data.role = role;
     const updated = await prisma.user.update({
       where: { id },
       data,
@@ -326,5 +328,70 @@ export async function deleteUser(req: AuthRequest, res: Response) {
     res.json({ message: "Usuario eliminado" });
   } catch {
     res.status(500).json({ error: "Error al eliminar usuario" });
+  }
+}
+
+export async function createUser(req: AuthRequest, res: Response) {
+  try {
+    const { name, email, password, role } = req.body;
+    if (!name || !email || !password) {
+      return res.status(400).json({ error: "Nombre, email y contraseña son requeridos" });
+    }
+    if (password.length < 6) {
+      return res.status(400).json({ error: "La contraseña debe tener al menos 6 caracteres" });
+    }
+    const existing = await prisma.user.findUnique({ where: { email } });
+    if (existing) {
+      return res.status(409).json({ error: "El email ya está registrado" });
+    }
+    const hashed = await bcrypt.hash(password, 10);
+    const user = await prisma.user.create({
+      data: {
+        name,
+        email,
+        password: hashed,
+        role: role || "CLIENTE",
+      },
+      select: { id: true, email: true, name: true, role: true, active: true, createdAt: true },
+    });
+    res.status(201).json(user);
+  } catch {
+    res.status(500).json({ error: "Error al crear usuario" });
+  }
+}
+
+export async function updateUserPassword(req: AuthRequest, res: Response) {
+  try {
+    const id = String(req.params.id);
+    const { newPassword } = req.body;
+    if (!newPassword || newPassword.length < 6) {
+      return res.status(400).json({ error: "La contraseña debe tener al menos 6 caracteres" });
+    }
+    const hashed = await bcrypt.hash(newPassword, 10);
+    await prisma.user.update({ where: { id }, data: { password: hashed } });
+    res.json({ message: "Contraseña actualizada" });
+  } catch {
+    res.status(500).json({ error: "Error al cambiar contraseña" });
+  }
+}
+
+export async function resetAll(_req: AuthRequest, res: Response) {
+  try {
+    await prisma.$transaction([
+      prisma.orderItem.deleteMany(),
+      prisma.order.deleteMany(),
+      prisma.favorite.deleteMany(),
+      prisma.cartItem.deleteMany(),
+      prisma.cart.deleteMany(),
+      prisma.review.deleteMany(),
+      prisma.productVideo.deleteMany(),
+      prisma.productImage.deleteMany(),
+      prisma.product.deleteMany(),
+      prisma.category.deleteMany(),
+      prisma.user.deleteMany({ where: { email: { not: "admin@belencho.com" } } }),
+    ]);
+    res.json({ message: "Restablecimiento completo exitoso" });
+  } catch {
+    res.status(500).json({ error: "Error al restablecer" });
   }
 }

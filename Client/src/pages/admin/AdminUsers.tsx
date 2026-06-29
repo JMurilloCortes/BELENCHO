@@ -1,15 +1,15 @@
 import { useEffect, useState } from 'react'
-import { Edit2, Trash2, Power, PowerOff, Save, Search, Users as UsersIcon, X } from 'lucide-react'
+import { Edit2, Trash2, Power, PowerOff, Save, Search, Users as UsersIcon, X, Eye, EyeOff, Plus } from 'lucide-react'
 import { showToast, showConfirm } from '../../lib/sweetalert'
 import api from '../../services/api'
-import { getUsers, updateUserRole, toggleUserActive, deleteUser } from '../../services/admin.service'
+import { getUsers, createUser, updateUserRole, toggleUserActive, deleteUser, updateUserPassword } from '../../services/admin.service'
 
-const roles = ['ADMIN', 'COLLABORATOR', 'CLIENT'] as const
+const roles = ['ADMINISTRADOR', 'COLABORADOR', 'CLIENTE'] as const
 
 const roleColors: Record<string, string> = {
-  ADMIN: 'bg-purple-50 text-purple-600',
-  COLLABORATOR: 'bg-blue-50 text-blue-600',
-  CLIENT: 'bg-gray-100 text-gray-600',
+  ADMINISTRADOR: 'bg-purple-50 text-purple-600',
+  COLABORADOR: 'bg-blue-50 text-blue-600',
+  CLIENTE: 'bg-gray-100 text-gray-600',
 }
 
 export default function AdminUsers() {
@@ -17,6 +17,10 @@ export default function AdminUsers() {
   const [loading, setLoading] = useState(true)
   const [search, setSearch] = useState('')
   const [editUser, setEditUser] = useState<any>(null)
+  const [newPassword, setNewPassword] = useState('')
+  const [showPassword, setShowPassword] = useState(false)
+  const [showCreate, setShowCreate] = useState(false)
+  const [createForm, setCreateForm] = useState({ name: '', email: '', password: '', role: 'CLIENTE' })
 
   const load = async () => {
     const u = await getUsers()
@@ -65,12 +69,28 @@ export default function AdminUsers() {
   const handleEditSave = async () => {
     if (!editUser) return
     try {
-      await api.put(`/admin/users/${editUser.id}`, { name: editUser.name, email: editUser.email })
+      await api.put(`/admin/users/${editUser.id}`, { name: editUser.name, email: editUser.email, role: editUser.role })
+      if (newPassword.length >= 6) {
+        await updateUserPassword(editUser.id, newPassword)
+      }
       showToast('success', 'Usuario actualizado')
       setEditUser(null)
+      setNewPassword('')
       load()
     } catch {
       showToast('error', 'Error al actualizar')
+    }
+  }
+
+  const handleCreate = async () => {
+    try {
+      await createUser(createForm)
+      showToast('success', 'Usuario creado')
+      setShowCreate(false)
+      setCreateForm({ name: '', email: '', password: '', role: 'CLIENTE' })
+      load()
+    } catch {
+      showToast('error', 'Error al crear usuario')
     }
   }
 
@@ -92,9 +112,12 @@ export default function AdminUsers() {
           <h1 className="text-2xl font-bold text-gray-800">Usuarios</h1>
           <p className="text-sm text-gray-400 mt-1">{users.length} usuarios registrados · {users.filter((u) => (u as any).active !== false).length} activos</p>
         </div>
-        <div className="relative w-full sm:w-64">
-          <Search size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400" />
-          <input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Buscar usuarios..." className="w-full pl-10 pr-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all" />
+        <div className="relative w-full sm:w-64 flex gap-2">
+          <div className="relative flex-1">
+            <Search size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400" />
+            <input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Buscar usuarios..." className="w-full pl-10 pr-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all" />
+          </div>
+          <button onClick={() => setShowCreate(true)} className="shrink-0 flex items-center gap-1.5 px-4 py-2.5 bg-primary text-white rounded-xl text-sm font-semibold hover:bg-primary-dark transition-all duration-200"><Plus size={16} /> Nuevo</button>
         </div>
       </div>
 
@@ -102,7 +125,13 @@ export default function AdminUsers() {
         <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50 p-4" onClick={() => setEditUser(null)}>
           <div className="bg-white rounded-2xl shadow-xl w-full max-w-md" onClick={(e) => e.stopPropagation()}>
             <div className="flex items-center justify-between p-5 sm:p-6 border-b border-gray-100">
-              <h2 className="text-lg font-semibold text-gray-800">Editar usuario</h2>
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-xl bg-primary/5 flex items-center justify-center"><Edit2 size={20} className="text-primary" /></div>
+                <div>
+                  <h2 className="text-lg font-semibold text-gray-800">Editar usuario</h2>
+                  <p className="text-xs text-gray-400">{editUser.name} · {editUser.email}</p>
+                </div>
+              </div>
               <button onClick={() => setEditUser(null)} className="p-2 hover:bg-gray-100 rounded-lg transition-colors"><X size={18} /></button>
             </div>
             <div className="p-5 sm:p-6 space-y-4">
@@ -114,10 +143,72 @@ export default function AdminUsers() {
                 <label className="block text-sm font-medium text-gray-600 mb-1.5">Email</label>
                 <input value={editUser.email || ''} onChange={(e) => setEditUser({ ...editUser, email: e.target.value })} className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-primary/20" />
               </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-600 mb-1.5">Rol</label>
+                <select value={editUser.role || 'CLIENTE'} onChange={(e) => setEditUser({ ...editUser, role: e.target.value })} className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-primary/20">
+                  {roles.map((r) => <option key={r} value={r}>{r}</option>)}
+                </select>
+              </div>
+              <div className="border-t border-gray-100 pt-4">
+                <label className="block text-sm font-medium text-gray-600 mb-1.5">Nueva contraseña <span className="text-gray-400 font-normal">(opcional)</span></label>
+                <div className="relative">
+                  <input
+                    type={showPassword ? 'text' : 'password'}
+                    value={newPassword}
+                    onChange={(e) => setNewPassword(e.target.value)}
+                    placeholder="Dejar vacío para no cambiar"
+                    className="w-full px-4 py-2.5 pr-11 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-primary/20"
+                  />
+                  <button onClick={() => setShowPassword(!showPassword)} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors">
+                    {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                  </button>
+                </div>
+              </div>
             </div>
             <div className="flex gap-3 justify-end p-5 sm:p-6 border-t border-gray-100">
-              <button onClick={() => setEditUser(null)} className="px-5 py-2.5 rounded-xl text-sm font-medium text-gray-600 hover:bg-gray-100 transition-colors">Cancelar</button>
+              <button onClick={() => { setEditUser(null); setNewPassword('') }} className="px-5 py-2.5 rounded-xl text-sm font-medium text-gray-600 hover:bg-gray-100 transition-colors">Cancelar</button>
               <button onClick={handleEditSave} className="bg-primary hover:bg-primary-dark text-white px-5 py-2.5 rounded-xl text-sm font-semibold transition-all duration-200 flex items-center gap-2"><Save size={16} /> Guardar</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {showCreate && (
+        <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50 p-4" onClick={() => setShowCreate(false)}>
+          <div className="bg-white rounded-2xl shadow-xl w-full max-w-md" onClick={(e) => e.stopPropagation()}>
+            <div className="flex items-center justify-between p-5 sm:p-6 border-b border-gray-100">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-xl bg-primary/5 flex items-center justify-center"><Plus size={20} className="text-primary" /></div>
+                <div>
+                  <h2 className="text-lg font-semibold text-gray-800">Nuevo usuario</h2>
+                  <p className="text-xs text-gray-400">Crear un nuevo usuario en el sistema</p>
+                </div>
+              </div>
+              <button onClick={() => setShowCreate(false)} className="p-2 hover:bg-gray-100 rounded-lg transition-colors"><X size={18} /></button>
+            </div>
+            <div className="p-5 sm:p-6 space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-600 mb-1.5">Nombre</label>
+                <input value={createForm.name} onChange={(e) => setCreateForm({ ...createForm, name: e.target.value })} className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-primary/20" placeholder="Nombre del usuario" />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-600 mb-1.5">Email</label>
+                <input type="email" value={createForm.email} onChange={(e) => setCreateForm({ ...createForm, email: e.target.value })} className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-primary/20" placeholder="correo@ejemplo.com" />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-600 mb-1.5">Contraseña</label>
+                <input type="password" value={createForm.password} onChange={(e) => setCreateForm({ ...createForm, password: e.target.value })} className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-primary/20" placeholder="Mínimo 6 caracteres" />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-600 mb-1.5">Rol</label>
+                <select value={createForm.role} onChange={(e) => setCreateForm({ ...createForm, role: e.target.value })} className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-primary/20">
+                  {roles.map((r) => <option key={r} value={r}>{r}</option>)}
+                </select>
+              </div>
+            </div>
+            <div className="flex gap-3 justify-end p-5 sm:p-6 border-t border-gray-100">
+              <button onClick={() => setShowCreate(false)} className="px-5 py-2.5 rounded-xl text-sm font-medium text-gray-600 hover:bg-gray-100 transition-colors">Cancelar</button>
+              <button onClick={handleCreate} className="bg-primary hover:bg-primary-dark text-white px-5 py-2.5 rounded-xl text-sm font-semibold transition-all duration-200 flex items-center gap-2"><Save size={16} /> Crear</button>
             </div>
           </div>
         </div>

@@ -17,7 +17,7 @@ const adminNavItems = [
 export default function AdminLayout() {
   const { pathname } = useLocation()
   const user = useAuthStore((s) => s.user)
-  const isAdmin = user?.role === 'ADMIN'
+  const isAdmin = user?.role === 'ADMINISTRADOR'
   const [sidebarOpen, setSidebarOpen] = useState(false)
 
   const NavLink = ({ item }: { item: typeof navItems[0] }) => {

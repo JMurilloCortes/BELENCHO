@@ -8,9 +8,9 @@ datasource db {
 }
 
 enum Role {
-  ADMIN
-  COLLABORATOR
-  CLIENT
+  ADMINISTRADOR
+  COLABORADOR
+  CLIENTE
 }
 
 enum OrderStatus {
@@ -30,7 +30,7 @@ model User {
   email     String   @unique
   password  String?
   name      String
-  role      Role     @default(CLIENT)
+  role      Role     @default(CLIENTE)
   active    Boolean  @default(true)
   googleId  String?  @unique
   avatar    String?

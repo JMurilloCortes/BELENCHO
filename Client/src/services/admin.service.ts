@@ -10,6 +10,11 @@ export async function getUsers() {
   return data
 }
 
+export async function createUser(userData: { name: string; email: string; password: string; role?: string }) {
+  const { data } = await api.post('/admin/users', userData)
+  return data
+}
+
 export async function updateUserRole(userId: string, role: string) {
   const { data } = await api.put(`/admin/users/${userId}/role`, { role })
   return data
@@ -22,6 +27,11 @@ export async function toggleUserActive(userId: string) {
 
 export async function deleteUser(userId: string) {
   const { data } = await api.delete(`/admin/users/${userId}`)
+  return data
+}
+
+export async function updateUserPassword(userId: string, newPassword: string) {
+  const { data } = await api.put(`/admin/users/${userId}/password`, { newPassword })
   return data
 }
 
