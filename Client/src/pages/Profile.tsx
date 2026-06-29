@@ -7,6 +7,7 @@ import { getProfile, updateProfile, changePassword } from '../services/user.serv
 export default function Profile() {
   const { user, login, isAuthenticated } = useAuthStore()
   const [loading, setLoading] = useState(true)
+  const [profile, setProfile] = useState<any>(null)
   const [name, setName] = useState('')
   const [email, setEmail] = useState('')
   const [currentPassword, setCurrentPassword] = useState('')
@@ -19,6 +20,7 @@ export default function Profile() {
     if (!isAuthenticated) return
     getProfile()
       .then((u) => {
+        setProfile(u)
         setName(u.name)
         setEmail(u.email)
       })
@@ -98,8 +100,8 @@ export default function Profile() {
 
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-10">
         {[
-          { icon: Shield, label: 'Rol', value: user?.role },
-          { icon: Calendar, label: 'Miembro desde', value: user?.createdAt ? new Date(user.createdAt).toLocaleDateString() : '-' },
+          { icon: Shield, label: 'Rol', value: profile?.role || user?.role },
+          { icon: Calendar, label: 'Miembro desde', value: profile?.createdAt ? new Date(profile.createdAt).toLocaleDateString() : '-' },
         ].map(({ icon: Icon, label, value }) => (
           <div key={label} className="col-span-2 sm:col-span-2 bg-white rounded-xl border border-gray-100 p-4 flex items-center gap-3">
             <div className="w-10 h-10 rounded-lg bg-primary/5 flex items-center justify-center shrink-0">
