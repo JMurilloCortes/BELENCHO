@@ -104,8 +104,9 @@ export async function updateOrderStatus(req: AuthRequest, res: Response) {
       where: { id: String(req.params.id) },
       data: { status },
       include: {
-        user: { select: { name: true, email: true } },
-        items: { include: { product: { select: { name: true } } } },
+        user: { select: { id: true, name: true, email: true } },
+        neighborhood: { select: { id: true, name: true } },
+        items: { include: { product: { include: { images: { orderBy: { order: "asc" } } } } } },
       },
     });
 
