@@ -113,8 +113,7 @@ export default function Home() {
           </h1>
 
           <p className="text-xs sm:text-base lg:text-base text-white/60 mb-4 sm:mb-8 max-w-lg mx-auto leading-relaxed">
-            En BELENCHO creamos experiencias únicas a través de regalos creativos y personalizados. 
-            Encuentra el detalle perfecto para cada ocasión.
+            Regalos creativos para momentos inolvidables.
           </p>
 
           {/* Buttons */}
