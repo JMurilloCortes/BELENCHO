@@ -34,40 +34,35 @@ export default function ProductDetail() {
       .finally(() => setLoading(false))
   }, [id])
 
-  const handleAddToCart = async () => {
+  const handleAddToCart = () => {
     if (!isAuthenticated) { window.location.href = '/login'; return }
     if (!product) return
-    try {
-      await addItem(product.id)
-      setAddedToCart(true)
-      setTimeout(() => setAddedToCart(false), 2000)
-      showToast('success', 'Agregado al carrito')
-    } catch {
+    setAddedToCart(true)
+    setTimeout(() => setAddedToCart(false), 2000)
+    showToast('success', 'Agregado al carrito')
+    addItem(product.id, 1, product).catch(() => {
       showToast('error', 'Error al agregar al carrito')
-    }
+    })
   }
 
-  const handleToggleFavorite = async () => {
+  const handleToggleFavorite = () => {
     if (!isAuthenticated) { window.location.href = '/login'; return }
     if (!product) return
-    try {
-      const wasFavorite = isFavorite(product.id)
-      await toggleFavorite(product.id)
-      showToast('success', wasFavorite ? 'Eliminado de favoritos' : 'Agregado a favoritos')
-    } catch {
+    const wasFavorite = isFavorite(product.id)
+    showToast('success', wasFavorite ? 'Eliminado de favoritos' : 'Agregado a favoritos')
+    toggleFavorite(product.id, product).catch(() => {
       showToast('error', 'Error al actualizar favoritos')
-    }
+    })
   }
 
-  const handleBuyNow = async () => {
+  const handleBuyNow = () => {
     if (!isAuthenticated) { window.location.href = '/login'; return }
     if (!product) return
-    try {
-      await addItem(product.id)
+    addItem(product.id, 1, product).then(() => {
       navigate('/checkout')
-    } catch {
+    }).catch(() => {
       showToast('error', 'Error al procesar la compra')
-    }
+    })
   }
 
   const [reviewRating, setReviewRating] = useState(0)

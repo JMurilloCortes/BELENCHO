@@ -1,7 +1,11 @@
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { ArrowRight, Star, Shield, Award, Gift, Package, Sparkles, HeartHandshake, ChevronRight, Zap, Quote } from 'lucide-react'
+import { ArrowRight, Star, Shield, Award, Gift, Package, Sparkles, HeartHandshake, ChevronRight, Zap, Quote, Heart, ShoppingCart } from 'lucide-react'
 import { getProducts } from '../services/product.service'
+import { showToast } from '../lib/sweetalert'
+import { useCartStore } from '../store/cart.store'
+import { useFavoriteStore } from '../store/favorite.store'
+import { useAuthStore } from '../store/auth.store'
 import type { Product } from '../types'
 
 const stats = [
@@ -26,10 +30,24 @@ const testimonials = [
 
 export default function Home() {
   const [products, setProducts] = useState<Product[]>([])
+  const addItem = useCartStore((s) => s.addItem)
+  const { toggleFavorite, isFavorite, loadFavorites } = useFavoriteStore()
+  const isAuthenticated = useAuthStore((s) => s.isAuthenticated)
+
+  useEffect(() => { if (isAuthenticated) loadFavorites() }, [isAuthenticated])
 
   useEffect(() => {
     getProducts().then(setProducts).catch(() => {})
   }, [])
+
+  const handleAddToCart = (productId: string) => {
+    if (!isAuthenticated) { window.location.href = '/login'; return }
+    const product = products.find((p) => p.id === productId)
+    showToast('success', 'Agregado al carrito')
+    addItem(productId, 1, product).catch(() => {
+      showToast('error', 'Error al agregar al carrito')
+    })
+  }
 
   return (
     <div className="overflow-hidden">
@@ -205,31 +223,50 @@ export default function Home() {
             </div>
 
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
-              {products.slice(0, 4).map((product) => (
+              {products.slice(0, 4).map((product) => {
+                const fav = isFavorite(product.id)
+                return (
                 <div
                   key={product.id}
                   className="group relative bg-white rounded-2xl sm:rounded-3xl overflow-hidden shadow-sm hover:shadow-2xl transition-all duration-500 hover:-translate-y-2 border border-gray-100 hover:border-transparent"
                 >
-                  <Link to={`/producto/${product.id}`} className="block relative aspect-square overflow-hidden">
+                  <Link to={`/producto/${product.id}`} className="block relative aspect-[4/5] overflow-hidden">
                     <img
-                      src={product.images?.[0]?.url || 'https://placehold.co/400x400/e2e8f0/94a3b8?text=No'}
+                      src={product.images?.[0]?.url || 'https://placehold.co/400x500/e2e8f0/94a3b8?text=No'}
                       alt={product.name}
                       className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
                     />
-                    <span className="absolute top-3 left-3 bg-white/90 backdrop-blur-sm text-gray-700 text-[10px] sm:text-xs font-semibold px-2.5 py-1 rounded-full shadow-sm">
+                    <span className="absolute top-3 left-3 bg-white/90 backdrop-blur-sm text-gray-700 text-[10px] sm:text-xs font-semibold px-2.5 py-1 rounded-full shadow-sm z-10">
                       {product.category?.name}
                     </span>
+                    <button
+                      onClick={(e) => {
+                        e.preventDefault()
+                        if (!isAuthenticated) { window.location.href = '/login'; return }
+                        const wasFav = isFavorite(product.id)
+                        showToast('success', wasFav ? 'Eliminado de favoritos' : 'Agregado a favoritos')
+                        toggleFavorite(product.id, product).catch(() => {
+                          showToast('error', 'Error al actualizar favoritos')
+                        })
+                      }}
+                      className={`absolute top-3 right-3 z-10 p-2 rounded-full transition-all duration-300 ${
+                        fav
+                          ? 'bg-accent text-white shadow-lg shadow-accent/30'
+                          : 'bg-white/80 backdrop-blur-sm text-gray-400 hover:bg-accent hover:text-white hover:shadow-lg hover:shadow-accent/30'
+                      }`}
+                    >
+                      <Heart size={16} fill={fav ? 'currentColor' : 'none'} />
+                    </button>
                     {product.stock <= 3 && product.stock > 0 && (
-                      <span className="absolute top-3 right-3 bg-accent text-white text-[10px] font-semibold px-2.5 py-1 rounded-full shadow-lg shadow-accent/30">
+                      <span className="absolute bottom-3 left-3 bg-accent text-white text-[10px] font-semibold px-2.5 py-1 rounded-full shadow-lg shadow-accent/30 z-10">
                         Últimas {product.stock}
                       </span>
                     )}
                     {product.stock === 0 && (
-                      <span className="absolute top-3 right-3 bg-gray-900/90 text-white text-[10px] font-semibold px-2.5 py-1 rounded-full backdrop-blur-sm">
+                      <span className="absolute bottom-3 left-3 bg-gray-900/90 text-white text-[10px] font-semibold px-2.5 py-1 rounded-full backdrop-blur-sm z-10">
                         Agotado
                       </span>
                     )}
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/15 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
                   </Link>
                   <div className="p-3 sm:p-5">
                     <Link to={`/producto/${product.id}`}>
@@ -241,13 +278,21 @@ export default function Home() {
                       <span className="text-lg sm:text-xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
                         ${Number(product.price).toLocaleString()}
                       </span>
-                      <span className={`text-[10px] sm:text-xs font-medium ${product.stock > 5 ? 'text-green-600' : 'text-orange-500'}`}>
-                        {product.stock > 0 ? `${product.stock} uds` : ''}
-                      </span>
+                      <button
+                        onClick={() => handleAddToCart(product.id)}
+                        disabled={product.stock === 0}
+                        className={`p-2.5 rounded-xl transition-all duration-300 ${
+                          product.stock === 0
+                            ? 'bg-gray-100 text-gray-300 cursor-not-allowed'
+                            : 'bg-primary/10 text-primary hover:bg-primary hover:text-white hover:shadow-lg hover:shadow-primary/20'
+                        }`}
+                      >
+                        <ShoppingCart size={16} />
+                      </button>
                     </div>
                   </div>
                 </div>
-              ))}
+              )})}
             </div>
 
             <div className="text-center mt-12">

@@ -86,46 +86,38 @@ export default function FavoritesPage() {
             className="group relative bg-white rounded-2xl sm:rounded-3xl overflow-hidden shadow-sm hover:shadow-2xl transition-all duration-500 hover:-translate-y-2 border border-gray-100 hover:border-transparent"
           >
             {/* Image */}
-            <Link to={`/producto/${product.id}`} className="block relative aspect-square overflow-hidden">
+            <Link to={`/producto/${product.id}`} className="block relative aspect-[4/5] overflow-hidden">
               <img
-                src={product.images?.[0]?.url || 'https://placehold.co/400x400/e2e8f0/94a3b8?text=No'}
+                src={product.images?.[0]?.url || 'https://placehold.co/400x500/e2e8f0/94a3b8?text=No'}
                 alt={product.name}
                 className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
               />
-              <span className="absolute top-3 left-3 bg-white/90 backdrop-blur-sm text-gray-700 text-[10px] sm:text-xs font-semibold px-2.5 py-1 rounded-full shadow-sm">
+              <span className="absolute top-3 left-3 bg-white/90 backdrop-blur-sm text-gray-700 text-[10px] sm:text-xs font-semibold px-2.5 py-1 rounded-full shadow-sm z-10">
                 {product.category?.name}
               </span>
+              {/* Favorite button */}
+              <button
+                onClick={(e) => {
+                  e.preventDefault()
+                  showToast('success', 'Eliminado de favoritos')
+                  toggleFavorite(product.id, product).catch(() => {
+                    showToast('error', 'Error al actualizar favoritos')
+                  })
+                }}
+                className="absolute top-3 right-3 z-10 p-2 rounded-full bg-accent text-white shadow-lg shadow-accent/30 transition-all duration-300 hover:scale-110"
+              >
+                <Heart size={16} fill="currentColor" />
+              </button>
               {product.stock <= 3 && product.stock > 0 && (
-                <span className="absolute top-3 right-3 bg-accent text-white text-[10px] font-semibold px-2.5 py-1 rounded-full shadow-lg shadow-accent/30">
+                <span className="absolute bottom-3 left-3 bg-accent text-white text-[10px] font-semibold px-2.5 py-1 rounded-full shadow-lg shadow-accent/30 z-10">
                   Últimas {product.stock}
                 </span>
               )}
               {product.stock === 0 && (
-                <span className="absolute top-3 right-3 bg-gray-900/90 text-white text-[10px] font-semibold px-2.5 py-1 rounded-full backdrop-blur-sm">
+                <span className="absolute bottom-3 left-3 bg-gray-900/90 text-white text-[10px] font-semibold px-2.5 py-1 rounded-full backdrop-blur-sm z-10">
                   Agotado
                 </span>
               )}
-              <div className="absolute inset-0 bg-gradient-to-t from-black/15 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-              {/* Quick actions overlay */}
-              <div className="absolute inset-0 flex items-center justify-center gap-3 opacity-0 group-hover:opacity-100 transition-all duration-500 translate-y-4 group-hover:translate-y-0">
-                <button
-                  onClick={(e) => {
-                    e.preventDefault()
-                    if (!isAuthenticated) { window.location.href = '/login'; return }
-                    addItem(product.id).then(() => showToast('success', 'Agregado al carrito')).catch(() => showToast('error', 'Error'))
-                  }}
-                  className="px-4 py-2.5 rounded-xl text-xs font-bold border border-primary/20 bg-primary/5 text-primary hover:bg-primary hover:text-white hover:border-primary hover:shadow-lg hover:shadow-primary/20 transition-all duration-300 flex items-center gap-1.5"
-                >
-                  <ShoppingCart size={14} />
-                  Agregar
-                </button>
-                <button
-                  onClick={(e) => { e.preventDefault(); toggleFavorite(product.id) }}
-                  className="p-2.5 rounded-xl border-2 border-accent bg-accent text-white shadow-lg shadow-accent/30 transition-all duration-300"
-                >
-                  <Heart size={18} fill="currentColor" />
-                </button>
-              </div>
             </Link>
 
             {/* Info */}
@@ -139,9 +131,21 @@ export default function FavoritesPage() {
                 <span className="text-lg sm:text-xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
                   ${Number(product.price).toLocaleString()}
                 </span>
-                <span className={`text-[10px] sm:text-xs font-medium ${product.stock > 5 ? 'text-green-600' : 'text-orange-500'}`}>
-                  {product.stock > 0 ? `${product.stock} uds` : ''}
-                </span>
+                <button
+                  onClick={() => {
+                    if (!isAuthenticated) { window.location.href = '/login'; return }
+                    showToast('success', 'Agregado al carrito')
+                    addItem(product.id, 1, product).catch(() => showToast('error', 'Error'))
+                  }}
+                  disabled={product.stock === 0}
+                  className={`p-2.5 rounded-xl transition-all duration-300 ${
+                    product.stock === 0
+                      ? 'bg-gray-100 text-gray-300 cursor-not-allowed'
+                      : 'bg-primary/10 text-primary hover:bg-primary hover:text-white hover:shadow-lg hover:shadow-primary/20'
+                  }`}
+                >
+                  <ShoppingCart size={16} />
+                </button>
               </div>
             </div>
           </div>

@@ -7,7 +7,7 @@ interface FavoriteState {
   items: Product[]
   loading: boolean
   loadFavorites: () => Promise<void>
-  toggleFavorite: (productId: string) => Promise<void>
+  toggleFavorite: (productId: string, product?: Product) => Promise<void>
   isFavorite: (productId: string) => boolean
   reset: () => void
 }
@@ -31,16 +31,25 @@ export const useFavoriteStore = create<FavoriteState>()(
         }
       },
 
-      toggleFavorite: async (productId) => {
+      toggleFavorite: async (productId, product) => {
         const { items } = get()
         const exists = items.some((p) => p.id === productId)
         if (exists) {
-          await favoriteService.removeFavorite(productId)
           set({ items: items.filter((p) => p.id !== productId) })
-        } else {
-          await favoriteService.addFavorite(productId)
-          const favorites = await favoriteService.getFavorites()
-          set({ items: favorites?.map((f: any) => f.product) || [] })
+        } else if (product) {
+          set({ items: [...items, product] })
+        }
+        try {
+          if (exists) {
+            await favoriteService.removeFavorite(productId)
+          } else {
+            await favoriteService.addFavorite(productId)
+            const favorites = await favoriteService.getFavorites()
+            set({ items: favorites?.map((f: any) => f.product) || [] })
+          }
+        } catch {
+          set({ items })
+          throw new Error()
         }
       },
 

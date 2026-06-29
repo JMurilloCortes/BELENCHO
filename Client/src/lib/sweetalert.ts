@@ -1,17 +1,12 @@
 import Swal from 'sweetalert2'
 
-const baseStyle = {
-  fontFamily: 'inherit',
-  borderRadius: '16px',
-  padding: '0',
-}
-
 export const SwalToast = Swal.mixin({
   toast: true,
-  position: 'top-end',
+  position: 'bottom-right',
   showConfirmButton: false,
-  timer: 3000,
+  timer: 2500,
   timerProgressBar: true,
+  showCloseButton: false,
   customClass: {
     popup: 'swal-toast-popup',
     title: 'swal-toast-title',
@@ -22,20 +17,55 @@ export const SwalToast = Swal.mixin({
 const style = document.createElement('style')
 style.textContent = `
   .swal-toast-popup {
-    border-radius: 16px !important;
-    padding: 16px 20px !important;
-    box-shadow: 0 20px 60px rgba(0,0,0,0.15), 0 4px 20px rgba(0,0,0,0.08) !important;
-    backdrop-filter: blur(20px) !important;
+    border-radius: 999px !important;
+    padding: 10px 18px !important;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.1) !important;
+    width: auto !important;
+    max-width: 320px !important;
+    min-width: auto !important;
+    margin-bottom: 8px !important;
+    justify-content: center !important;
   }
   .swal-toast-title {
-    font-size: 14px !important;
+    font-size: 13px !important;
     font-weight: 600 !important;
     padding: 0 !important;
     margin: 0 !important;
+    text-align: center !important;
+    flex: none !important;
   }
   .swal-timer-bar {
     background: linear-gradient(90deg, #49b8a7, #fc8a80) !important;
-    height: 3px !important;
+    height: 2px !important;
+    border-radius: 0 0 999px 999px !important;
+  }
+  .swal2-icon {
+    font-size: 10px !important;
+    margin: 0 6px 0 0 !important;
+    width: 20px !important;
+    height: 20px !important;
+    border-width: 2px !important;
+  }
+  .swal2-icon-content {
+    font-size: 11px !important;
+  }
+  .swal2-icon.swal2-success .swal2-success-ring {
+    border-color: currentColor !important;
+  }
+  .swal2-icon.swal2-success [class^=swal2-success-line] {
+    background-color: currentColor !important;
+  }
+  .swal2-icon.swal2-error {
+    border-color: currentColor !important;
+  }
+  .swal2-icon.swal2-error [class^=swal2-x-mark-line] {
+    background-color: currentColor !important;
+  }
+  .swal2-icon.swal2-warning {
+    border-color: currentColor !important;
+  }
+  .swal2-icon.swal2-info {
+    border-color: currentColor !important;
   }
   .swal-confirm-popup {
     border-radius: 24px !important;
@@ -114,18 +144,18 @@ style.textContent = `
 document.head.appendChild(style)
 
 export function showToast(icon: 'success' | 'error' | 'info' | 'warning', title: string) {
-  const colors: Record<string, string> = {
-    success: '#49b8a7',
-    error: '#fc8a80',
-    info: '#49b8a7',
-    warning: '#f8e694',
+  const config: Record<string, string> = {
+    success: '#059669',
+    error: '#dc2626',
+    info: '#059669',
+    warning: '#d97706',
   }
   return SwalToast.fire({
     icon,
     title,
-    color: colors[icon],
-    iconColor: colors[icon],
-    background: '#ffffff',
+    color: config[icon],
+    iconColor: config[icon],
+    background: '#e5e7eb',
   })
 }
 

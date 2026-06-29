@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom'
 import { Trash2, Minus, Plus, ShoppingBag, ArrowLeft } from 'lucide-react'
 import { useCartStore } from '../store/cart.store'
 import { useAuthStore } from '../store/auth.store'
+import { showToast } from '../lib/sweetalert'
 
 export default function CartPage() {
   const { items, loading, loadCart, updateQuantity, removeItem } = useCartStore()
@@ -111,7 +112,10 @@ export default function CartPage() {
                       <p className="text-[10px] sm:text-xs text-gray-400 mt-0.5">{item.product.category?.name}</p>
                     </div>
                     <button
-                      onClick={() => removeItem(item.id)}
+                      onClick={() => {
+                        showToast('success', 'Producto eliminado')
+                        removeItem(item.id).catch(() => showToast('error', 'Error al eliminar'))
+                      }}
                       className="p-2 rounded-xl border border-red-200 bg-red-50 text-red-500 hover:text-white hover:bg-red-500 hover:border-red-400 hover:shadow-lg hover:shadow-red-500/20 transition-all duration-300"
                       title="Eliminar"
                     >
