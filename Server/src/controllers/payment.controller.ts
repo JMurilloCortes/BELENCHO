@@ -10,12 +10,15 @@ import { prisma } from "../lib/prisma";
 
 export async function createPayment(req: AuthRequest, res: Response) {
   try {
-    const { paymentMethod, customerName, customerEmail, customerPhone, deliveryAddress, deliveryInstructions, neighborhoodId } = req.body;
+    const { paymentMethod, customerName, customerEmail, customerPhone, deliveryAddress, deliveryInstructions, neighborhoodId, deliveryDate, deliveryTimeSlot } = req.body;
     if (!["WOMPI", "MERCADOPAGO"].includes(paymentMethod)) {
       return res.status(400).json({ error: "Método de pago inválido" });
     }
     if (!customerName || !customerEmail || !customerPhone || !deliveryAddress || !neighborhoodId) {
       return res.status(400).json({ error: "Completa todos los datos de entrega" });
+    }
+    if (!deliveryDate || !deliveryTimeSlot) {
+      return res.status(400).json({ error: "Selecciona fecha y horario de entrega" });
     }
 
     const neighborhood = await prisma.neighborhood.findUnique({ where: { id: neighborhoodId } });
@@ -23,8 +26,22 @@ export async function createPayment(req: AuthRequest, res: Response) {
       return res.status(400).json({ error: "Barrio no disponible para entregas" });
     }
 
+    // Validate delivery slot availability
+    const startDate = new Date(deliveryDate + "T00:00:00.000Z");
+    const endDate = new Date(deliveryDate + "T23:59:59.999Z");
+    const bookedCount = await prisma.order.count({
+      where: {
+        deliveryDate: { gte: startDate, lte: endDate },
+        deliveryTimeSlot,
+        status: { notIn: ["CANCELLED", "REFUNDED"] },
+      },
+    });
+    if (bookedCount >= 5) {
+      return res.status(400).json({ error: "Este horario ya no tiene cupo disponible" });
+    }
+
     const order = await createOrderFromCart(req.user!.id, paymentMethod, {
-      customerName, customerEmail, customerPhone, deliveryAddress, deliveryInstructions, neighborhoodId,
+      customerName, customerEmail, customerPhone, deliveryAddress, deliveryInstructions, neighborhoodId, deliveryDate, deliveryTimeSlot,
     });
 
     let result;

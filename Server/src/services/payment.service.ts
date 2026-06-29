@@ -98,6 +98,8 @@ export async function createOrderFromCart(
     deliveryAddress: string;
     deliveryInstructions?: string;
     neighborhoodId: string;
+    deliveryDate: string;
+    deliveryTimeSlot: string;
   }
 ) {
   const cart = await prisma.cart.findUnique({
@@ -126,6 +128,8 @@ export async function createOrderFromCart(
       deliveryAddress: customerData.deliveryAddress,
       deliveryInstructions: customerData.deliveryInstructions || null,
       neighborhoodId: customerData.neighborhoodId,
+      deliveryDate: new Date(customerData.deliveryDate + "T00:00:00.000Z"),
+      deliveryTimeSlot: customerData.deliveryTimeSlot,
       total,
       paymentMethod,
       items: {

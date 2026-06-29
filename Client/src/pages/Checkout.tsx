@@ -1,12 +1,14 @@
-import { useState, useEffect } from 'react'
-import { CreditCard, ChevronRight, MapPin, Phone, Mail, User, MessageSquare, ShoppingBag, Shield, Lock, Truck, ArrowLeft, Star, Package, Building2 } from 'lucide-react'
+import { useState, useEffect, useMemo } from 'react'
+import { CreditCard, ChevronRight, MapPin, Phone, Mail, User, MessageSquare, ShoppingBag, Shield, Lock, Truck, ArrowLeft, Package, Building2, Calendar, Clock } from 'lucide-react'
 import { showToast } from '../lib/sweetalert'
 import { createPayment } from '../services/payment.service'
 import { getActiveNeighborhoods } from '../services/neighborhood.service'
+import { getTimeSlots } from '../services/delivery.service'
 import { useCartStore } from '../store/cart.store'
 import { useAuthStore } from '../store/auth.store'
 import { Link } from 'react-router-dom'
 import type { Neighborhood } from '../types'
+import type { TimeSlot } from '../services/delivery.service'
 
 export default function Checkout() {
   const { items, itemCount, clearCart } = useCartStore()
@@ -15,6 +17,10 @@ export default function Checkout() {
   const [selectedMethod, setSelectedMethod] = useState<'WOMPI' | 'MERCADOPAGO' | null>(null)
   const [neighborhoods, setNeighborhoods] = useState<Neighborhood[]>([])
   const [selectedNeighborhoodId, setSelectedNeighborhoodId] = useState('')
+  const [deliveryDate, setDeliveryDate] = useState('')
+  const [timeSlots, setTimeSlots] = useState<TimeSlot[]>([])
+  const [selectedTimeSlot, setSelectedTimeSlot] = useState('')
+  const [slotsLoading, setSlotsLoading] = useState(false)
   const [form, setForm] = useState({
     customerName: user?.name || '',
     customerEmail: user?.email || '',
@@ -27,6 +33,22 @@ export default function Checkout() {
     getActiveNeighborhoods().then(setNeighborhoods).catch(() => {})
   }, [])
 
+  useEffect(() => {
+    if (!deliveryDate) { setTimeSlots([]); setSelectedTimeSlot(''); return }
+    setSelectedTimeSlot('')
+    setSlotsLoading(true)
+    getTimeSlots(deliveryDate)
+      .then(setTimeSlots)
+      .catch(() => showToast('error', 'Error al cargar horarios'))
+      .finally(() => setSlotsLoading(false))
+  }, [deliveryDate])
+
+  const tomorrow = useMemo(() => {
+    const d = new Date()
+    d.setDate(d.getDate() + 1)
+    return d.toISOString().split('T')[0]
+  }, [])
+
   const total = items.reduce((sum, item) => sum + Number(item.product.price) * item.quantity, 0)
 
   const updateField = (field: string, value: string) => setForm((prev) => ({ ...prev, [field]: value }))
@@ -37,10 +59,12 @@ export default function Checkout() {
       return
     }
     if (!selectedNeighborhoodId) { showToast('error', 'Selecciona un barrio para la entrega'); return }
+    if (!deliveryDate) { showToast('error', 'Selecciona una fecha de entrega'); return }
+    if (!selectedTimeSlot) { showToast('error', 'Selecciona un horario de entrega'); return }
     if (!selectedMethod) { showToast('error', 'Selecciona un método de pago'); return }
     setLoading(true)
     try {
-      const { redirectUrl } = await createPayment(selectedMethod, { ...form, neighborhoodId: selectedNeighborhoodId })
+      const { redirectUrl } = await createPayment(selectedMethod, { ...form, neighborhoodId: selectedNeighborhoodId, deliveryDate, deliveryTimeSlot: selectedTimeSlot })
       clearCart()
       window.location.href = redirectUrl
     } catch (e: any) {
@@ -182,6 +206,75 @@ export default function Checkout() {
               </div>
             </div>
 
+            {/* Delivery schedule */}
+            <div className="bg-white rounded-2xl sm:rounded-3xl shadow-lg shadow-gray-200/50 border border-gray-100 overflow-hidden">
+              <div className="p-5 sm:p-7 lg:p-8">
+                <div className="flex items-center gap-3 mb-6 pb-5 border-b border-gray-50">
+                  <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-highlight to-primary flex items-center justify-center shadow-lg shadow-highlight/20">
+                    <Calendar size={18} className="text-white" />
+                  </div>
+                  <div>
+                    <h2 className="text-base sm:text-lg font-bold text-gray-800">Agendar entrega</h2>
+                    <p className="text-xs text-gray-400">Elige fecha y horario para recibir tu pedido</p>
+                  </div>
+                </div>
+
+                <div className="space-y-5">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-600 mb-2">Fecha de entrega</label>
+                    <div className="relative group">
+                      <Calendar size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-300 group-focus-within:text-primary transition-colors duration-300 pointer-events-none" />
+                      <input
+                        type="date"
+                        value={deliveryDate}
+                        onChange={(e) => setDeliveryDate(e.target.value)}
+                        min={tomorrow}
+                        className="w-full pl-11 pr-4 py-3.5 bg-white border-2 border-gray-100 rounded-xl text-sm text-gray-800 focus:outline-none focus:border-primary focus:bg-white focus:ring-4 focus:ring-primary/5 transition-all duration-300 hover:border-gray-200"
+                      />
+                    </div>
+                  </div>
+
+                  {deliveryDate && (
+                    <div>
+                      <label className="block text-sm font-medium text-gray-600 mb-3">Horario disponible</label>
+                      {slotsLoading ? (
+                        <div className="flex items-center justify-center py-8">
+                          <div className="w-6 h-6 border-2 border-primary/30 border-t-primary rounded-full animate-spin" />
+                        </div>
+                      ) : (
+                        <div className="grid grid-cols-2 sm:grid-cols-3 gap-2.5">
+                          {timeSlots.map((ts) => {
+                            const isSelected = selectedTimeSlot === ts.slot
+                            const isDisabled = ts.available <= 0
+                            return (
+                              <button
+                                key={ts.slot}
+                                onClick={() => !isDisabled && setSelectedTimeSlot(ts.slot)}
+                                disabled={isDisabled}
+                                className={`relative flex flex-col items-center py-3 px-2 rounded-xl text-sm font-medium border-2 transition-all duration-200 ${
+                                  isSelected
+                                    ? 'border-primary bg-gradient-to-r from-primary/5 to-accent/5 shadow-md shadow-primary/10 text-primary'
+                                    : isDisabled
+                                      ? 'border-gray-100 bg-gray-50 text-gray-300 cursor-not-allowed'
+                                      : 'border-gray-100 hover:border-gray-200 hover:shadow-sm hover:bg-gray-50 text-gray-700'
+                                }`}
+                              >
+                                <Clock size={14} className={`mb-1 ${isSelected ? 'text-primary' : isDisabled ? 'text-gray-300' : 'text-gray-400'}`} />
+                                <span className="font-semibold">{ts.slot.replace('-', ' - ')}</span>
+                                <span className={`text-[10px] mt-0.5 ${isDisabled ? 'text-gray-300' : isSelected ? 'text-primary/70' : 'text-gray-400'}`}>
+                                  {isDisabled ? 'Completo' : `${ts.available} cupo${ts.available !== 1 ? 's' : ''}`}
+                                </span>
+                              </button>
+                            )
+                          })}
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+
             {/* Payment method */}
             <div className="bg-white rounded-2xl sm:rounded-3xl shadow-lg shadow-gray-200/50 border border-gray-100 overflow-hidden">
               <div className="p-5 sm:p-7 lg:p-8">
@@ -255,7 +348,7 @@ export default function Checkout() {
             <div className="lg:hidden">
               <button
                 onClick={handlePay}
-                disabled={!selectedMethod || !selectedNeighborhoodId || loading}
+                disabled={!selectedMethod || !selectedNeighborhoodId || !deliveryDate || !selectedTimeSlot || loading}
                 className="w-full bg-gradient-to-r from-primary to-accent text-white py-4 rounded-xl text-base font-bold shadow-xl shadow-primary/20 hover:shadow-2xl hover:shadow-primary/30 transition-all duration-300 hover:scale-[1.02] active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
               >
                 {loading ? (
@@ -331,7 +424,7 @@ export default function Checkout() {
               <div className="hidden lg:block">
                 <button
                   onClick={handlePay}
-                  disabled={!selectedMethod || !selectedNeighborhoodId || loading}
+                  disabled={!selectedMethod || !selectedNeighborhoodId || !deliveryDate || !selectedTimeSlot || loading}
                   className="w-full bg-gradient-to-r from-primary to-accent text-white py-4 rounded-xl text-base font-bold shadow-xl shadow-primary/20 hover:shadow-2xl hover:shadow-primary/30 transition-all duration-300 hover:scale-[1.02] active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                 >
                   {loading ? (

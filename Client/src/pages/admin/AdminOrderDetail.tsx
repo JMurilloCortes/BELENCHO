@@ -152,6 +152,18 @@ export default function AdminOrderDetail() {
             <span className="text-gray-400 block mb-0.5">Dirección</span>
             <p className="font-medium text-gray-800">{order.deliveryAddress}</p>
           </div>
+          {order.deliveryDate && (
+            <div>
+              <span className="text-gray-400 block mb-0.5">Fecha de entrega</span>
+              <p className="font-medium text-gray-800">{new Date(order.deliveryDate).toLocaleDateString()}</p>
+            </div>
+          )}
+          {order.deliveryTimeSlot && (
+            <div>
+              <span className="text-gray-400 block mb-0.5">Horario</span>
+              <p className="font-medium text-gray-800">{order.deliveryTimeSlot.replace('-', ' - ')}</p>
+            </div>
+          )}
           {order.deliveryInstructions && (
             <div className="sm:col-span-2">
               <span className="text-gray-400 block mb-0.5">Instrucciones</span>

@@ -67,6 +67,8 @@ export interface Order {
   deliveryInstructions?: string
   neighborhood?: { id: string; name: string }
   neighborhoodId: string
+  deliveryDate?: string
+  deliveryTimeSlot?: string
   status: 'PENDING' | 'PAID' | 'CANCELLED' | 'REFUNDED'
   total: number
   paymentMethod: 'WOMPI' | 'MERCADOPAGO'
