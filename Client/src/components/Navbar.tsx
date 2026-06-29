@@ -241,6 +241,7 @@ export default function Navbar() {
             </button>
           </div>
         </div>
+        <div className="h-0.5 bg-gradient-to-r from-primary via-accent to-highlight" />
       </nav>
 
       {/* Mobile drawer overlay */}
