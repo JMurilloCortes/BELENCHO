@@ -1,8 +1,16 @@
-import { Link, Outlet, useLocation } from 'react-router-dom'
-import { Menu, X, Package, Users, Tag, LayoutDashboard, ShoppingCart, ArrowLeft, MapPin, Bell, X as XIcon } from 'lucide-react'
+import { Link, Outlet, useLocation, useNavigate } from 'react-router-dom'
+import { Menu, X, Package, Users, Tag, LayoutDashboard, ShoppingCart, ArrowLeft, MapPin, Bell, X as XIcon, Clock, CheckCheck, Trash2, ChevronRight } from 'lucide-react'
 import { useAuthStore } from '../../store/auth.store'
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { connectSocket } from '../../services/socket.service'
+
+interface Notification {
+  id: string
+  customerName: string
+  total: number
+  createdAt: string
+  read: boolean
+}
 
 const navItems = [
   { path: '/admin', icon: LayoutDashboard, label: 'Dashboard' },
@@ -16,14 +24,31 @@ const adminNavItems = [
   { path: '/admin/usuarios', icon: Users, label: 'Usuarios' },
 ]
 
+function timeAgo(dateStr: string) {
+  const now = Date.now()
+  const diff = now - new Date(dateStr).getTime()
+  const mins = Math.floor(diff / 60000)
+  if (mins < 1) return 'Ahora'
+  if (mins < 60) return `Hace ${mins} min`
+  const hrs = Math.floor(mins / 60)
+  if (hrs < 24) return `Hace ${hrs}h`
+  const days = Math.floor(hrs / 24)
+  return `Hace ${days}d`
+}
+
 export default function AdminLayout() {
   const { pathname } = useLocation()
+  const navigate = useNavigate()
   const user = useAuthStore((s) => s.user)
   const isAdmin = user?.role === 'ADMINISTRADOR'
   const [sidebarOpen, setSidebarOpen] = useState(false)
 
-  const [newOrdersCount, setNewOrdersCount] = useState(0)
+  const [notifications, setNotifications] = useState<Notification[]>([])
+  const [showNotifications, setShowNotifications] = useState(false)
   const [toast, setToast] = useState<{ id: string; customerName: string; total: number } | null>(null)
+  const notifRef = useRef<HTMLDivElement>(null)
+
+  const unreadCount = notifications.filter((n) => !n.read).length
 
   useEffect(() => {
     if ('Notification' in window && Notification.permission === 'default') {
@@ -37,8 +62,11 @@ export default function AdminLayout() {
 
     const socket = connectSocket(token)
 
-    socket.on('new-order', (order: { id: string; customerName: string; total: number }) => {
-      setNewOrdersCount((c) => c + 1)
+    socket.on('new-order', (order: { id: string; customerName: string; total: number; createdAt: string }) => {
+      setNotifications((prev) => [
+        { ...order, createdAt: order.createdAt || new Date().toISOString(), read: false },
+        ...prev,
+      ])
       setToast(order)
 
       if ('Notification' in window && Notification.permission === 'granted') {
@@ -59,6 +87,33 @@ export default function AdminLayout() {
     const t = setTimeout(() => setToast(null), 4000)
     return () => clearTimeout(t)
   }, [toast])
+
+  useEffect(() => {
+    function handleClick(e: MouseEvent) {
+      if (notifRef.current && !notifRef.current.contains(e.target as Node)) {
+        setShowNotifications(false)
+      }
+    }
+    if (showNotifications) {
+      document.addEventListener('mousedown', handleClick)
+    }
+    return () => document.removeEventListener('mousedown', handleClick)
+  }, [showNotifications])
+
+  const markAllRead = () => {
+    setNotifications((prev) => prev.map((n) => ({ ...n, read: true })))
+  }
+
+  const clearAll = () => {
+    setNotifications([])
+    setShowNotifications(false)
+  }
+
+  const handleNotifClick = (notif: Notification) => {
+    setNotifications((prev) => prev.map((n) => (n.id === notif.id ? { ...n, read: true } : n)))
+    setShowNotifications(false)
+    navigate(`/admin/ordenes/${notif.id}`)
+  }
 
   const NavLink = ({ item }: { item: typeof navItems[0] }) => {
     const active = pathname === item.path || (item.path !== '/admin' && pathname.startsWith(item.path))
@@ -138,15 +193,124 @@ export default function AdminLayout() {
               <Menu size={20} />
             </button>
             <span className="lg:hidden text-sm font-semibold text-gray-800">BELENCHO</span>
-            <div className="flex items-center gap-3 ml-auto">
-              <button className="relative p-2 text-gray-600 hover:bg-gray-100 rounded-lg transition-colors" aria-label="Notificaciones">
-                <Bell size={18} />
-                {newOrdersCount > 0 && (
-                  <span className="absolute -top-0.5 -right-0.5 w-5 h-5 bg-red-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center shadow-sm">
-                    {newOrdersCount}
-                  </span>
+            <div className="flex items-center gap-3 ml-auto" ref={notifRef}>
+              <div className="relative">
+                <button
+                  onClick={() => setShowNotifications((v) => !v)}
+                  className="relative p-2.5 text-gray-500 hover:text-gray-800 hover:bg-gray-100 rounded-xl transition-all duration-200"
+                  aria-label="Notificaciones"
+                >
+                  <Bell size={18} />
+                  {unreadCount > 0 && (
+                    <span className="absolute -top-0.5 -right-0.5 min-w-[18px] h-[18px] bg-gradient-to-br from-red-500 to-red-600 text-white text-[10px] font-bold rounded-full flex items-center justify-center px-1 shadow-sm shadow-red-500/30 animate-fadeIn">
+                      {unreadCount > 99 ? '99+' : unreadCount}
+                    </span>
+                  )}
+                </button>
+
+                {showNotifications && (
+                  <div className="absolute right-0 mt-2 w-[360px] sm:w-[420px] bg-white rounded-2xl shadow-2xl shadow-gray-900/10 border border-gray-100 animate-dropdown overflow-hidden">
+                    <div className="p-4 pb-3 border-b border-gray-100 flex items-center justify-between">
+                      <div className="flex items-center gap-2.5">
+                        <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-primary/10 to-accent/10 flex items-center justify-center">
+                          <Bell size={15} className="text-primary" />
+                        </div>
+                        <div>
+                          <h3 className="text-sm font-bold text-gray-800">Notificaciones</h3>
+                          {unreadCount > 0 && (
+                            <p className="text-[11px] text-gray-400 font-medium">{unreadCount} sin leer</p>
+                          )}
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-1">
+                        {unreadCount > 0 && (
+                          <button
+                            onClick={markAllRead}
+                            className="p-2 text-gray-400 hover:text-primary hover:bg-primary/5 rounded-lg transition-all text-xs font-medium flex items-center gap-1"
+                            title="Marcar todo como leído"
+                          >
+                            <CheckCheck size={14} />
+                          </button>
+                        )}
+                        {notifications.length > 0 && (
+                          <button
+                            onClick={clearAll}
+                            className="p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-all text-xs font-medium flex items-center gap-1"
+                            title="Limpiar todas"
+                          >
+                            <Trash2 size={14} />
+                          </button>
+                        )}
+                      </div>
+                    </div>
+
+                    <div className="max-h-[360px] overflow-y-auto">
+                      {notifications.length === 0 ? (
+                        <div className="flex flex-col items-center justify-center py-12 px-6">
+                          <div className="w-14 h-14 rounded-2xl bg-gray-50 flex items-center justify-center mb-4">
+                            <Bell size={24} className="text-gray-300" />
+                          </div>
+                          <p className="text-sm font-semibold text-gray-800">Sin notificaciones</p>
+                          <p className="text-xs text-gray-400 mt-1 text-center">Los nuevos pedidos aparecerán aquí</p>
+                        </div>
+                      ) : (
+                        notifications.map((notif) => (
+                          <button
+                            key={notif.id}
+                            onClick={() => handleNotifClick(notif)}
+                            className={`w-full text-left px-4 py-3.5 flex items-start gap-3 transition-all duration-200 border-b border-gray-50 last:border-b-0 hover:bg-gray-50/80 group ${
+                              !notif.read ? 'bg-primary/[0.02]' : ''
+                            }`}
+                          >
+                            <div className={`mt-0.5 w-9 h-9 rounded-xl flex items-center justify-center shrink-0 transition-all duration-200 ${
+                              !notif.read
+                                ? 'bg-gradient-to-br from-primary to-accent text-white shadow-sm shadow-primary/20'
+                                : 'bg-gray-100 text-gray-400'
+                            }`}>
+                              <ShoppingCart size={16} />
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <div className="flex items-start justify-between gap-2">
+                                <p className={`text-sm leading-snug ${!notif.read ? 'font-semibold text-gray-800' : 'font-medium text-gray-600'}`}>
+                                  ¡Nuevo pedido!
+                                </p>
+                                {!notif.read && (
+                                  <span className="mt-1 w-2 h-2 rounded-full bg-primary shrink-0" />
+                                )}
+                              </div>
+                              <p className="text-xs text-gray-400 mt-0.5 truncate">{notif.customerName}</p>
+                              <div className="flex items-center justify-between mt-1.5">
+                                <span className="text-xs font-semibold text-gray-700">
+                                  ${Number(notif.total).toLocaleString('es-CO')}
+                                </span>
+                                <div className="flex items-center gap-1 text-[10px] text-gray-400">
+                                  <Clock size={10} />
+                                  {timeAgo(notif.createdAt)}
+                                </div>
+                              </div>
+                            </div>
+                            <ChevronRight size={14} className="mt-1 text-gray-300 group-hover:text-gray-500 transition-colors shrink-0" />
+                          </button>
+                        ))
+                      )}
+                    </div>
+
+                    {notifications.length > 0 && (
+                      <div className="p-3 border-t border-gray-100 bg-gray-50/50">
+                        <Link
+                          to="/admin/ordenes"
+                          onClick={() => setShowNotifications(false)}
+                          className="flex items-center justify-center gap-1.5 text-xs font-semibold text-primary hover:text-primary/80 transition-colors"
+                        >
+                          Ver todas las órdenes
+                          <ChevronRight size={12} />
+                        </Link>
+                      </div>
+                    )}
+                  </div>
                 )}
-              </button>
+              </div>
+
               <img
                 src="https://res.cloudinary.com/dtarklm7p/image/upload/v1782689025/BELENCHO/Logos/Logo_belencho_hm2kbc.jpg"
                 alt="BELENCHO"
