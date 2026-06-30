@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { Package, Users, ShoppingCart, DollarSign, TrendingUp, Clock, ArrowUpRight, ArrowRight, Trash2, Bell } from 'lucide-react'
+import { Package, Users, ShoppingCart, DollarSign, TrendingUp, Clock, ArrowUpRight, ArrowRight, Trash2 } from 'lucide-react'
 import { getDashboardStats } from '../../services/admin.service'
 import { showToast, showConfirm } from '../../lib/sweetalert'
 import api from '../../services/api'
@@ -66,9 +66,6 @@ export default function AdminDashboard() {
             <p className="text-sm text-gray-400 mt-1">Resumen general de tu tienda</p>
           </div>
           <div className="flex items-center gap-2">
-            <button onClick={async () => { try { await api.get('/admin/test-notification'); showToast('success', 'Notificación enviada') } catch { showToast('error', 'Error al enviar notificación') } }} className="flex items-center gap-1.5 px-4 py-2.5 text-sm font-medium text-primary bg-primary/5 border border-primary/20 rounded-xl hover:bg-primary hover:text-white hover:border-primary hover:shadow-lg hover:shadow-primary/20 transition-all duration-200">
-              <Bell size={16} /> Probar notificación
-            </button>
             <button onClick={handleReset} className="flex items-center gap-1.5 px-4 py-2.5 text-sm font-medium text-red-600 bg-red-50 border border-red-200 rounded-xl hover:text-white hover:bg-red-500 hover:border-red-400 hover:shadow-lg hover:shadow-red-500/20 transition-all duration-200">
               <Trash2 size={16} /> Restablecer todo
             </button>

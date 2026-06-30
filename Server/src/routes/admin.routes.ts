@@ -8,7 +8,7 @@ import {
   getCategories, createCategory, updateCategory, deleteCategory,
   toggleProductActive, toggleCategoryActive, toggleUserActive, deleteUser,
   getNeighborhoods, createNeighborhood, updateNeighborhood,
-  toggleNeighborhoodActive, deleteNeighborhood, testNotification,
+  toggleNeighborhoodActive, deleteNeighborhood,
 } from "../controllers/admin.controller";
 
 const router = Router();
@@ -42,8 +42,6 @@ router.post("/categories", createCategory as any);
 router.put("/categories/:id", updateCategory as any);
 router.put("/categories/:id/toggle-active", toggleCategoryActive as any);
 router.delete("/categories/:id", deleteCategory as any);
-
-router.get("/test-notification", testNotification as any);
 
 router.get("/neighborhoods", getNeighborhoods as any);
 router.post("/neighborhoods", authorize("ADMINISTRADOR") as any, createNeighborhood as any);

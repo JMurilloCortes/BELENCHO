@@ -1,7 +1,6 @@
 import { Response } from "express";
 import { AuthRequest } from "../middleware/auth";
 import { prisma } from "../lib/prisma";
-import { emitNewOrder } from "../lib/socket";
 import bcrypt from "bcryptjs";
 
 export async function getDashboardStats(_req: AuthRequest, res: Response) {
@@ -463,14 +462,4 @@ export async function deleteNeighborhood(req: AuthRequest, res: Response) {
   } catch {
     res.status(500).json({ error: "Error al eliminar barrio" });
   }
-}
-
-export async function testNotification(_req: AuthRequest, res: Response) {
-  emitNewOrder({
-    id: "test",
-    customerName: "Cliente de Prueba",
-    total: 50000,
-    createdAt: new Date(),
-  });
-  res.json({ message: "Notificación de prueba enviada" });
 }
