@@ -38,7 +38,6 @@ export default function AdminLayout() {
 
     return () => {
       socket.off('new-order')
-      disconnectSocket()
     }
   }, [])
 

@@ -4,14 +4,32 @@ let socket: Socket | null = null
 
 export function connectSocket(token: string) {
   if (socket?.connected) return socket
+  if (socket) {
+    socket.connect()
+    return socket
+  }
 
-  socket = io(import.meta.env.VITE_SERVER_URL || 'http://localhost:4000', {
+  socket = io(window.location.origin, {
+    path: '/api/socket.io',
     auth: { token },
-    transports: ['websocket', 'polling'],
+    query: { token },
+    transports: ['polling', 'websocket'],
+    autoConnect: true,
+    reconnection: true,
+    reconnectionAttempts: Infinity,
+    reconnectionDelay: 1000,
+  })
+
+  socket.on('connect', () => {
+    console.log('[Socket] Conectado')
   })
 
   socket.on('connect_error', (err) => {
-    console.error('Socket error:', err.message)
+    console.error('[Socket] Error:', err.message)
+  })
+
+  socket.on('disconnect', (reason) => {
+    console.log('[Socket] Desconectado:', reason)
   })
 
   return socket
@@ -19,6 +37,7 @@ export function connectSocket(token: string) {
 
 export function disconnectSocket() {
   if (socket) {
+    socket.removeAllListeners()
     socket.disconnect()
     socket = null
   }
