@@ -25,6 +25,11 @@ enum PaymentMethod {
   MERCADOPAGO
 }
 
+enum TransportType {
+  MOTO
+  TAXI
+}
+
 model User {
   id                   String        @id @default(cuid())
   email                String        @unique
@@ -60,10 +65,11 @@ model Product {
   name        String
   description String
   price       Decimal  @db.Decimal(10, 2)
-  stock       Int      @default(0)
-  active      Boolean  @default(true)
-  categoryId  String
-  category    Category @relation(fields: [categoryId], references: [id])
+  stock         Int            @default(0)
+  active        Boolean        @default(true)
+  transportType TransportType? @default(MOTO)
+  categoryId    String
+  category      Category       @relation(fields: [categoryId], references: [id])
   images      ProductImage[]
   videos      ProductVideo[]
   reviews     Review[]
@@ -151,6 +157,7 @@ model Order {
   giftMessage         String?
   status              OrderStatus   @default(PENDING)
   total               Decimal       @db.Decimal(12, 2)
+  deliveryCost        Decimal?      @db.Decimal(10, 2)
   paymentMethod       PaymentMethod
   paymentId           String?
   redirectUrl         String?
@@ -170,9 +177,11 @@ model OrderItem {
 }
 
 model Neighborhood {
-  id     String  @id @default(cuid())
-  name   String  @unique
-  active Boolean @default(true)
-  orders Order[]
-  users  User[]  @relation("DefaultNeighborhood")
+  id        String   @id @default(cuid())
+  name      String   @unique
+  active    Boolean  @default(true)
+  motoPrice Decimal? @db.Decimal(10, 2)
+  taxiPrice Decimal? @db.Decimal(10, 2)
+  orders    Order[]
+  users     User[]   @relation("DefaultNeighborhood")
 }

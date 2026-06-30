@@ -105,14 +105,14 @@ export async function getNeighborhoods() {
   return data
 }
 
-export async function createNeighborhood(name: string) {
-  const { data } = await api.post('/admin/neighborhoods', { name })
-  return data
+export async function createNeighborhood(data: { name: string; motoPrice?: number | null; taxiPrice?: number | null }) {
+  const { data: res } = await api.post('/admin/neighborhoods', data)
+  return res
 }
 
-export async function updateNeighborhood(id: string, name: string) {
-  const { data } = await api.put(`/admin/neighborhoods/${id}`, { name })
-  return data
+export async function updateNeighborhood(id: string, data: { name: string; motoPrice?: number | null; taxiPrice?: number | null }) {
+  const { data: res } = await api.put(`/admin/neighborhoods/${id}`, data)
+  return res
 }
 
 export async function toggleNeighborhoodActive(id: string) {

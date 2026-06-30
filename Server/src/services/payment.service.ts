@@ -103,6 +103,7 @@ export async function createOrderFromCart(
     giftFrom?: string;
     giftTo?: string;
     giftMessage?: string;
+    deliveryCost?: number;
   }
 ) {
   const cart = await prisma.cart.findUnique({
@@ -120,7 +121,9 @@ export async function createOrderFromCart(
     }
   }
 
-  const total = cart.items.reduce((sum, item) => sum + Number(item.product.price) * item.quantity, 0);
+  const subtotal = cart.items.reduce((sum, item) => sum + Number(item.product.price) * item.quantity, 0);
+  const deliveryCost = customerData.deliveryCost || 0;
+  const total = subtotal + deliveryCost;
 
   const order = await prisma.order.create({
     data: {
@@ -137,6 +140,7 @@ export async function createOrderFromCart(
       giftTo: customerData.giftTo || null,
       giftMessage: customerData.giftMessage || null,
       total,
+      deliveryCost,
       paymentMethod,
       items: {
         create: cart.items.map((item) => ({

@@ -139,7 +139,7 @@ export async function getAllProducts(_req: AuthRequest, res: Response) {
 
 export async function createProduct(req: AuthRequest, res: Response) {
   try {
-    const { name, description, price, stock, categoryId, images } = req.body;
+    const { name, description, price, stock, transportType, categoryId, images } = req.body;
     if (!name || !price || !categoryId) {
       return res.status(400).json({ error: "Nombre, precio y categoría son requeridos" });
     }
@@ -150,6 +150,7 @@ export async function createProduct(req: AuthRequest, res: Response) {
         description: description || "",
         price: parseFloat(price),
         stock: parseInt(stock) || 0,
+        transportType: transportType || "MOTO",
         categoryId,
         images: images?.length ? {
           create: images.map((url: string, i: number) => ({ url, order: i })),
@@ -166,12 +167,13 @@ export async function createProduct(req: AuthRequest, res: Response) {
 export async function updateProduct(req: AuthRequest, res: Response) {
   try {
     const id = String(req.params.id);
-    const { name, description, price, stock, categoryId, images } = req.body;
+    const { name, description, price, stock, transportType, categoryId, images } = req.body;
     const data: any = {};
     if (name) data.name = name;
     if (description !== undefined) data.description = description;
     if (price) data.price = parseFloat(price);
     if (stock !== undefined) data.stock = parseInt(stock);
+    if (transportType) data.transportType = transportType;
     if (categoryId) data.categoryId = categoryId;
 
     const product = await prisma.product.update({
@@ -413,9 +415,9 @@ export async function getNeighborhoods(_req: AuthRequest, res: Response) {
 
 export async function createNeighborhood(req: AuthRequest, res: Response) {
   try {
-    const { name } = req.body;
+    const { name, motoPrice, taxiPrice } = req.body;
     if (!name) return res.status(400).json({ error: "Nombre requerido" });
-    const neighborhood = await prisma.neighborhood.create({ data: { name } });
+    const neighborhood = await prisma.neighborhood.create({ data: { name, motoPrice: motoPrice ? parseFloat(motoPrice) : null, taxiPrice: taxiPrice ? parseFloat(taxiPrice) : null } });
     res.status(201).json(neighborhood);
   } catch {
     res.status(500).json({ error: "Error al crear barrio" });
@@ -425,9 +427,12 @@ export async function createNeighborhood(req: AuthRequest, res: Response) {
 export async function updateNeighborhood(req: AuthRequest, res: Response) {
   try {
     const id = String(req.params.id);
-    const { name } = req.body;
+    const { name, motoPrice, taxiPrice } = req.body;
     if (!name) return res.status(400).json({ error: "Nombre requerido" });
-    const neighborhood = await prisma.neighborhood.update({ where: { id }, data: { name } });
+    const data: any = { name };
+    if (motoPrice !== undefined) data.motoPrice = motoPrice ? parseFloat(motoPrice) : null;
+    if (taxiPrice !== undefined) data.taxiPrice = taxiPrice ? parseFloat(taxiPrice) : null;
+    const neighborhood = await prisma.neighborhood.update({ where: { id }, data });
     res.json(neighborhood);
   } catch {
     res.status(500).json({ error: "Error al actualizar barrio" });

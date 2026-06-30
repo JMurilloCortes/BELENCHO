@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { Plus, Edit2, Trash2, Power, PowerOff, Search, Package, X } from 'lucide-react'
+import { Plus, Edit2, Trash2, Power, PowerOff, Search, Package, X, Bike, Car } from 'lucide-react'
 import { showToast, showConfirm } from '../../lib/sweetalert'
 import { getAdminProducts, createProduct, updateProduct, deleteProduct, toggleProductActive, getCategories } from '../../services/admin.service'
 import type { Product, Category } from '../../types'
@@ -11,7 +11,7 @@ export default function AdminProducts() {
   const [showForm, setShowForm] = useState(false)
   const [editing, setEditing] = useState<Product | null>(null)
   const [search, setSearch] = useState('')
-  const [form, setForm] = useState({ name: '', description: '', price: '', stock: '', categoryId: '', images: '' })
+  const [form, setForm] = useState({ name: '', description: '', price: '', stock: '', transportType: 'MOTO', categoryId: '', images: '' })
 
   const load = async () => {
     const [p, c] = await Promise.all([getAdminProducts(), getCategories()])
@@ -24,7 +24,7 @@ export default function AdminProducts() {
 
   const openCreate = () => {
     setEditing(null)
-    setForm({ name: '', description: '', price: '', stock: '', categoryId: categories[0]?.id || '', images: '' })
+    setForm({ name: '', description: '', price: '', stock: '', transportType: 'MOTO', categoryId: categories[0]?.id || '', images: '' })
     setShowForm(true)
   }
 
@@ -35,6 +35,7 @@ export default function AdminProducts() {
       description: p.description,
       price: String(p.price),
       stock: String(p.stock),
+      transportType: p.transportType || 'MOTO',
       categoryId: p.categoryId,
       images: '',
     })
@@ -52,6 +53,7 @@ export default function AdminProducts() {
         description: form.description,
         price: parseFloat(form.price),
         stock: parseInt(form.stock) || 0,
+        transportType: form.transportType,
         categoryId: form.categoryId,
         images: form.images.split('\n').filter(Boolean),
       }
@@ -158,6 +160,37 @@ export default function AdminProducts() {
                 </div>
               </div>
               <div>
+                <label className="block text-sm font-medium text-gray-600 mb-1.5 flex items-center gap-1.5">
+                  <Bike size={14} className="text-primary" />{' '}
+                  <Car size={14} className="text-accent" />{' '}
+                  Transporte para entrega
+                </label>
+                <div className="grid grid-cols-2 gap-2">
+                  <button
+                    type="button"
+                    onClick={() => setForm({ ...form, transportType: 'MOTO' })}
+                    className={`flex items-center justify-center gap-2 py-2.5 rounded-xl text-sm font-semibold border-2 transition-all duration-200 ${
+                      form.transportType === 'MOTO'
+                        ? 'border-primary bg-primary/5 text-primary'
+                        : 'border-gray-200 text-gray-500 hover:border-gray-300'
+                    }`}
+                  >
+                    <Bike size={16} /> Moto
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setForm({ ...form, transportType: 'TAXI' })}
+                    className={`flex items-center justify-center gap-2 py-2.5 rounded-xl text-sm font-semibold border-2 transition-all duration-200 ${
+                      form.transportType === 'TAXI'
+                        ? 'border-primary bg-primary/5 text-primary'
+                        : 'border-gray-200 text-gray-500 hover:border-gray-300'
+                    }`}
+                  >
+                    <Car size={16} /> Taxi
+                  </button>
+                </div>
+              </div>
+              <div>
                 <label className="block text-sm font-medium text-gray-600 mb-1.5">Categoría</label>
                 <select value={form.categoryId} onChange={(e) => setForm({ ...form, categoryId: e.target.value })} className={inputClass}>
                   <option value="">Seleccionar</option>
@@ -202,6 +235,9 @@ export default function AdminProducts() {
                     {isActive ? 'Activo' : 'Inactivo'}
                   </span>
                   <span className="text-xs text-gray-400">{(p as any).category?.name || '-'}</span>
+                  <span className={`text-[10px] flex items-center gap-0.5 ${p.transportType === 'TAXI' ? 'text-accent' : 'text-primary'}`}>
+                    {p.transportType === 'TAXI' ? <Car size={10} /> : <Bike size={10} />} {p.transportType === 'TAXI' ? 'Taxi' : 'Moto'}
+                  </span>
                 </div>
               </div>
               <div className="flex gap-2 pt-3 border-t border-gray-100">
@@ -239,6 +275,7 @@ export default function AdminProducts() {
               <th className="text-left p-3 lg:p-4 text-xs font-semibold text-gray-400 uppercase tracking-wider">Precio</th>
               <th className="text-center p-3 lg:p-4 text-xs font-semibold text-gray-400 uppercase tracking-wider">Stock</th>
               <th className="text-left p-3 lg:p-4 text-xs font-semibold text-gray-400 uppercase tracking-wider">Categoría</th>
+              <th className="text-center p-3 lg:p-4 text-xs font-semibold text-gray-400 uppercase tracking-wider">Transporte</th>
               <th className="text-center p-3 lg:p-4 text-xs font-semibold text-gray-400 uppercase tracking-wider">Estado</th>
               <th className="text-right p-3 lg:p-4 text-xs font-semibold text-gray-400 uppercase tracking-wider">Acciones</th>
             </tr>
@@ -266,6 +303,12 @@ export default function AdminProducts() {
                     </span>
                   </td>
                   <td className="p-3 lg:p-4 text-sm text-gray-500">{(p as any).category?.name || '-'}</td>
+                  <td className="p-3 lg:p-4 text-center">
+                    <span className={`text-xs font-medium px-2.5 py-1 rounded-full inline-flex items-center gap-1 ${p.transportType === 'TAXI' ? 'bg-accent/10 text-accent' : 'bg-primary/10 text-primary'}`}>
+                      {p.transportType === 'TAXI' ? <Car size={11} /> : <Bike size={11} />}
+                      {p.transportType === 'TAXI' ? 'Taxi' : 'Moto'}
+                    </span>
+                  </td>
                   <td className="p-3 lg:p-4 text-center">
                     <span className={`text-xs font-medium px-2.5 py-1 rounded-full ${isActive ? 'bg-green-50 text-green-600' : 'bg-gray-100 text-gray-400'}`}>
                       {isActive ? 'Activo' : 'Inactivo'}

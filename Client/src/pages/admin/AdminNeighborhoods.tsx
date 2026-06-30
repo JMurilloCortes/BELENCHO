@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { Plus, Edit2, Trash2, Power, PowerOff, MapPin, X, Search } from 'lucide-react'
+import { Plus, Edit2, Trash2, Power, PowerOff, MapPin, X, Search, Bike, Car } from 'lucide-react'
 import { showToast, showConfirm } from '../../lib/sweetalert'
 import { getNeighborhoods, createNeighborhood, updateNeighborhood, deleteNeighborhood, toggleNeighborhoodActive } from '../../services/admin.service'
 import type { Neighborhood } from '../../types'
@@ -10,6 +10,8 @@ export default function AdminNeighborhoods() {
   const [showForm, setShowForm] = useState(false)
   const [editing, setEditing] = useState<Neighborhood | null>(null)
   const [name, setName] = useState('')
+  const [motoPrice, setMotoPrice] = useState('')
+  const [taxiPrice, setTaxiPrice] = useState('')
   const [search, setSearch] = useState('')
 
   const load = async () => {
@@ -23,12 +25,16 @@ export default function AdminNeighborhoods() {
   const openCreate = () => {
     setEditing(null)
     setName('')
+    setMotoPrice('')
+    setTaxiPrice('')
     setShowForm(true)
   }
 
   const openEdit = (n: Neighborhood) => {
     setEditing(n)
     setName(n.name)
+    setMotoPrice(n.motoPrice != null ? String(n.motoPrice) : '')
+    setTaxiPrice(n.taxiPrice != null ? String(n.taxiPrice) : '')
     setShowForm(true)
   }
 
@@ -36,10 +42,10 @@ export default function AdminNeighborhoods() {
     if (!name.trim()) return showToast('error', 'El nombre es requerido')
     try {
       if (editing) {
-        await updateNeighborhood(editing.id, name.trim())
+        await updateNeighborhood(editing.id, { name: name.trim(), motoPrice: motoPrice ? Number(motoPrice) : null, taxiPrice: taxiPrice ? Number(taxiPrice) : null })
         showToast('success', 'Barrio actualizado')
       } else {
-        await createNeighborhood(name.trim())
+        await createNeighborhood({ name: name.trim(), motoPrice: motoPrice ? Number(motoPrice) : null, taxiPrice: taxiPrice ? Number(taxiPrice) : null })
         showToast('success', 'Barrio creado')
       }
       setShowForm(false)
@@ -115,9 +121,27 @@ export default function AdminNeighborhoods() {
               </div>
               <button onClick={() => setShowForm(false)} className="p-2 hover:bg-gray-100 rounded-lg transition-colors"><X size={18} /></button>
             </div>
-            <div className="p-5 sm:p-6">
-              <label className="block text-sm font-medium text-gray-600 mb-1.5">Nombre</label>
-              <input value={name} onChange={(e) => setName(e.target.value)} placeholder="Nombre del barrio" className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all" autoFocus />
+            <div className="p-5 sm:p-6 space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-600 mb-1.5">Nombre</label>
+                <input value={name} onChange={(e) => setName(e.target.value)} placeholder="Nombre del barrio" className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all" autoFocus />
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-sm font-medium text-gray-600 mb-1.5 flex items-center gap-1.5"><Bike size={14} className="text-primary" /> Tarifa moto</label>
+                  <div className="relative">
+                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm font-medium">$</span>
+                    <input value={motoPrice} onChange={(e) => setMotoPrice(e.target.value)} placeholder="0" type="number" min="0" className="w-full pl-7 pr-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all" />
+                  </div>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-600 mb-1.5 flex items-center gap-1.5"><Car size={14} className="text-accent" /> Tarifa taxi</label>
+                  <div className="relative">
+                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm font-medium">$</span>
+                    <input value={taxiPrice} onChange={(e) => setTaxiPrice(e.target.value)} placeholder="0" type="number" min="0" className="w-full pl-7 pr-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all" />
+                  </div>
+                </div>
+              </div>
             </div>
             <div className="flex gap-3 justify-end p-5 sm:p-6 border-t border-gray-100">
               <button onClick={() => setShowForm(false)} className="px-5 py-2.5 rounded-xl text-sm font-medium text-gray-600 hover:bg-gray-100 transition-colors">Cancelar</button>
@@ -139,7 +163,11 @@ export default function AdminNeighborhoods() {
                     <h3 className="font-semibold text-gray-800 text-sm">{n.name}</h3>
                     {!isActive && <span className="text-[10px] bg-gray-200 text-gray-500 px-1.5 py-0.5 rounded-full">Inactivo</span>}
                   </div>
-                  <p className="text-xs text-gray-400 mt-0.5">{n._count?.orders || 0} órdenes</p>
+                  <div className="flex items-center gap-2 mt-1 text-xs">
+                    <span className="flex items-center gap-1 text-primary font-medium"><Bike size={12} /> ${(n as any).motoPrice != null ? Number((n as any).motoPrice).toLocaleString() : '—'}</span>
+                    <span className="text-gray-300">·</span>
+                    <span className="flex items-center gap-1 text-accent font-medium"><Car size={12} /> ${(n as any).taxiPrice != null ? Number((n as any).taxiPrice).toLocaleString() : '—'}</span>
+                  </div>
                 </div>
                 <span className="text-xs bg-gray-100 text-gray-600 px-2.5 py-1 rounded-full shrink-0">{n._count?.orders || 0}</span>
               </div>
@@ -175,6 +203,7 @@ export default function AdminNeighborhoods() {
           <thead>
             <tr className="border-b border-gray-100">
               <th className="text-left p-3 lg:p-4 text-xs font-semibold text-gray-400 uppercase tracking-wider">Barrio</th>
+              <th className="text-left p-3 lg:p-4 text-xs font-semibold text-gray-400 uppercase tracking-wider">Tarifas</th>
               <th className="text-left p-3 lg:p-4 text-xs font-semibold text-gray-400 uppercase tracking-wider">Órdenes</th>
               <th className="text-left p-3 lg:p-4 text-xs font-semibold text-gray-400 uppercase tracking-wider">Estado</th>
               <th className="text-right p-3 lg:p-4 text-xs font-semibold text-gray-400 uppercase tracking-wider">Acciones</th>
@@ -194,6 +223,13 @@ export default function AdminNeighborhoods() {
                         <span className="text-sm font-medium text-gray-800">{n.name}</span>
                         {!isActive && <span className="text-[10px] ml-2 bg-gray-200 text-gray-500 px-1.5 py-0.5 rounded-full">Inactivo</span>}
                       </div>
+                    </div>
+                  </td>
+                  <td className="p-3 lg:p-4">
+                    <div className="flex items-center gap-2 text-xs">
+                      <span className="flex items-center gap-1 text-primary font-medium"><Bike size={13} /> ${(n as any).motoPrice != null ? Number((n as any).motoPrice).toLocaleString() : '—'}</span>
+                      <span className="text-gray-300">·</span>
+                      <span className="flex items-center gap-1 text-accent font-medium"><Car size={13} /> ${(n as any).taxiPrice != null ? Number((n as any).taxiPrice).toLocaleString() : '—'}</span>
                     </div>
                   </td>
                   <td className="p-3 lg:p-4">

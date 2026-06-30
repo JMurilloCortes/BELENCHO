@@ -64,6 +64,20 @@ export default function Checkout() {
   const deliveryComplete = form.customerName.trim() !== '' && form.customerEmail.trim() !== '' && form.customerPhone.trim() !== '' && form.deliveryAddress.trim() !== '' && selectedNeighborhoodId !== ''
   const scheduleComplete = deliveryComplete && deliveryDate !== '' && selectedTimeSlot !== ''
 
+  const selectedNeighborhood = neighborhoods.find((n) => n.id === selectedNeighborhoodId)
+  const deliveryCost = selectedNeighborhood
+    ? Math.max(
+        ...items.map((item) => {
+          const transport = item.product.transportType || 'MOTO'
+          return transport === 'TAXI'
+            ? Number(selectedNeighborhood.taxiPrice ?? 0)
+            : Number(selectedNeighborhood.motoPrice ?? 0)
+        }),
+        0
+      )
+    : 0
+  const totalWithDelivery = total + deliveryCost
+
   const updateField = (field: string, value: string) => setForm((prev) => ({ ...prev, [field]: value }))
 
   const handlePay = async () => {
@@ -77,7 +91,7 @@ export default function Checkout() {
     if (!selectedMethod) { showToast('error', 'Selecciona un método de pago'); return }
     setLoading(true)
     try {
-      const { redirectUrl } = await createPayment(selectedMethod, { ...form, neighborhoodId: selectedNeighborhoodId, deliveryDate, deliveryTimeSlot: selectedTimeSlot })
+      const { redirectUrl } = await createPayment(selectedMethod, { ...form, neighborhoodId: selectedNeighborhoodId, deliveryDate, deliveryTimeSlot: selectedTimeSlot, deliveryCost })
       clearCart()
       window.location.href = redirectUrl
     } catch (e: any) {
@@ -491,7 +505,7 @@ export default function Checkout() {
                 ) : (
                   <>
                     <Lock size={16} />
-                    Pagar ${total.toLocaleString()}
+                    Pagar ${totalWithDelivery.toLocaleString()}
                   </>
                 )}
               </button>
@@ -542,11 +556,15 @@ export default function Checkout() {
                     </div>
                     <div className="flex justify-between text-sm">
                       <span className="text-gray-400">Domicilio</span>
-                      <span className="text-green-600 font-medium bg-green-50 px-2.5 py-0.5 rounded-full text-xs">Gratis</span>
+                      {deliveryCost > 0 ? (
+                        <span className="font-semibold text-gray-800">${deliveryCost.toLocaleString()}</span>
+                      ) : (
+                        <span className="text-green-600 font-medium bg-green-50 px-2.5 py-0.5 rounded-full text-xs">Pendiente</span>
+                      )}
                     </div>
                     <div className="flex justify-between text-sm pt-3 border-t border-gray-100">
                       <span className="font-bold text-gray-900 text-base">Total</span>
-                      <span className="text-xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">${total.toLocaleString()}</span>
+                      <span className="text-xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">${totalWithDelivery.toLocaleString()}</span>
                     </div>
                   </div>
                 </div>
@@ -567,7 +585,7 @@ export default function Checkout() {
                   ) : (
                     <>
                       <Lock size={16} />
-                      Pagar ${total.toLocaleString()}
+                      Pagar ${totalWithDelivery.toLocaleString()}
                     </>
                   )}
                 </button>

@@ -35,6 +35,7 @@ export interface Product {
   description: string
   price: number
   stock: number
+  transportType?: 'MOTO' | 'TAXI'
   categoryId: string
   category: Category
   images: ProductImage[]
@@ -78,6 +79,7 @@ export interface Order {
   giftMessage?: string
   status: 'PENDING' | 'PAID' | 'CANCELLED' | 'REFUNDED'
   total: number
+  deliveryCost?: number | null
   paymentMethod: 'WOMPI' | 'MERCADOPAGO'
   paymentId?: string
   redirectUrl?: string
@@ -99,6 +101,8 @@ export interface Neighborhood {
   id: string
   name: string
   active?: boolean
+  motoPrice?: number | null
+  taxiPrice?: number | null
   _count?: { orders: number }
 }
 
