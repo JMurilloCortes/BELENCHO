@@ -107,7 +107,7 @@ export default function Home() {
 
         <div className="relative w-full max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-12 lg:py-14 text-center">
           {/* Title */}
-          <h1 className="text-3xl sm:text-5xl md:text-6xl lg:text-7xl font-bold text-white leading-[0.85] mb-3 sm:mb-5 tracking-tight">
+          <h1 className="text-3xl sm:text-5xl md:text-6xl lg:text-7xl font-bold text-white leading-[0.85] mb-3 sm:mb-5 tracking-tight whitespace-nowrap">
             Regalos{' '}
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary via-accent to-highlight">que enamoran</span>
           </h1>
