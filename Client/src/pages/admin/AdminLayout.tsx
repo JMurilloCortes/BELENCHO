@@ -43,7 +43,9 @@ export default function AdminLayout() {
   const isAdmin = user?.role === 'ADMINISTRADOR'
   const [sidebarOpen, setSidebarOpen] = useState(false)
 
-  const [notifications, setNotifications] = useState<Notification[]>([])
+  const [notifications, setNotifications] = useState<Notification[]>(() => {
+    try { return JSON.parse(localStorage.getItem('adminNotifications') || '[]') } catch { return [] }
+  })
   const [showNotifications, setShowNotifications] = useState(false)
   const [toast, setToast] = useState<{ id: string; customerName: string; total: number } | null>(null)
   const notifRef = useRef<HTMLDivElement>(null)
@@ -57,16 +59,24 @@ export default function AdminLayout() {
   }, [])
 
   useEffect(() => {
+    localStorage.setItem('adminNotifications', JSON.stringify(notifications.slice(0, 50)))
+  }, [notifications])
+
+  useEffect(() => {
     const token = localStorage.getItem('token')
     if (!token) return
 
     const socket = connectSocket(token)
 
     socket.on('new-order', (order: { id: string; customerName: string; total: number; createdAt: string }) => {
-      setNotifications((prev) => [
-        { ...order, createdAt: order.createdAt || new Date().toISOString(), read: false },
-        ...prev,
-      ])
+      setNotifications((prev) => {
+        const updated = [
+          { ...order, createdAt: order.createdAt || new Date().toISOString(), read: false },
+          ...prev,
+        ]
+        localStorage.setItem('adminNotifications', JSON.stringify(updated.slice(0, 50)))
+        return updated
+      })
       setToast(order)
 
       if ('Notification' in window && Notification.permission === 'granted') {
@@ -101,16 +111,25 @@ export default function AdminLayout() {
   }, [showNotifications])
 
   const markAllRead = () => {
-    setNotifications((prev) => prev.map((n) => ({ ...n, read: true })))
+    setNotifications((prev) => {
+      const updated = prev.map((n) => ({ ...n, read: true }))
+      localStorage.setItem('adminNotifications', JSON.stringify(updated))
+      return updated
+    })
   }
 
   const clearAll = () => {
     setNotifications([])
+    localStorage.removeItem('adminNotifications')
     setShowNotifications(false)
   }
 
   const handleNotifClick = (notif: Notification) => {
-    setNotifications((prev) => prev.map((n) => (n.id === notif.id ? { ...n, read: true } : n)))
+    setNotifications((prev) => {
+      const updated = prev.map((n) => (n.id === notif.id ? { ...n, read: true } : n))
+      localStorage.setItem('adminNotifications', JSON.stringify(updated))
+      return updated
+    })
     setShowNotifications(false)
     navigate(`/admin/ordenes/${notif.id}`)
   }
