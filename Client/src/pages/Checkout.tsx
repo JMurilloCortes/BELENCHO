@@ -195,6 +195,18 @@ export default function Checkout() {
                     </select>
                     <ChevronRight size={14} className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-300 pointer-events-none rotate-90" />
                   </div>
+                  <p className="text-[11px] text-gray-400 mt-2 leading-relaxed">
+                    ¿No encuentras tu barrio?{' '}
+                    <a
+                      href="https://wa.me/573167498990"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-primary font-medium hover:text-primary-dark underline underline-offset-2 transition-colors"
+                    >
+                      Escríbenos al WhatsApp
+                    </a>{' '}
+                    para atención personalizada
+                  </p>
                   <div className="relative group">
                     <MapPin size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-300 group-focus-within:text-primary transition-colors duration-300" />
                     <input
