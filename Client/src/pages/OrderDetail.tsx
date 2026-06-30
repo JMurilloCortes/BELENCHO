@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useParams, Link } from 'react-router-dom'
-import { ArrowLeft, ShoppingCart, CreditCard, MapPin, Gift, Package, User as UserIcon, CheckCircle, Clock, Shield } from 'lucide-react'
+import { ArrowLeft, ShoppingCart, CreditCard, MapPin, Gift, Package, User as UserIcon, CheckCircle, Clock, Shield, Truck, Home, Box } from 'lucide-react'
 import { showToast } from '../lib/sweetalert'
 import { getOrder } from '../services/payment.service'
 import type { Order } from '../types'
@@ -21,6 +21,26 @@ const statusConfig: Record<string, { label: string; color: string; icon: any }> 
     label: 'Pagada',
     color: 'bg-green-50 text-green-600 border-green-200',
     icon: CheckCircle,
+  },
+  EN_PREPARACION: {
+    label: 'En preparación',
+    color: 'bg-blue-50 text-blue-600 border-blue-200',
+    icon: Package,
+  },
+  LISTA: {
+    label: 'Lista',
+    color: 'bg-indigo-50 text-indigo-600 border-indigo-200',
+    icon: Box,
+  },
+  EN_CAMINO: {
+    label: 'En camino',
+    color: 'bg-purple-50 text-purple-600 border-purple-200',
+    icon: Truck,
+  },
+  ENTREGADA: {
+    label: 'Entregada',
+    color: 'bg-emerald-50 text-emerald-600 border-emerald-200',
+    icon: Home,
   },
   CANCELLED: {
     label: 'Cancelada',

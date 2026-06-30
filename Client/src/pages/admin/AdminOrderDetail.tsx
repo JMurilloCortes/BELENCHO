@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useParams, Link } from 'react-router-dom'
-import { ArrowLeft, ShoppingCart, User as UserIcon, CreditCard, Clock, MapPin } from 'lucide-react'
+import { ArrowLeft, ShoppingCart, User as UserIcon, CreditCard, Clock, MapPin, Check, Package, Truck, Home, XCircle, RotateCcw } from 'lucide-react'
 import { showToast } from '../../lib/sweetalert'
 import { getOrderDetail, updateOrderStatus } from '../../services/admin.service'
 
@@ -10,10 +10,24 @@ const formatSlot = (slot: string) => {
   return `${f(s)} - ${f(e)}`
 }
 
-const statuses = ['PENDING', 'PAID', 'CANCELLED', 'REFUNDED'] as const
+const flowSteps = [
+  { key: 'PENDING', label: 'Pendiente', icon: Clock },
+  { key: 'PAID', label: 'Pagada', icon: CreditCard },
+  { key: 'EN_PREPARACION', label: 'Preparando', icon: Package },
+  { key: 'LISTA', label: 'Lista', icon: Check },
+  { key: 'EN_CAMINO', label: 'En camino', icon: Truck },
+  { key: 'ENTREGADA', label: 'Entregada', icon: Home },
+] as const
+
+const terminalStatuses = ['CANCELLED', 'REFUNDED'] as const
+
 const statusColors: Record<string, string> = {
   PENDING: 'bg-yellow-50 text-yellow-600 border-yellow-200',
   PAID: 'bg-green-50 text-green-600 border-green-200',
+  EN_PREPARACION: 'bg-blue-50 text-blue-600 border-blue-200',
+  LISTA: 'bg-indigo-50 text-indigo-600 border-indigo-200',
+  EN_CAMINO: 'bg-purple-50 text-purple-600 border-purple-200',
+  ENTREGADA: 'bg-emerald-50 text-emerald-600 border-emerald-200',
   CANCELLED: 'bg-red-50 text-red-600 border-red-200',
   REFUNDED: 'bg-gray-100 text-gray-500 border-gray-200',
 }
@@ -21,6 +35,10 @@ const statusColors: Record<string, string> = {
 const statusLabels: Record<string, string> = {
   PENDING: 'Pendiente',
   PAID: 'Pagada',
+  EN_PREPARACION: 'En preparación',
+  LISTA: 'Lista',
+  EN_CAMINO: 'En camino',
+  ENTREGADA: 'Entregada',
   CANCELLED: 'Cancelada',
   REFUNDED: 'Reembolsada',
 }
@@ -50,13 +68,17 @@ export default function AdminOrderDetail() {
     try {
       const updated = await updateOrderStatus(id, newStatus)
       setOrder(updated)
-      showToast('success', 'Estado actualizado')
+      showToast('success', `Estado actualizado a ${statusLabels[newStatus] || newStatus}`)
     } catch {
       showToast('error', 'Error al actualizar estado')
     } finally {
       setUpdating(false)
     }
   }
+
+  const isTerminal = terminalStatuses.includes(order?.status as any)
+  const currentStepIndex = flowSteps.findIndex((s) => s.key === order?.status)
+  const isInFlow = currentStepIndex !== -1
 
   if (loading) return (
     <div className="flex items-center justify-center min-h-[60vh]">
@@ -86,6 +108,81 @@ export default function AdminOrderDetail() {
         <span className={`text-sm font-semibold px-3 lg:px-4 py-1.5 rounded-xl border ${statusColors[order.status] || 'bg-gray-100'}`}>
           {statusLabels[order.status] || order.status}
         </span>
+      </div>
+
+      <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-4 lg:p-6 mb-6 lg:mb-8">
+        <div className="flex items-center gap-3 mb-4 lg:mb-6 pb-3 border-b border-gray-100">
+          <div className="w-8 h-8 lg:w-9 lg:h-9 rounded-xl bg-accent/5 flex items-center justify-center">
+            <Clock size={16} className="text-accent" />
+          </div>
+          <h2 className="text-sm font-semibold text-gray-700">Estado del pedido</h2>
+        </div>
+
+        {isTerminal ? (
+          <div className={`flex items-center gap-4 p-4 rounded-2xl border ${order.status === 'CANCELLED' ? 'bg-red-50 border-red-100' : 'bg-gray-50 border-gray-200'}`}>
+            <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${order.status === 'CANCELLED' ? 'bg-red-100 text-red-600' : 'bg-gray-200 text-gray-500'}`}>
+              {order.status === 'CANCELLED' ? <XCircle size={24} /> : <RotateCcw size={24} />}
+            </div>
+            <div>
+              <p className="font-semibold text-gray-800">{statusLabels[order.status]}</p>
+              <p className="text-sm text-gray-500 mt-0.5">
+                {order.status === 'CANCELLED' ? 'Esta orden fue cancelada' : 'El pago fue reembolsado al cliente'}
+              </p>
+            </div>
+          </div>
+        ) : null}
+
+        <div className="relative mt-4 lg:mt-6">
+          <div className="hidden sm:flex items-center justify-between">
+            {flowSteps.map((step, i) => {
+              const done = i <= currentStepIndex
+              const current = i === currentStepIndex
+              return (
+                <div key={step.key} className="flex-1 relative">
+                  {i < flowSteps.length - 1 && (
+                    <div className={`absolute top-4 left-[calc(50%+20px)] right-[calc(50%-20px)] h-0.5 -translate-y-1/2 ${
+                      i < currentStepIndex ? 'bg-primary' : 'bg-gray-200'
+                    }`} />
+                  )}
+                  <div className="flex flex-col items-center">
+                    <div className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold transition-all duration-300 ${
+                      done ? 'bg-primary text-white shadow-sm shadow-primary/30' : 'bg-gray-100 text-gray-400'
+                    } ${current ? 'ring-4 ring-primary/20 scale-110' : ''}`}>
+                      {done && i < currentStepIndex ? <Check size={14} /> : <step.icon size={14} />}
+                    </div>
+                    <p className={`text-[10px] font-medium mt-1.5 text-center leading-tight max-w-[70px] ${
+                      done ? 'text-primary' : 'text-gray-400'
+                    }`}>
+                      {step.label}
+                    </p>
+                  </div>
+                </div>
+              )
+            })}
+          </div>
+
+          <div className="sm:hidden space-y-2">
+            {flowSteps.map((step, i) => {
+              const done = i <= currentStepIndex
+              const current = i === currentStepIndex
+              return (
+                <div key={step.key} className="flex items-center gap-3">
+                  <div className="flex flex-col items-center">
+                    <div className={`w-7 h-7 rounded-full flex items-center justify-center text-[10px] font-bold transition-all duration-300 ${
+                      done ? 'bg-primary text-white' : 'bg-gray-100 text-gray-400'
+                    } ${current ? 'ring-4 ring-primary/20' : ''}`}>
+                      {done && i < currentStepIndex ? <Check size={12} /> : <step.icon size={12} />}
+                    </div>
+                    {i < flowSteps.length - 1 && (
+                      <div className={`w-0.5 h-5 ${i < currentStepIndex ? 'bg-primary' : 'bg-gray-200'}`} />
+                    )}
+                  </div>
+                  <p className={`text-xs font-medium ${done ? 'text-primary' : 'text-gray-400'}`}>{step.label}</p>
+                </div>
+              )
+            })}
+          </div>
+        </div>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 lg:gap-6 mb-6 lg:mb-8">
@@ -129,7 +226,6 @@ export default function AdminOrderDetail() {
         </div>
       </div>
 
-      {/* Delivery info */}
       <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-4 lg:p-6 mb-6 lg:mb-8">
         <div className="flex items-center gap-3 mb-3 lg:mb-4 pb-3 border-b border-gray-100">
           <div className="w-8 h-8 lg:w-9 lg:h-9 rounded-xl bg-highlight/10 flex items-center justify-center">
@@ -232,33 +328,54 @@ export default function AdminOrderDetail() {
         </div>
       </div>
 
-      <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-4 lg:p-6">
-        <div className="flex items-center gap-3 mb-3 lg:mb-4 pb-3 border-b border-gray-100">
-          <div className="w-8 h-8 lg:w-9 lg:h-9 rounded-xl bg-accent/5 flex items-center justify-center">
-            <Clock size={16} className="text-accent" />
+      {isInFlow && (
+        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-4 lg:p-6">
+          <div className="flex items-center gap-3 mb-3 lg:mb-4 pb-3 border-b border-gray-100">
+            <div className="w-8 h-8 lg:w-9 lg:h-9 rounded-xl bg-accent/5 flex items-center justify-center">
+              <Clock size={16} className="text-accent" />
+            </div>
+            <h2 className="text-sm font-semibold text-gray-700">Actualizar estado</h2>
           </div>
-          <h2 className="text-sm font-semibold text-gray-700">Actualizar estado</h2>
+          <div className="flex gap-2 flex-wrap">
+            {flowSteps.map(({ key, label }) => {
+              const active = key === order.status
+              return (
+                <button
+                  key={key}
+                  onClick={() => handleStatusChange(key)}
+                  disabled={active || updating}
+                  className={`px-3 lg:px-5 py-2 lg:py-2.5 rounded-xl text-xs lg:text-sm font-medium border transition-all duration-200 ${
+                    active
+                      ? 'bg-primary text-white border-primary shadow-sm'
+                      : 'border-gray-200 text-gray-600 hover:border-gray-300 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed'
+                  }`}
+                >
+                  {label}
+                </button>
+              )
+            })}
+            {!isTerminal && (
+              <>
+                <div className="w-px bg-gray-200 mx-1" />
+                <button
+                  onClick={() => handleStatusChange('CANCELLED')}
+                  disabled={updating}
+                  className="px-3 lg:px-5 py-2 lg:py-2.5 rounded-xl text-xs lg:text-sm font-medium border border-red-200 text-red-600 hover:bg-red-50 disabled:opacity-50 transition-all duration-200"
+                >
+                  Cancelar
+                </button>
+                <button
+                  onClick={() => handleStatusChange('REFUNDED')}
+                  disabled={updating}
+                  className="px-3 lg:px-5 py-2 lg:py-2.5 rounded-xl text-xs lg:text-sm font-medium border border-gray-200 text-gray-600 hover:bg-gray-50 disabled:opacity-50 transition-all duration-200"
+                >
+                  Reembolsar
+                </button>
+              </>
+            )}
+          </div>
         </div>
-        <div className="flex gap-2 flex-wrap">
-          {statuses.map((s) => {
-            const active = s === order.status
-            return (
-              <button
-                key={s}
-                onClick={() => handleStatusChange(s)}
-                disabled={active || updating}
-                className={`px-3 lg:px-5 py-2 lg:py-2.5 rounded-xl text-xs lg:text-sm font-medium border transition-all duration-200 ${
-                  active
-                    ? 'bg-primary text-white border-primary shadow-sm'
-                    : 'border-gray-200 text-gray-600 hover:border-gray-300 hover:bg-gray-50 disabled:opacity-50'
-                }`}
-              >
-                {statusLabels[s]}
-              </button>
-            )
-          })}
-        </div>
-      </div>
+      )}
     </div>
   )
 }

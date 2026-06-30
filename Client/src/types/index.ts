@@ -77,7 +77,7 @@ export interface Order {
   giftFrom?: string
   giftTo?: string
   giftMessage?: string
-  status: 'PENDING' | 'PAID' | 'CANCELLED' | 'REFUNDED'
+  status: 'PENDING' | 'PAID' | 'EN_PREPARACION' | 'LISTA' | 'EN_CAMINO' | 'ENTREGADA' | 'CANCELLED' | 'REFUNDED'
   total: number
   deliveryCost?: number | null
   paymentMethod: 'WOMPI' | 'MERCADOPAGO'

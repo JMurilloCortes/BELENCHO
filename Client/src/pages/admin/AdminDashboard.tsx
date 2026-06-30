@@ -99,9 +99,12 @@ export default function AdminDashboard() {
             {[
               { label: 'Pendientes', count: statusCount('PENDING'), color: 'bg-yellow-400', text: 'text-yellow-600', bg: 'bg-yellow-50' },
               { label: 'Pagadas', count: statusCount('PAID'), color: 'bg-green-400', text: 'text-green-600', bg: 'bg-green-50' },
+              { label: 'En preparación', count: statusCount('EN_PREPARACION'), color: 'bg-blue-400', text: 'text-blue-600', bg: 'bg-blue-50' },
+              { label: 'En camino', count: statusCount('EN_CAMINO'), color: 'bg-purple-400', text: 'text-purple-600', bg: 'bg-purple-50' },
+              { label: 'Entregadas', count: statusCount('ENTREGADA'), color: 'bg-emerald-400', text: 'text-emerald-600', bg: 'bg-emerald-50' },
               { label: 'Canceladas', count: statusCount('CANCELLED'), color: 'bg-red-400', text: 'text-red-600', bg: 'bg-red-50' },
             ].map((item) => {
-              const total = statusCount('PENDING') + statusCount('PAID') + statusCount('CANCELLED')
+              const total = statusCount('PENDING') + statusCount('PAID') + statusCount('EN_PREPARACION') + statusCount('LISTA') + statusCount('EN_CAMINO') + statusCount('ENTREGADA') + statusCount('CANCELLED') + statusCount('REFUNDED')
               const pct = total > 0 ? Math.round((item.count / total) * 100) : 0
               return (
                 <div key={item.label}>

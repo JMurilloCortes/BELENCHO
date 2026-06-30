@@ -97,7 +97,7 @@ export async function getOrderDetail(req: AuthRequest, res: Response) {
 export async function updateOrderStatus(req: AuthRequest, res: Response) {
   try {
     const { status } = req.body;
-    if (!["PENDING", "PAID", "CANCELLED", "REFUNDED"].includes(status)) {
+    if (!["PENDING", "PAID", "EN_PREPARACION", "LISTA", "EN_CAMINO", "ENTREGADA", "CANCELLED", "REFUNDED"].includes(status)) {
       return res.status(400).json({ error: "Estado inválido" });
     }
     const order = await prisma.order.update({

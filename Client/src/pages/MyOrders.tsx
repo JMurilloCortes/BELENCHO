@@ -9,6 +9,10 @@ import type { Order } from '../types'
 const statusLabels: Record<string, string> = {
   PENDING: 'Pendiente',
   PAID: 'Pagada',
+  EN_PREPARACION: 'En preparación',
+  LISTA: 'Lista',
+  EN_CAMINO: 'En camino',
+  ENTREGADA: 'Entregada',
   CANCELLED: 'Cancelada',
   REFUNDED: 'Reembolsada',
 }
@@ -16,6 +20,10 @@ const statusLabels: Record<string, string> = {
 const statusColors: Record<string, string> = {
   PENDING: 'bg-yellow-50 text-yellow-600',
   PAID: 'bg-green-50 text-green-600',
+  EN_PREPARACION: 'bg-blue-50 text-blue-600',
+  LISTA: 'bg-indigo-50 text-indigo-600',
+  EN_CAMINO: 'bg-purple-50 text-purple-600',
+  ENTREGADA: 'bg-emerald-50 text-emerald-600',
   CANCELLED: 'bg-red-50 text-red-600',
   REFUNDED: 'bg-gray-100 text-gray-500',
 }
