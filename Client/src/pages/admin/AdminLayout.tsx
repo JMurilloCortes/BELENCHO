@@ -2,7 +2,7 @@ import { Link, Outlet, useLocation } from 'react-router-dom'
 import { Menu, X, Package, Users, Tag, LayoutDashboard, ShoppingCart, ArrowLeft, MapPin, Bell, X as XIcon } from 'lucide-react'
 import { useAuthStore } from '../../store/auth.store'
 import { useState, useEffect } from 'react'
-import { connectSocket, disconnectSocket } from '../../services/socket.service'
+import { connectSocket } from '../../services/socket.service'
 
 const navItems = [
   { path: '/admin', icon: LayoutDashboard, label: 'Dashboard' },
@@ -26,6 +26,12 @@ export default function AdminLayout() {
   const [toast, setToast] = useState<{ id: string; customerName: string; total: number } | null>(null)
 
   useEffect(() => {
+    if ('Notification' in window && Notification.permission === 'default') {
+      Notification.requestPermission()
+    }
+  }, [])
+
+  useEffect(() => {
     const token = localStorage.getItem('token')
     if (!token) return
 
@@ -34,6 +40,13 @@ export default function AdminLayout() {
     socket.on('new-order', (order: { id: string; customerName: string; total: number }) => {
       setNewOrdersCount((c) => c + 1)
       setToast(order)
+
+      if ('Notification' in window && Notification.permission === 'granted') {
+        new Notification('¡Nuevo pedido!', {
+          body: `${order.customerName} — $${Number(order.total).toLocaleString('es-CO')}`,
+          icon: 'https://res.cloudinary.com/dtarklm7p/image/upload/v1782689025/BELENCHO/Logos/Logo_belencho_hm2kbc.jpg',
+        })
+      }
     })
 
     return () => {
