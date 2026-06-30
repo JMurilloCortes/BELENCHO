@@ -1,5 +1,5 @@
 import { Link, Outlet, useLocation, useNavigate } from 'react-router-dom'
-import { Menu, X, Package, Users, Tag, LayoutDashboard, ShoppingCart, ArrowLeft, MapPin, Bell, X as XIcon, Clock, CheckCheck, Trash2, ChevronRight } from 'lucide-react'
+import { X, Package, Users, Tag, LayoutDashboard, ShoppingCart, ArrowLeft, MapPin, Bell, X as XIcon, Clock, CheckCheck, Trash2, ChevronRight, Menu } from 'lucide-react'
 import { useAuthStore } from '../../store/auth.store'
 import { useState, useEffect, useRef } from 'react'
 import { connectSocket } from '../../services/socket.service'
@@ -12,17 +12,22 @@ interface Notification {
   read: boolean
 }
 
-const navItems = [
-  { path: '/admin', icon: LayoutDashboard, label: 'Dashboard' },
-  { path: '/admin/productos', icon: Package, label: 'Productos' },
-  { path: '/admin/ordenes', icon: ShoppingCart, label: 'Órdenes' },
-  { path: '/admin/categorias', icon: Tag, label: 'Categorías' },
-  { path: '/admin/barrios', icon: MapPin, label: 'Barrios' },
+interface NavItem {
+  path: string
+  icon: any
+  label: string
+  short?: string
+}
+
+const navItems: NavItem[] = [
+  { path: '/admin', icon: LayoutDashboard, label: 'Dashboard', short: 'Inicio' },
+  { path: '/admin/productos', icon: Package, label: 'Productos', short: 'Prod.' },
+  { path: '/admin/ordenes', icon: ShoppingCart, label: 'Órdenes', short: 'Ordenes' },
+  { path: '/admin/categorias', icon: Tag, label: 'Categorías', short: 'Categ.' },
+  { path: '/admin/barrios', icon: MapPin, label: 'Barrios', short: 'Barrios' },
 ]
 
-const adminNavItems = [
-  { path: '/admin/usuarios', icon: Users, label: 'Usuarios' },
-]
+const adminOnlyItem: NavItem = { path: '/admin/usuarios', icon: Users, label: 'Usuarios', short: 'Usuarios' }
 
 function timeAgo(dateStr: string) {
   const now = Date.now()
@@ -36,13 +41,18 @@ function timeAgo(dateStr: string) {
   return `Hace ${days}d`
 }
 
+function isActive(pathname: string, item: NavItem) {
+  return pathname === item.path || (item.path !== '/admin' && pathname.startsWith(item.path))
+}
+
 export default function AdminLayout() {
   const { pathname } = useLocation()
   const navigate = useNavigate()
   const user = useAuthStore((s) => s.user)
   const isAdmin = user?.role === 'ADMINISTRADOR'
-  const [sidebarOpen, setSidebarOpen] = useState(false)
 
+  const [sidebarOpen, setSidebarOpen] = useState(false)
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false)
   const [notifications, setNotifications] = useState<Notification[]>(() => {
     try { return JSON.parse(localStorage.getItem('adminNotifications') || '[]') } catch { return [] }
   })
@@ -134,83 +144,112 @@ export default function AdminLayout() {
     navigate(`/admin/ordenes/${notif.id}`)
   }
 
-  const NavLink = ({ item }: { item: typeof navItems[0] }) => {
-    const active = pathname === item.path || (item.path !== '/admin' && pathname.startsWith(item.path))
+  const NavLink = ({ item, collapsed }: { item: NavItem; collapsed?: boolean }) => {
+    const active = isActive(pathname, item)
     return (
       <Link
         to={item.path}
         onClick={() => setSidebarOpen(false)}
-        className={`flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 ${
+        className={`flex items-center gap-3 rounded-xl text-sm font-medium transition-all duration-200 ${
+          collapsed ? 'justify-center p-2.5' : 'px-4 py-2.5'
+        } ${
           active
             ? 'bg-gradient-to-r from-primary/10 to-primary/5 text-primary shadow-sm'
             : 'text-gray-400 hover:text-gray-200 hover:bg-white/5'
         }`}
+        title={collapsed ? item.label : undefined}
       >
-        <div className={`w-8 h-8 rounded-lg flex items-center justify-center transition-all duration-200 ${
+        <div className={`w-8 h-8 rounded-lg flex items-center justify-center transition-all duration-200 shrink-0 ${
           active ? 'bg-primary text-white shadow-sm' : 'bg-white/5 text-gray-500'
         }`}>
           <item.icon size={16} />
         </div>
-        <span>{item.label}</span>
+        {!collapsed && <span>{item.label}</span>}
       </Link>
     )
   }
 
   return (
-    <div className="min-h-screen flex bg-gray-50">
-      <aside className={`fixed inset-y-0 left-0 z-40 w-64 bg-gray-900 flex flex-col transition-transform duration-300 lg:translate-x-0 ${
-        sidebarOpen ? 'translate-x-0' : '-translate-x-full'
-      }`}>
-        <div className="p-5 border-b border-gray-800 flex items-center justify-between">
-          <Link to="/admin" className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-primary to-accent flex items-center justify-center text-white font-bold text-sm">
+    <div className="min-h-screen flex bg-gray-50 pb-16 lg:pb-0">
+      <aside className={`fixed inset-y-0 left-0 z-40 bg-gray-900 flex flex-col transition-all duration-300 ${
+        sidebarCollapsed ? 'w-16' : 'w-64'
+      } ${
+        sidebarOpen ? 'translate-x-0 shadow-2xl' : '-translate-x-full'
+      } lg:translate-x-0`}>
+        <div className={`p-4 border-b border-gray-800 flex items-center ${sidebarCollapsed ? 'justify-center' : 'justify-between'}`}>
+          {sidebarCollapsed ? (
+            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-primary to-accent flex items-center justify-center text-white font-bold text-xs">
               A
             </div>
-            <span className="text-white font-semibold text-sm">Admin</span>
-          </Link>
-          <button onClick={() => setSidebarOpen(false)} className="lg:hidden p-1.5 text-gray-500 hover:text-white hover:bg-white/5 rounded-lg transition-colors" aria-label="Cerrar menú">
-            <X size={16} />
-          </button>
+          ) : (
+            <>
+              <Link to="/admin" className="flex items-center gap-2">
+                <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-primary to-accent flex items-center justify-center text-white font-bold text-sm">
+                  A
+                </div>
+                <span className="text-white font-semibold text-sm">Admin</span>
+              </Link>
+              <div className="flex items-center gap-1">
+                <button onClick={() => setSidebarCollapsed(true)} className="hidden lg:flex p-1.5 text-gray-500 hover:text-white hover:bg-white/5 rounded-lg transition-colors" aria-label="Colapsar menú">
+                  <Menu size={14} />
+                </button>
+                <button onClick={() => setSidebarOpen(false)} className="lg:hidden p-1.5 text-gray-500 hover:text-white hover:bg-white/5 rounded-lg transition-colors" aria-label="Cerrar menú">
+                  <X size={16} />
+                </button>
+              </div>
+            </>
+          )}
         </div>
 
-        <nav className="flex-1 p-3 space-y-1 overflow-y-auto">
-          {navItems.map((item) => <NavLink key={item.path} item={item} />)}
+        <nav className="flex-1 p-2 space-y-1 overflow-y-auto">
+          {navItems.map((item) => <NavLink key={item.path} item={item} collapsed={sidebarCollapsed} />)}
           {isAdmin && (
-            <>
-              <div className="border-t border-gray-800 my-3" />
-              <p className="px-4 text-[10px] uppercase tracking-widest text-gray-600 font-semibold mb-1">Super admin</p>
-              {adminNavItems.map((item) => <NavLink key={item.path} item={item} />)}
-            </>
+            <NavLink item={adminOnlyItem} collapsed={sidebarCollapsed} />
           )}
         </nav>
 
-        <div className="p-3 border-t border-gray-800 space-y-1">
-          <div className="flex items-center gap-3 px-4 py-2.5">
-            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-primary to-accent flex items-center justify-center text-white text-xs font-bold shrink-0">
-              {user?.name?.[0]?.toUpperCase() || 'A'}
+        {!sidebarCollapsed && (
+          <div className="p-3 border-t border-gray-800 space-y-1">
+            <div className="flex items-center gap-3 px-4 py-2.5">
+              <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-primary to-accent flex items-center justify-center text-white text-xs font-bold shrink-0">
+                {user?.name?.[0]?.toUpperCase() || 'A'}
+              </div>
+              <div className="min-w-0">
+                <p className="text-sm font-medium text-gray-200 truncate">{user?.name}</p>
+                <p className="text-xs text-gray-500 truncate">{user?.role}</p>
+              </div>
             </div>
-            <div className="min-w-0">
-              <p className="text-sm font-medium text-gray-200 truncate">{user?.name}</p>
-              <p className="text-xs text-gray-500 truncate">{user?.role}</p>
-            </div>
+            <Link to="/" className="flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm text-gray-400 hover:text-gray-200 hover:bg-white/5 transition-all duration-200">
+              <ArrowLeft size={16} />
+              Volver a la tienda
+            </Link>
           </div>
-          <Link to="/" className="flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm text-gray-400 hover:text-gray-200 hover:bg-white/5 transition-all duration-200">
-            <ArrowLeft size={16} />
-            Volver a la tienda
-          </Link>
-        </div>
+        )}
+
+        {sidebarCollapsed && (
+          <div className="p-2 border-t border-gray-800">
+            <Link to="/" className="flex items-center justify-center p-2.5 rounded-xl text-gray-400 hover:text-gray-200 hover:bg-white/5 transition-all duration-200" title="Volver a la tienda">
+              <ArrowLeft size={16} />
+            </Link>
+          </div>
+        )}
       </aside>
 
       {sidebarOpen && (
         <div className="fixed inset-0 bg-black/50 z-30 lg:hidden" onClick={() => setSidebarOpen(false)} />
       )}
 
-      <div className="flex-1 lg:ml-64">
+      <div className={`flex-1 transition-all duration-300 ${sidebarCollapsed ? 'lg:ml-16' : 'lg:ml-64'}`}>
         <header className="sticky top-0 z-20 bg-white/80 backdrop-blur-lg border-b border-gray-100">
           <div className="flex items-center justify-between px-4 lg:px-8 h-16">
             <button onClick={() => setSidebarOpen(true)} className="lg:hidden p-2 text-gray-600 hover:bg-gray-100 rounded-lg" aria-label="Abrir menú">
               <Menu size={20} />
             </button>
+            {sidebarCollapsed && (
+              <button onClick={() => setSidebarCollapsed(false)} className="hidden lg:flex p-2 text-gray-600 hover:bg-gray-100 rounded-lg" aria-label="Expandir menú">
+                <Menu size={20} />
+              </button>
+            )}
             <span className="lg:hidden text-sm font-semibold text-gray-800">BELENCHO</span>
             <div className="flex items-center gap-3 ml-auto" ref={notifRef}>
               <div className="relative">
@@ -358,6 +397,49 @@ export default function AdminLayout() {
           <Outlet />
         </main>
       </div>
+
+      <nav className="fixed bottom-0 inset-x-0 z-40 lg:hidden bg-white/95 backdrop-blur-lg border-t border-gray-200" style={{ paddingBottom: 'env(safe-area-inset-bottom, 0px)' }}>
+        <div className="flex items-center justify-around h-16 px-1">
+          {navItems.map((item) => {
+            const active = isActive(pathname, item)
+            return (
+              <Link
+                key={item.path}
+                to={item.path}
+                className={`flex flex-col items-center justify-center gap-0.5 px-2 py-1 rounded-xl transition-all duration-200 min-w-0 flex-1 ${
+                  active
+                    ? 'text-primary'
+                    : 'text-gray-400 hover:text-gray-600'
+                }`}
+              >
+                <div className={`p-1.5 rounded-lg transition-all duration-200 ${
+                  active ? 'bg-primary/10' : ''
+                }`}>
+                  <item.icon size={18} />
+                </div>
+                <span className="text-[10px] font-medium truncate max-w-full">{item.short || item.label}</span>
+              </Link>
+            )
+          })}
+          {isAdmin && (
+            <Link
+              to={adminOnlyItem.path}
+              className={`flex flex-col items-center justify-center gap-0.5 px-2 py-1 rounded-xl transition-all duration-200 min-w-0 flex-1 ${
+                isActive(pathname, adminOnlyItem)
+                  ? 'text-primary'
+                  : 'text-gray-400 hover:text-gray-600'
+              }`}
+            >
+              <div className={`p-1.5 rounded-lg transition-all duration-200 ${
+                isActive(pathname, adminOnlyItem) ? 'bg-primary/10' : ''
+              }`}>
+                <Users size={18} />
+              </div>
+              <span className="text-[10px] font-medium truncate max-w-full">{adminOnlyItem.short}</span>
+            </Link>
+          )}
+        </div>
+      </nav>
     </div>
   )
 }
