@@ -1,7 +1,9 @@
 import "dotenv/config";
 import express from "express";
 import cors from "cors";
+import http from "http";
 import "./services/passport";
+import { initSocket } from "./lib/socket";
 import authRoutes from "./routes/auth.routes";
 import cartRoutes from "./routes/cart.routes";
 import favoriteRoutes from "./routes/favorite.routes";
@@ -34,6 +36,9 @@ app.get("/api/health", (_req, res) => {
   res.json({ status: "ok" });
 });
 
-app.listen(PORT, () => {
+const httpServer = http.createServer(app);
+initSocket(httpServer);
+
+httpServer.listen(PORT, () => {
   console.log(`Servidor corriendo en http://localhost:${PORT}`);
 });

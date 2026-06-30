@@ -1,5 +1,6 @@
 import { prisma } from "../lib/prisma";
 import axios from "axios";
+import { emitNewOrder } from "../lib/socket";
 
 const WOMPI_API = process.env.WOMPI_API || "https://sandbox.wompi.co/v1";
 const WOMPI_PRIVATE_KEY = process.env.WOMPI_PRIVATE_KEY || "";
@@ -161,6 +162,8 @@ export async function createOrderFromCart(
   }
 
   await prisma.cartItem.deleteMany({ where: { cartId: cart.id } });
+
+  emitNewOrder(order);
 
   return order;
 }

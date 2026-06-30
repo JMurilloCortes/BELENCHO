@@ -1,7 +1,8 @@
 import { Link, Outlet, useLocation } from 'react-router-dom'
-import { Menu, X, Package, Users, Tag, LayoutDashboard, ShoppingCart, ArrowLeft, MapPin } from 'lucide-react'
+import { Menu, X, Package, Users, Tag, LayoutDashboard, ShoppingCart, ArrowLeft, MapPin, Bell, X as XIcon } from 'lucide-react'
 import { useAuthStore } from '../../store/auth.store'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
+import { connectSocket, disconnectSocket } from '../../services/socket.service'
 
 const navItems = [
   { path: '/admin', icon: LayoutDashboard, label: 'Dashboard' },
@@ -20,6 +21,32 @@ export default function AdminLayout() {
   const user = useAuthStore((s) => s.user)
   const isAdmin = user?.role === 'ADMINISTRADOR'
   const [sidebarOpen, setSidebarOpen] = useState(false)
+
+  const [newOrdersCount, setNewOrdersCount] = useState(0)
+  const [toast, setToast] = useState<{ id: string; customerName: string; total: number } | null>(null)
+
+  useEffect(() => {
+    const token = localStorage.getItem('token')
+    if (!token) return
+
+    const socket = connectSocket(token)
+
+    socket.on('new-order', (order: { id: string; customerName: string; total: number }) => {
+      setNewOrdersCount((c) => c + 1)
+      setToast(order)
+    })
+
+    return () => {
+      socket.off('new-order')
+      disconnectSocket()
+    }
+  }, [])
+
+  useEffect(() => {
+    if (!toast) return
+    const t = setTimeout(() => setToast(null), 4000)
+    return () => clearTimeout(t)
+  }, [toast])
 
   const NavLink = ({ item }: { item: typeof navItems[0] }) => {
     const active = pathname === item.path || (item.path !== '/admin' && pathname.startsWith(item.path))
@@ -99,13 +126,38 @@ export default function AdminLayout() {
               <Menu size={20} />
             </button>
             <span className="lg:hidden text-sm font-semibold text-gray-800">BELENCHO</span>
-            <img
-              src="https://res.cloudinary.com/dtarklm7p/image/upload/v1782689025/BELENCHO/Logos/Logo_belencho_hm2kbc.jpg"
-              alt="BELENCHO"
-              className="h-8 w-auto ml-auto"
-            />
+            <div className="flex items-center gap-3 ml-auto">
+              <button className="relative p-2 text-gray-600 hover:bg-gray-100 rounded-lg transition-colors" aria-label="Notificaciones">
+                <Bell size={18} />
+                {newOrdersCount > 0 && (
+                  <span className="absolute -top-0.5 -right-0.5 w-5 h-5 bg-red-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center shadow-sm">
+                    {newOrdersCount}
+                  </span>
+                )}
+              </button>
+              <img
+                src="https://res.cloudinary.com/dtarklm7p/image/upload/v1782689025/BELENCHO/Logos/Logo_belencho_hm2kbc.jpg"
+                alt="BELENCHO"
+                className="h-8 w-auto"
+              />
+            </div>
           </div>
         </header>
+
+        {toast && (
+          <div className="fixed top-4 right-4 z-50 animate-fadeIn max-w-sm bg-white rounded-2xl shadow-2xl border border-gray-100 p-4 flex items-start gap-3">
+            <div className="w-10 h-10 rounded-xl bg-green-100 flex items-center justify-center shrink-0">
+              <ShoppingCart size={18} className="text-green-600" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-semibold text-gray-800">¡Nuevo pedido!</p>
+              <p className="text-xs text-gray-500 mt-0.5 truncate">{toast.customerName} — ${Number(toast.total).toLocaleString('es-CO')}</p>
+            </div>
+            <button onClick={() => setToast(null)} className="p-1 text-gray-400 hover:text-gray-600 rounded-lg hover:bg-gray-100 shrink-0" aria-label="Cerrar">
+              <XIcon size={14} />
+            </button>
+          </div>
+        )}
 
         <main className="p-4 lg:p-8">
           <Outlet />
