@@ -50,6 +50,22 @@ export async function updateOrderStatus(orderId: string, status: string) {
   return data
 }
 
+export async function createManualOrder(orderData: {
+  items: { productId: string; quantity: number }[]
+  customerName: string
+  customerPhone: string
+  customerEmail?: string
+  paymentMethod: string
+  deliveryAddress?: string
+  deliveryInstructions?: string
+  neighborhoodId?: string
+  deliveryDate?: string
+  deliveryTimeSlot?: string
+}) {
+  const { data } = await api.post('/admin/orders/manual', orderData)
+  return data
+}
+
 export async function getAdminProducts() {
   const { data } = await api.get('/admin/products')
   return data

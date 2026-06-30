@@ -25,6 +25,9 @@ enum OrderStatus {
 }
 
 enum PaymentMethod {
+  EFECTIVO
+  TRANSFERENCIA
+  TARJETA
   WOMPI
   MERCADOPAGO
 }

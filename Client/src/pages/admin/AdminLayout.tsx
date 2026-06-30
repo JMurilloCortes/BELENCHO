@@ -1,5 +1,5 @@
 import { Link, Outlet, useLocation, useNavigate } from 'react-router-dom'
-import { X, Package, Users, Tag, LayoutDashboard, ShoppingCart, ArrowLeft, MapPin, Bell, X as XIcon, Clock, CheckCheck, Trash2, ChevronRight, Menu } from 'lucide-react'
+import { Plus, Package, Users, Tag, LayoutDashboard, ShoppingCart, ArrowLeft, MapPin, Bell, X, Clock, CheckCheck, Trash2, ChevronRight, Menu } from 'lucide-react'
 import { useAuthStore } from '../../store/auth.store'
 import { useState, useEffect, useRef } from 'react'
 import { connectSocket } from '../../services/socket.service'
@@ -21,6 +21,7 @@ interface NavItem {
 
 const navItems: NavItem[] = [
   { path: '/admin', icon: LayoutDashboard, label: 'Dashboard', short: 'Inicio' },
+  { path: '/admin/pedidos/nuevo', icon: Plus, label: 'Nuevo pedido', short: 'Nuevo' },
   { path: '/admin/productos', icon: Package, label: 'Productos', short: 'Prod.' },
   { path: '/admin/ordenes', icon: ShoppingCart, label: 'Órdenes', short: 'Ordenes' },
   { path: '/admin/categorias', icon: Tag, label: 'Categorías', short: 'Categ.' },
@@ -388,7 +389,7 @@ export default function AdminLayout() {
               <p className="text-xs text-gray-500 mt-0.5 truncate">{toast.customerName} — ${Number(toast.total).toLocaleString('es-CO')}</p>
             </div>
             <button onClick={() => setToast(null)} className="p-1 text-gray-400 hover:text-gray-600 rounded-lg hover:bg-gray-100 shrink-0" aria-label="Cerrar">
-              <XIcon size={14} />
+              <X size={14} />
             </button>
           </div>
         )}

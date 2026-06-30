@@ -1,6 +1,7 @@
 import { Response } from "express";
 import { AuthRequest } from "../middleware/auth";
 import { prisma } from "../lib/prisma";
+import { emitNewOrder } from "../lib/socket";
 import bcrypt from "bcryptjs";
 
 export async function getDashboardStats(_req: AuthRequest, res: Response) {
@@ -129,7 +130,7 @@ export async function getAllProducts(_req: AuthRequest, res: Response) {
   try {
     const products = await prisma.product.findMany({
       orderBy: { createdAt: "desc" },
-      include: { category: true },
+      include: { category: true, images: { orderBy: { order: "asc" } } },
     });
     res.json(products);
   } catch {
@@ -461,5 +462,99 @@ export async function deleteNeighborhood(req: AuthRequest, res: Response) {
     res.json({ message: "Barrio eliminado" });
   } catch {
     res.status(500).json({ error: "Error al eliminar barrio" });
+  }
+}
+
+export async function createManualOrder(req: AuthRequest, res: Response) {
+  try {
+    const { items, customerName, customerPhone, customerEmail, paymentMethod, deliveryAddress, deliveryInstructions, neighborhoodId, deliveryDate, deliveryTimeSlot, deliveryCost: clientDeliveryCost, giftFrom, giftTo, giftMessage } = req.body;
+
+    if (!items?.length) return res.status(400).json({ error: "Debe incluir al menos un producto" });
+    if (!customerName || !customerPhone) return res.status(400).json({ error: "Nombre y teléfono del cliente son obligatorios" });
+    if (!["EFECTIVO", "TRANSFERENCIA", "TARJETA", "WOMPI", "MERCADOPAGO"].includes(paymentMethod)) {
+      return res.status(400).json({ error: "Método de pago inválido" });
+    }
+
+    const productIds = items.map((i: any) => i.productId);
+    const products = await prisma.product.findMany({ where: { id: { in: productIds } } });
+
+    const productMap = new Map(products.map((p) => [p.id, p]));
+    for (const item of items) {
+      const product = productMap.get(item.productId);
+      if (!product) return res.status(400).json({ error: `Producto ${item.productId} no encontrado` });
+      if (!product.active) return res.status(400).json({ error: `Producto ${product.name} no está disponible` });
+      if (item.quantity > product.stock) return res.status(400).json({ error: `Stock insuficiente para ${product.name}` });
+    }
+
+    if (deliveryDate && deliveryTimeSlot) {
+      const bookedCount = await prisma.order.count({
+        where: { deliveryDate, deliveryTimeSlot, status: { notIn: ["CANCELLED", "REFUNDED"] } },
+      });
+      if (bookedCount >= 5) return res.status(400).json({ error: "Este horario ya no tiene cupo disponible" });
+    }
+
+    let deliveryCost = 0;
+    if (neighborhoodId && deliveryAddress !== "Recoge en tienda") {
+      const neighborhood = await prisma.neighborhood.findUnique({ where: { id: neighborhoodId } });
+      if (neighborhood) {
+        for (const item of items) {
+          const product = productMap.get(item.productId);
+          const transport = product?.transportType || "MOTO";
+          const cost = transport === "TAXI"
+            ? Number(neighborhood.taxiPrice ?? 0)
+            : Number(neighborhood.motoPrice ?? 0);
+          if (cost > deliveryCost) deliveryCost = cost;
+        }
+      }
+    }
+    if (typeof clientDeliveryCost === "number" && clientDeliveryCost >= 0) {
+      deliveryCost = clientDeliveryCost;
+    }
+
+    const subtotal = items.reduce((sum: number, item: any) => {
+      const product = productMap.get(item.productId);
+      return sum + Number(product!.price) * item.quantity;
+    }, 0);
+
+    const order = await prisma.order.create({
+      data: {
+        userId: req.user!.id,
+        customerName,
+        customerPhone,
+        customerEmail: customerEmail || "",
+        deliveryAddress: deliveryAddress || "Recoge en tienda",
+        deliveryInstructions: deliveryInstructions || null,
+        neighborhoodId: neighborhoodId || null,
+        deliveryDate: deliveryDate || null,
+        deliveryTimeSlot: deliveryTimeSlot || null,
+        giftFrom: giftFrom || null,
+        giftTo: giftTo || null,
+        giftMessage: giftMessage || null,
+        total: subtotal + deliveryCost,
+        deliveryCost,
+        paymentMethod,
+        status: "PAID",
+        items: {
+          create: items.map((item: any) => {
+            const product = productMap.get(item.productId);
+            return { productId: item.productId, quantity: item.quantity, price: product!.price };
+          }),
+        },
+      },
+      include: { items: { include: { product: true } }, neighborhood: true },
+    });
+
+    for (const item of items) {
+      await prisma.product.update({
+        where: { id: item.productId },
+        data: { stock: { decrement: item.quantity } },
+      });
+    }
+
+    emitNewOrder(order);
+
+    res.json(order);
+  } catch (e: any) {
+    res.status(500).json({ error: e.message || "Error al crear la orden" });
   }
 }

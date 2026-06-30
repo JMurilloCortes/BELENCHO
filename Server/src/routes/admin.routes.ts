@@ -8,7 +8,7 @@ import {
   getCategories, createCategory, updateCategory, deleteCategory,
   toggleProductActive, toggleCategoryActive, toggleUserActive, deleteUser,
   getNeighborhoods, createNeighborhood, updateNeighborhood,
-  toggleNeighborhoodActive, deleteNeighborhood,
+  toggleNeighborhoodActive, deleteNeighborhood, createManualOrder,
 } from "../controllers/admin.controller";
 
 const router = Router();
@@ -28,6 +28,7 @@ router.put("/users/:id/password", authorize("ADMINISTRADOR") as any, updateUserP
 router.post("/reset", authorize("ADMINISTRADOR") as any, resetAll as any);
 
 router.get("/orders", getAllOrders as any);
+router.post("/orders/manual", createManualOrder as any);
 router.get("/orders/:id", getOrderDetail as any);
 router.put("/orders/:id/status", updateOrderStatus as any);
 

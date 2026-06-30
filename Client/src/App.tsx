@@ -22,6 +22,7 @@ import AdminOrderDetail from './pages/admin/AdminOrderDetail'
 import AdminCategories from './pages/admin/AdminCategories'
 import AdminNeighborhoods from './pages/admin/AdminNeighborhoods'
 import AdminUsers from './pages/admin/AdminUsers'
+import AdminNewOrder from './pages/admin/AdminNewOrder'
 import { useAuthStore } from './store/auth.store'
 
 function AppContent() {
@@ -51,6 +52,7 @@ function AppContent() {
       <Route path="/admin" element={<AdminLayout />}>
         <Route index element={<AdminDashboard />} />
         <Route path="productos" element={<AdminProducts />} />
+        <Route path="pedidos/nuevo" element={<AdminNewOrder />} />
         <Route path="ordenes" element={<AdminOrders />} />
         <Route path="ordenes/:id" element={<AdminOrderDetail />} />
         <Route path="categorias" element={<AdminCategories />} />
