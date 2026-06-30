@@ -14,6 +14,7 @@ import userRoutes from "./routes/user.routes";
 import paymentRoutes from "./routes/payment.routes";
 import neighborhoodRoutes from "./routes/neighborhood.routes";
 import deliveryRoutes from "./routes/delivery.routes";
+import heroSlideRoutes from "./routes/heroSlide.routes";
 
 const app = express();
 const PORT = process.env.PORT || 4000;
@@ -31,6 +32,7 @@ app.use("/api/users", userRoutes);
 app.use("/api/payments", paymentRoutes);
 app.use("/api/neighborhoods", neighborhoodRoutes);
 app.use("/api/delivery", deliveryRoutes);
+app.use("/api/hero-slides", heroSlideRoutes);
 
 app.get("/api/health", (_req, res) => {
   res.json({ status: "ok" });

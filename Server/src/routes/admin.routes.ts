@@ -9,6 +9,7 @@ import {
   toggleProductActive, toggleCategoryActive, toggleUserActive, deleteUser,
   getNeighborhoods, createNeighborhood, updateNeighborhood,
   toggleNeighborhoodActive, deleteNeighborhood, createManualOrder,
+  getHeroSlidesAdmin, createHeroSlide, updateHeroSlide, deleteHeroSlide,
 } from "../controllers/admin.controller";
 
 const router = Router();
@@ -49,5 +50,10 @@ router.post("/neighborhoods", authorize("ADMINISTRADOR") as any, createNeighborh
 router.put("/neighborhoods/:id", authorize("ADMINISTRADOR") as any, updateNeighborhood as any);
 router.put("/neighborhoods/:id/toggle-active", authorize("ADMINISTRADOR") as any, toggleNeighborhoodActive as any);
 router.delete("/neighborhoods/:id", authorize("ADMINISTRADOR") as any, deleteNeighborhood as any);
+
+router.get("/hero-slides", getHeroSlidesAdmin as any);
+router.post("/hero-slides", authorize("ADMINISTRADOR") as any, createHeroSlide as any);
+router.put("/hero-slides/:id", authorize("ADMINISTRADOR") as any, updateHeroSlide as any);
+router.delete("/hero-slides/:id", authorize("ADMINISTRADOR") as any, deleteHeroSlide as any);
 
 export default router;

@@ -465,6 +465,56 @@ export async function deleteNeighborhood(req: AuthRequest, res: Response) {
   }
 }
 
+export async function getHeroSlidesAdmin(_req: AuthRequest, res: Response) {
+  try {
+    const slides = await prisma.heroSlide.findMany({ orderBy: { order: "asc" } });
+    res.json(slides);
+  } catch {
+    res.status(500).json({ error: "Error al obtener slides del hero" });
+  }
+}
+
+export async function createHeroSlide(req: AuthRequest, res: Response) {
+  try {
+    const { imageUrl, imageUrlMobile, altText, order } = req.body;
+    if (!imageUrl) return res.status(400).json({ error: "URL de imagen requerida" });
+    const max = await prisma.heroSlide.aggregate({ _max: { order: true } });
+    const slide = await prisma.heroSlide.create({
+      data: { imageUrl, imageUrlMobile: imageUrlMobile || null, altText: altText || null, order: order ?? ((max._max.order ?? -1) + 1) },
+    });
+    res.status(201).json(slide);
+  } catch {
+    res.status(500).json({ error: "Error al crear slide" });
+  }
+}
+
+export async function updateHeroSlide(req: AuthRequest, res: Response) {
+  try {
+    const id = String(req.params.id);
+    const { imageUrl, imageUrlMobile, altText, order, active } = req.body;
+    const data: any = {};
+    if (imageUrl !== undefined) data.imageUrl = imageUrl;
+    if (imageUrlMobile !== undefined) data.imageUrlMobile = imageUrlMobile;
+    if (altText !== undefined) data.altText = altText;
+    if (order !== undefined) data.order = order;
+    if (active !== undefined) data.active = active;
+    const slide = await prisma.heroSlide.update({ where: { id }, data });
+    res.json(slide);
+  } catch {
+    res.status(500).json({ error: "Error al actualizar slide" });
+  }
+}
+
+export async function deleteHeroSlide(req: AuthRequest, res: Response) {
+  try {
+    const id = String(req.params.id);
+    await prisma.heroSlide.delete({ where: { id } });
+    res.json({ message: "Slide eliminado" });
+  } catch {
+    res.status(500).json({ error: "Error al eliminar slide" });
+  }
+}
+
 export async function createManualOrder(req: AuthRequest, res: Response) {
   try {
     const { items, customerName, customerPhone, customerEmail, paymentMethod, deliveryAddress, deliveryInstructions, neighborhoodId, deliveryDate, deliveryTimeSlot, deliveryCost: clientDeliveryCost, giftFrom, giftTo, giftMessage } = req.body;

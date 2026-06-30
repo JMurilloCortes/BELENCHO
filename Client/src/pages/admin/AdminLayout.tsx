@@ -1,5 +1,5 @@
 import { Link, Outlet, useLocation, useNavigate } from 'react-router-dom'
-import { Plus, Package, Users, Tag, LayoutDashboard, ShoppingCart, ArrowLeft, MapPin, Bell, X, Clock, CheckCheck, Trash2, ChevronRight, Menu } from 'lucide-react'
+import { Plus, Package, Users, Tag, LayoutDashboard, ShoppingCart, ArrowLeft, MapPin, Bell, X, Clock, CheckCheck, Trash2, ChevronRight, Menu, Image } from 'lucide-react'
 import { useAuthStore } from '../../store/auth.store'
 import { useState, useEffect, useRef } from 'react'
 import { connectSocket } from '../../services/socket.service'
@@ -26,6 +26,7 @@ const navItems: NavItem[] = [
   { path: '/admin/ordenes', icon: ShoppingCart, label: 'Órdenes', short: 'Ordenes' },
   { path: '/admin/categorias', icon: Tag, label: 'Categorías', short: 'Categ.' },
   { path: '/admin/barrios', icon: MapPin, label: 'Barrios', short: 'Barrios' },
+  { path: '/admin/hero-slides', icon: Image, label: 'Hero Slides', short: 'Hero' },
 ]
 
 const adminOnlyItem: NavItem = { path: '/admin/usuarios', icon: Users, label: 'Usuarios', short: 'Usuarios' }

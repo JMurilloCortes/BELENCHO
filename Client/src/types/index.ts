@@ -111,3 +111,12 @@ export interface Favorite {
   productId: string
   product: Product
 }
+
+export interface HeroSlide {
+  id: string
+  imageUrl: string
+  imageUrlMobile?: string
+  altText?: string
+  order: number
+  active: boolean
+}

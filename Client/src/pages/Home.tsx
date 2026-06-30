@@ -7,11 +7,12 @@ import {
   Leaf, Eye, Package, ChevronLeft, Play, Circle,
 } from 'lucide-react'
 import { getProducts } from '../services/product.service'
+import { getHeroSlides } from '../services/heroSlide.service'
 import { showToast } from '../lib/sweetalert'
 import { useCartStore } from '../store/cart.store'
 import { useFavoriteStore } from '../store/favorite.store'
 import { useAuthStore } from '../store/auth.store'
-import type { Product } from '../types'
+import type { Product, HeroSlide } from '../types'
 import SkeletonCard from '../components/SkeletonCard'
 
 const categories = [
@@ -38,6 +39,9 @@ export default function Home() {
   const [products, setProducts] = useState<Product[]>([])
   const [productsLoading, setProductsLoading] = useState(true)
   const [activeTestimonial, setActiveTestimonial] = useState(0)
+  const [heroSlides, setHeroSlides] = useState<HeroSlide[]>([])
+  const [heroLoading, setHeroLoading] = useState(true)
+  const [currentSlide, setCurrentSlide] = useState(0)
   const addItem = useCartStore((s) => s.addItem)
   const { toggleFavorite, isFavorite, loadFavorites } = useFavoriteStore()
   const isAuthenticated = useAuthStore((s) => s.isAuthenticated)
@@ -50,7 +54,19 @@ export default function Home() {
       .then(setProducts)
       .catch(() => {})
       .finally(() => setProductsLoading(false))
+    getHeroSlides()
+      .then(setHeroSlides)
+      .catch(() => {})
+      .finally(() => setHeroLoading(false))
   }, [])
+
+  useEffect(() => {
+    if (heroSlides.length === 0) return
+    const interval = setInterval(() => {
+      setCurrentSlide((prev) => (prev + 1) % heroSlides.length)
+    }, 10000)
+    return () => clearInterval(interval)
+  }, [heroSlides])
 
   useEffect(() => {
     testimonialInterval.current = setInterval(() => {
@@ -71,82 +87,75 @@ export default function Home() {
   return (
     <div className="overflow-hidden">
 
-      {/* ===== HERO - CENTERED SPOTLIGHT ===== */}
+      {/* ===== HERO - CAROUSEL BACKGROUND ===== */}
       <section className="relative flex items-center justify-center overflow-hidden bg-gray-900" style={{ borderRadius: '0 0 50% 50% / 0 0 50px 50px', minHeight: '50vh' }}>
-        {/* Animated gradient mesh background */}
-        <div className="absolute inset-0 overflow-hidden">
-          <div className="absolute -top-1/2 -left-1/2 w-[200%] h-[200%] opacity-30 animate-[mesh_20s_ease-in-out_infinite]" style={{
-            background: 'conic-gradient(from 0deg at 50% 50%, #49b8a7 0deg, #fc8a80 90deg, #f8e694 180deg, #49b8a7 270deg, #49b8a7 360deg)',
-            filter: 'blur(120px)',
-          }} />
-          <div className="absolute -top-1/2 -right-1/2 w-[200%] h-[200%] opacity-20 animate-[mesh_25s_ease-in-out_infinite_reverse]" style={{
-            background: 'conic-gradient(from 180deg at 50% 50%, #fc8a80 0deg, #f8e694 120deg, #49b8a7 240deg, #fc8a80 360deg)',
-            filter: 'blur(100px)',
-          }} />
-        </div>
-
-        {/* Particle grid overlay */}
-        <div className="absolute inset-0 opacity-[0.03]" style={{
-          backgroundImage: 'radial-gradient(circle at 1px 1px, white 1px, transparent 0)',
-          backgroundSize: '40px 40px',
-        }} />
-
-        {/* Vignette */}
-        <div className="absolute inset-0" style={{
-          background: 'radial-gradient(ellipse at center, transparent 40%, rgba(17,24,39,0.6) 100%)',
-        }} />
-
-        <style>{`
-          @keyframes mesh {
-            0%, 100% { transform: translate(0, 0) rotate(0deg) scale(1); }
-            25% { transform: translate(5%, 5%) rotate(90deg) scale(1.1); }
-            50% { transform: translate(-5%, 10%) rotate(180deg) scale(0.9); }
-            75% { transform: translate(10%, -5%) rotate(270deg) scale(1.05); }
-          }
-        `}</style>
-
-        <div className="relative w-full max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-12 lg:py-14 text-center">
-          {/* Title */}
-          <h1 className="text-3xl sm:text-5xl md:text-6xl lg:text-7xl font-bold text-white leading-[0.85] mb-3 sm:mb-5 tracking-tight whitespace-nowrap">
-            Regalos{' '}
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary via-accent to-highlight">que enamoran</span>
-          </h1>
-
-          <p className="text-xs sm:text-base lg:text-base text-white/60 mb-4 sm:mb-8 max-w-lg mx-auto leading-relaxed">
-            Regalos creativos para momentos inolvidables.
-          </p>
-
-          {/* Buttons */}
-          <div className="flex flex-row gap-2 sm:gap-3 justify-center">
-            <Link
-              to="/catalogo"
-              className="group inline-flex items-center justify-center gap-1.5 sm:gap-2.5 bg-white text-gray-900 px-5 sm:px-8 py-2 sm:py-3 rounded-lg sm:rounded-xl text-[11px] sm:text-sm font-semibold transition-all duration-300 hover:bg-primary hover:text-white hover:scale-105 hover:shadow-xl hover:shadow-primary/20"
-            >
-              Explorar
-              <ArrowRight size={13} className="group-hover:translate-x-1.5 transition-transform" />
-            </Link>
-            <Link
-              to="/catalogo"
-              className="group inline-flex items-center justify-center gap-1.5 sm:gap-2.5 bg-white/10 text-white/80 border border-white/20 sm:border-2 px-5 sm:px-8 py-2 sm:py-3 rounded-lg sm:rounded-xl text-[11px] sm:text-sm font-semibold transition-all duration-300 hover:bg-white/20 hover:border-white/40 hover:text-white hover:scale-105"
-            >
-              <Sparkles size={12} />
-              Ofertas
-            </Link>
+        {/* Spinner while fetching */}
+        {heroLoading && (
+          <div className="absolute inset-0 flex items-center justify-center bg-white">
+            <div className="w-10 h-10 border-4 border-primary/30 border-t-primary rounded-full animate-spin" />
           </div>
+        )}
 
-          {/* Bottom trust indicators */}
-          <div className="hidden sm:flex items-center justify-center gap-8 mt-10 pt-6 border-t border-white/10">
-            {[
-              { icon: Shield, text: 'Pago seguro' },
-              { icon: BadgeCheck, text: 'Calidad premium' },
-              { icon: Clock, text: 'Entrega rápida' },
-            ].map(({ icon: Icon, text }) => (
-              <div key={text} className="flex items-center gap-1.5 sm:gap-2 text-[10px] sm:text-xs lg:text-sm text-white/50">
-                <Icon size={11} className="text-primary" />
-                {text}
+        {/* Carousel images */}
+        {heroSlides.length > 0 && (
+          <div className="absolute inset-0">
+            {heroSlides.map((slide, i) => (
+              <div
+                key={slide.id}
+                className="absolute inset-0 transition-opacity duration-1000 ease-in-out"
+                style={{ opacity: i === currentSlide ? 1 : 0 }}
+              >
+                <picture>
+                  {slide.imageUrlMobile && (
+                    <source media="(max-width: 640px)" srcSet={slide.imageUrlMobile} />
+                  )}
+                  <img
+                    src={slide.imageUrl}
+                    alt={slide.altText || ''}
+                    className="w-full h-full object-cover"
+                  />
+                </picture>
               </div>
             ))}
           </div>
+        )}
+
+        {/* Subtle dark overlay for button contrast */}
+        <div className="absolute inset-0 bg-gray-900/10" />
+
+        {/* Navigation dots */}
+        {!heroLoading && heroSlides.length > 1 && (
+          <div className="absolute bottom-4 sm:bottom-6 left-1/2 -translate-x-1/2 z-10 flex gap-2">
+            {heroSlides.map((_, i) => (
+              <button
+                key={i}
+                onClick={() => setCurrentSlide(i)}
+                className={`transition-all duration-300 rounded-full ${
+                  i === currentSlide
+                    ? 'w-6 h-2 bg-white'
+                    : 'w-2 h-2 bg-white/40 hover:bg-white/60'
+                }`}
+              />
+            ))}
+          </div>
+        )}
+
+        {/* Buttons at bottom */}
+        <div className="absolute bottom-12 sm:bottom-16 left-1/2 -translate-x-1/2 z-10 flex flex-row gap-2 sm:gap-3">
+          <Link
+            to="/catalogo"
+            className="group inline-flex items-center justify-center gap-1.5 sm:gap-2.5 bg-white text-gray-900 px-5 sm:px-8 py-2 sm:py-3 rounded-lg sm:rounded-xl text-[11px] sm:text-sm font-semibold transition-all duration-300 hover:bg-primary hover:text-white hover:scale-105 hover:shadow-xl hover:shadow-primary/20"
+          >
+            Explorar
+            <ArrowRight size={13} className="group-hover:translate-x-1.5 transition-transform" />
+          </Link>
+          <Link
+            to="/catalogo"
+            className="group inline-flex items-center justify-center gap-1.5 sm:gap-2.5 bg-white/10 text-white/80 border border-white/20 sm:border-2 px-5 sm:px-8 py-2 sm:py-3 rounded-lg sm:rounded-xl text-[11px] sm:text-sm font-semibold transition-all duration-300 hover:bg-white/20 hover:border-white/40 hover:text-white hover:scale-105"
+          >
+            <Sparkles size={12} />
+            Ofertas
+          </Link>
         </div>
       </section>
 

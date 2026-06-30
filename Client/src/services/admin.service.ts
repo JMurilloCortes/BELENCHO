@@ -140,3 +140,23 @@ export async function deleteNeighborhood(id: string) {
   const { data } = await api.delete(`/admin/neighborhoods/${id}`)
   return data
 }
+
+export async function getHeroSlides() {
+  const { data } = await api.get('/admin/hero-slides')
+  return data
+}
+
+export async function createHeroSlide(slide: { imageUrl: string; altText?: string; order?: number }) {
+  const { data } = await api.post('/admin/hero-slides', slide)
+  return data
+}
+
+export async function updateHeroSlide(id: string, slide: { imageUrl?: string; altText?: string; order?: number; active?: boolean }) {
+  const { data } = await api.put(`/admin/hero-slides/${id}`, slide)
+  return data
+}
+
+export async function deleteHeroSlide(id: string) {
+  const { data } = await api.delete(`/admin/hero-slides/${id}`)
+  return data
+}

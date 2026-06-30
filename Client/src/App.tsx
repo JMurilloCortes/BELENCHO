@@ -23,6 +23,7 @@ import AdminCategories from './pages/admin/AdminCategories'
 import AdminNeighborhoods from './pages/admin/AdminNeighborhoods'
 import AdminUsers from './pages/admin/AdminUsers'
 import AdminNewOrder from './pages/admin/AdminNewOrder'
+import AdminHeroSlides from './pages/admin/AdminHeroSlides'
 import { useAuthStore } from './store/auth.store'
 
 function AppContent() {
@@ -57,6 +58,7 @@ function AppContent() {
         <Route path="ordenes/:id" element={<AdminOrderDetail />} />
         <Route path="categorias" element={<AdminCategories />} />
         <Route path="barrios" element={<AdminNeighborhoods />} />
+        <Route path="hero-slides" element={<AdminHeroSlides />} />
         <Route path="usuarios" element={<AdminUsers />} />
       </Route>
     </Routes>
