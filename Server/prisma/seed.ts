@@ -46,7 +46,8 @@ async function main() {
       name: "Ramón el carismático",
       description: "Hermoso ramo de rosas eternas que nunca se marchitan. Perfecto para regalar en cualquier ocasión especial. Cada rosa es preservada individualmente para mantener su belleza por años.",
       price: 45000,
-      stock: 12,
+      stock: 3,
+      inventoryType: "HYBRID",
       categoryId: catFlores.id,
       images: [
         "https://placehold.co/600x600/49b8a7/ffffff?text=Ramón+1",
@@ -58,7 +59,8 @@ async function main() {
       name: "Taza personalizada",
       description: "Taza de cerámica con diseño único. Ideal para el café de cada mañana o como detalle especial. Personalizable con nombres y frases.",
       price: 25000,
-      stock: 8,
+      stock: 0,
+      inventoryType: "MADE_TO_ORDER",
       categoryId: catHogar.id,
       images: [
         "https://placehold.co/600x600/fc8a80/ffffff?text=Taza+1",
@@ -69,7 +71,8 @@ async function main() {
       name: "Kit de regalo sorpresa",
       description: "Caja sorpresa con accesorios seleccionados especialmente para consentir a esa persona especial. Incluye detalles únicos y personalizados.",
       price: 65000,
-      stock: 5,
+      stock: 2,
+      inventoryType: "PRE_MADE",
       categoryId: catKits.id,
       images: [
         "https://placehold.co/600x600/f8e694/333333?text=Kit+1",
@@ -82,6 +85,7 @@ async function main() {
       description: "Llavero hecho a mano con materiales de alta calidad. Diseño exclusivo BELENCHO.",
       price: 15000,
       stock: 20,
+      inventoryType: "PRE_MADE",
       categoryId: catAccesorios.id,
       images: [
         "https://placehold.co/600x600/49b8a7/ffffff?text=Llavero",

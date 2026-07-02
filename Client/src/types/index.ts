@@ -29,12 +29,15 @@ export interface ProductVideo {
   url: string
 }
 
+export type InventoryType = 'PRE_MADE' | 'MADE_TO_ORDER' | 'HYBRID'
+
 export interface Product {
   id: string
   name: string
   description: string
   price: number
   stock: number
+  inventoryType: InventoryType
   transportType?: 'MOTO' | 'TAXI'
   categoryId: string
   category: Category

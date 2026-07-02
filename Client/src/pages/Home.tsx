@@ -88,7 +88,7 @@ export default function Home() {
     <div className="overflow-hidden">
 
       {/* ===== HERO - CAROUSEL BACKGROUND ===== */}
-      <section className="relative flex items-center justify-center overflow-hidden bg-gray-900" style={{ borderRadius: '0 0 50% 50% / 0 0 50px 50px', minHeight: '50vh' }}>
+      <section className="relative flex items-center justify-center overflow-hidden bg-gray-900" style={{ borderRadius: '0 0 50% 50% / 0 0 50px 50px', minHeight: '60vh' }}>
         {/* Spinner while fetching */}
         {heroLoading && (
           <div className="absolute inset-0 flex items-center justify-center bg-white">

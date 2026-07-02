@@ -167,15 +167,30 @@ export default function ProductDetail() {
               <span className="absolute top-4 left-4 bg-white/90 backdrop-blur-sm text-gray-700 text-xs font-semibold px-3 py-1.5 rounded-full shadow-sm">
                 {product.category?.name}
               </span>
-              {/* Stock badge */}
-              {product.stock <= 3 && product.stock > 0 && (
+              {/* Availability badge */}
+              {(product.inventoryType === 'PRE_MADE' || product.inventoryType === 'HYBRID') && product.stock > 0 && product.stock <= 3 && (
                 <span className="absolute top-4 right-4 bg-accent text-white text-xs font-semibold px-3 py-1.5 rounded-full shadow-lg shadow-accent/30">
                   Últimas {product.stock}
                 </span>
               )}
-              {product.stock === 0 && (
+              {product.inventoryType === 'PRE_MADE' && product.stock === 0 && (
                 <span className="absolute top-4 right-4 bg-gray-900/90 text-white text-xs font-semibold px-3 py-1.5 rounded-full backdrop-blur-sm">
                   Agotado
+                </span>
+              )}
+              {product.inventoryType === 'MADE_TO_ORDER' && (
+                <span className="absolute top-4 right-4 bg-purple-500/90 text-white text-xs font-semibold px-3 py-1.5 rounded-full backdrop-blur-sm">
+                  Bajo pedido
+                </span>
+              )}
+              {product.inventoryType === 'HYBRID' && product.stock > 0 && (
+                <span className="absolute top-4 right-4 bg-green-600/90 text-white text-xs font-semibold px-3 py-1.5 rounded-full backdrop-blur-sm">
+                  Disponible inmediato
+                </span>
+              )}
+              {product.inventoryType === 'HYBRID' && product.stock <= 0 && (
+                <span className="absolute top-4 right-4 bg-blue-500/90 text-white text-xs font-semibold px-3 py-1.5 rounded-full backdrop-blur-sm">
+                  Bajo pedido
                 </span>
               )}
               {/* Nav arrows */}
@@ -252,10 +267,27 @@ export default function ProductDetail() {
               <span className="text-4xl sm:text-5xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
                 ${Number(product.price).toLocaleString()}
               </span>
-              {product.stock > 0 && (
+              {product.inventoryType === 'PRE_MADE' && product.stock > 0 && (
                 <span className="text-sm text-green-600 font-medium bg-green-50 px-3 py-1 rounded-full">
                   <Check size={12} className="inline mr-1" />
                   En stock
+                </span>
+              )}
+              {product.inventoryType === 'HYBRID' && product.stock > 0 && (
+                <span className="text-sm text-green-600 font-medium bg-green-50 px-3 py-1 rounded-full">
+                  <Check size={12} className="inline mr-1" />
+                  Disponible inmediato
+                </span>
+              )}
+              {product.inventoryType === 'MADE_TO_ORDER' && (
+                <span className="text-sm text-purple-600 font-medium bg-purple-50 px-3 py-1 rounded-full">
+                  <Check size={12} className="inline mr-1" />
+                  Bajo pedido
+                </span>
+              )}
+              {product.inventoryType === 'HYBRID' && product.stock <= 0 && (
+                <span className="text-sm text-blue-600 font-medium bg-blue-50 px-3 py-1 rounded-full">
+                  Bajo pedido
                 </span>
               )}
             </div>
@@ -265,13 +297,25 @@ export default function ProductDetail() {
               {product.description}
             </p>
 
-            {/* Stock info */}
+            {/* Availability info */}
             <div className="bg-gray-50 rounded-2xl p-4 mb-6 flex items-center justify-between">
               <span className="text-sm text-gray-500">Disponibilidad</span>
-              <span className={`text-sm font-semibold ${product.stock > 0 ? 'text-green-600' : 'text-red-500'}`}>
-                {product.stock > 0
+              <span className={`text-sm font-semibold ${
+                product.inventoryType === 'PRE_MADE' && product.stock > 0
+                  ? 'text-green-600'
+                  : product.inventoryType === 'PRE_MADE' && product.stock <= 0
+                    ? 'text-red-500'
+                    : product.inventoryType === 'HYBRID' && product.stock > 0
+                      ? 'text-green-600'
+                      : 'text-purple-600'
+              }`}>
+                {product.inventoryType === 'PRE_MADE' && product.stock > 0
                   ? `${product.stock} unidad${product.stock !== 1 ? 'es' : ''} disponible${product.stock !== 1 ? 's' : ''}`
-                  : 'Agotado'}
+                  : product.inventoryType === 'PRE_MADE' && product.stock <= 0
+                    ? 'Agotado'
+                    : product.inventoryType === 'HYBRID' && product.stock > 0
+                      ? `${product.stock} pre-armado${product.stock !== 1 ? 's' : ''} · También bajo pedido`
+                      : 'Disponible bajo pedido'}
               </span>
             </div>
 
@@ -279,7 +323,7 @@ export default function ProductDetail() {
             <div className="flex gap-3 mb-8">
               <button
                 onClick={handleBuyNow}
-                disabled={product.stock === 0}
+                disabled={product.inventoryType === 'PRE_MADE' && product.stock === 0}
                 className="flex-1 inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-xl text-sm font-bold transition-all duration-300 active:scale-95 bg-gradient-to-r from-primary to-accent text-white hover:shadow-lg hover:shadow-primary/30 hover:scale-[1.02] disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
               >
                 <Zap size={18} />
@@ -287,7 +331,7 @@ export default function ProductDetail() {
               </button>
               <button
                 onClick={handleAddToCart}
-                disabled={product.stock === 0}
+                disabled={product.inventoryType === 'PRE_MADE' && product.stock === 0}
                 className={`p-3.5 rounded-xl border-2 transition-all duration-300 hover:scale-105 active:scale-95 ${
                   addedToCart
                     ? 'border-green-200 bg-green-50 text-green-600 hover:bg-green-500 hover:text-white hover:border-green-400 hover:shadow-lg hover:shadow-green-500/20'

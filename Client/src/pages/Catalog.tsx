@@ -223,15 +223,30 @@ export default function Catalog() {
                     >
                       <Heart size={15} fill={fav ? 'currentColor' : 'none'} />
                     </button>
-                    {/* Stock badges */}
-                    {product.stock <= 3 && product.stock > 0 && (
+                    {/* Availability badges */}
+                    {(product.inventoryType === 'PRE_MADE' || product.inventoryType === 'HYBRID') && product.stock > 0 && product.stock <= 3 && (
                       <span className="absolute bottom-3 left-3 bg-accent text-white text-[10px] font-semibold px-2.5 py-1 rounded-full shadow-lg shadow-accent/30 z-10">
                         Últimas {product.stock}
                       </span>
                     )}
-                    {product.stock === 0 && (
+                    {product.inventoryType === 'PRE_MADE' && product.stock <= 0 && (
                       <span className="absolute bottom-3 left-3 bg-gray-900/90 text-white text-[10px] font-semibold px-2.5 py-1 rounded-full backdrop-blur-sm z-10">
                         Agotado
+                      </span>
+                    )}
+                    {product.inventoryType === 'MADE_TO_ORDER' && (
+                      <span className="absolute bottom-3 left-3 bg-purple-500/90 text-white text-[10px] font-semibold px-2.5 py-1 rounded-full backdrop-blur-sm z-10">
+                        Bajo pedido
+                      </span>
+                    )}
+                    {product.inventoryType === 'HYBRID' && product.stock > 0 && (
+                      <span className="absolute bottom-3 left-3 bg-green-600/90 text-white text-[10px] font-semibold px-2.5 py-1 rounded-full backdrop-blur-sm z-10">
+                        Disponible inmediato
+                      </span>
+                    )}
+                    {product.inventoryType === 'HYBRID' && product.stock <= 0 && (
+                      <span className="absolute bottom-3 left-3 bg-blue-500/90 text-white text-[10px] font-semibold px-2.5 py-1 rounded-full backdrop-blur-sm z-10">
+                        Bajo pedido
                       </span>
                     )}
                   </Link>
@@ -254,9 +269,9 @@ export default function Catalog() {
                       </span>
                       <button
                         onClick={() => handleAddToCart(product.id)}
-                        disabled={product.stock === 0}
+                        disabled={product.inventoryType === 'PRE_MADE' && product.stock === 0}
                         className={`p-2.5 rounded-xl transition-all duration-300 ${
-                          product.stock === 0
+                          product.inventoryType === 'PRE_MADE' && product.stock === 0
                             ? 'bg-gray-100 text-gray-300 cursor-not-allowed'
                             : 'bg-primary/10 text-primary hover:bg-primary hover:text-white hover:shadow-lg hover:shadow-primary/20'
                         }`}

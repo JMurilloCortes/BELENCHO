@@ -37,7 +37,7 @@ export async function addToCart(req: AuthRequest, res: Response) {
 
     const currentQty = existing?.quantity || 0;
     const newQty = currentQty + quantity;
-    if (newQty > product.stock) {
+    if (product.inventoryType !== "MADE_TO_ORDER" && newQty > product.stock) {
       return res.status(400).json({ error: `Solo hay ${product.stock} unidades disponibles` });
     }
 
@@ -74,7 +74,7 @@ export async function updateCartItem(req: AuthRequest, res: Response) {
 
     if (quantity <= 0) {
       await prisma.cartItem.delete({ where: { id: item.id } });
-    } else if (quantity > item.product.stock) {
+    } else if (item.product.inventoryType !== "MADE_TO_ORDER" && quantity > item.product.stock) {
       return res.status(400).json({ error: `Solo hay ${item.product.stock} unidades disponibles` });
     } else {
       await prisma.cartItem.update({ where: { id: item.id }, data: { quantity } });

@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { Plus, Edit2, Trash2, Power, PowerOff, Search, Package, X, Bike, Car } from 'lucide-react'
+import { Plus, Edit2, Trash2, Power, PowerOff, Search, Package, X, Bike, Car, Box } from 'lucide-react'
 import { showToast, showConfirm } from '../../lib/sweetalert'
 import { getAdminProducts, createProduct, updateProduct, deleteProduct, toggleProductActive, getCategories } from '../../services/admin.service'
 import type { Product, Category } from '../../types'
@@ -11,7 +11,7 @@ export default function AdminProducts() {
   const [showForm, setShowForm] = useState(false)
   const [editing, setEditing] = useState<Product | null>(null)
   const [search, setSearch] = useState('')
-  const [form, setForm] = useState({ name: '', description: '', price: '', stock: '', transportType: 'MOTO', categoryId: '', images: '' })
+  const [form, setForm] = useState({ name: '', description: '', price: '', stock: '', inventoryType: 'MADE_TO_ORDER', transportType: 'MOTO', categoryId: '', images: '' })
 
   const load = async () => {
     const [p, c] = await Promise.all([getAdminProducts(), getCategories()])
@@ -24,7 +24,7 @@ export default function AdminProducts() {
 
   const openCreate = () => {
     setEditing(null)
-    setForm({ name: '', description: '', price: '', stock: '', transportType: 'MOTO', categoryId: categories[0]?.id || '', images: '' })
+    setForm({ name: '', description: '', price: '', stock: '', inventoryType: 'MADE_TO_ORDER', transportType: 'MOTO', categoryId: categories[0]?.id || '', images: '' })
     setShowForm(true)
   }
 
@@ -35,6 +35,7 @@ export default function AdminProducts() {
       description: p.description,
       price: String(p.price),
       stock: String(p.stock),
+      inventoryType: p.inventoryType || 'MADE_TO_ORDER',
       transportType: p.transportType || 'MOTO',
       categoryId: p.categoryId,
       images: '',
@@ -53,6 +54,7 @@ export default function AdminProducts() {
         description: form.description,
         price: parseFloat(form.price),
         stock: parseInt(form.stock) || 0,
+        inventoryType: form.inventoryType,
         transportType: form.transportType,
         categoryId: form.categoryId,
         images: form.images.split('\n').filter(Boolean),
@@ -155,10 +157,23 @@ export default function AdminProducts() {
                   <input value={form.price} onChange={(e) => setForm({ ...form, price: e.target.value })} type="number" className={inputClass} />
                 </div>
                 <div>
+                  <label className="block text-sm font-medium text-gray-600 mb-1.5 flex items-center gap-1.5">
+                    <Box size={14} className="text-primary" />
+                    Tipo de inventario
+                  </label>
+                  <select value={form.inventoryType} onChange={(e) => setForm({ ...form, inventoryType: e.target.value })} className={inputClass}>
+                    <option value="PRE_MADE">Pre-armado</option>
+                    <option value="MADE_TO_ORDER">Bajo pedido</option>
+                    <option value="HYBRID">Híbrido</option>
+                  </select>
+                </div>
+              </div>
+              {form.inventoryType !== 'MADE_TO_ORDER' && (
+                <div>
                   <label className="block text-sm font-medium text-gray-600 mb-1.5">Stock</label>
                   <input value={form.stock} onChange={(e) => setForm({ ...form, stock: e.target.value })} type="number" className={inputClass} />
                 </div>
-              </div>
+              )}
               <div>
                 <label className="block text-sm font-medium text-gray-600 mb-1.5 flex items-center gap-1.5">
                   <Bike size={14} className="text-primary" />{' '}
@@ -224,9 +239,17 @@ export default function AdminProducts() {
                   <div className="flex items-center gap-2 mt-1.5">
                     <span className="text-base font-bold text-primary">${Number(p.price).toLocaleString()}</span>
                     <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${
-                      p.stock > 5 ? 'bg-green-50 text-green-600' : p.stock > 0 ? 'bg-orange-50 text-orange-600' : 'bg-red-50 text-red-600'
+                      p.inventoryType === 'MADE_TO_ORDER'
+                        ? 'bg-purple-50 text-purple-600'
+                        : p.stock > 5
+                          ? 'bg-green-50 text-green-600'
+                          : p.stock > 0
+                            ? 'bg-orange-50 text-orange-600'
+                            : p.inventoryType === 'HYBRID'
+                              ? 'bg-blue-50 text-blue-600'
+                              : 'bg-red-50 text-red-600'
                     }`}>
-                      {p.stock} uds
+                      {p.inventoryType === 'MADE_TO_ORDER' ? 'Bajo pedido' : p.inventoryType === 'HYBRID' && p.stock <= 0 ? 'Bajo pedido' : `${p.stock} uds`}
                     </span>
                   </div>
                 </div>
@@ -273,7 +296,7 @@ export default function AdminProducts() {
             <tr className="border-b border-gray-100">
               <th className="text-left p-3 lg:p-4 text-xs font-semibold text-gray-400 uppercase tracking-wider">Producto</th>
               <th className="text-left p-3 lg:p-4 text-xs font-semibold text-gray-400 uppercase tracking-wider">Precio</th>
-              <th className="text-center p-3 lg:p-4 text-xs font-semibold text-gray-400 uppercase tracking-wider">Stock</th>
+              <th className="text-center p-3 lg:p-4 text-xs font-semibold text-gray-400 uppercase tracking-wider">Inventario</th>
               <th className="text-left p-3 lg:p-4 text-xs font-semibold text-gray-400 uppercase tracking-wider">Categoría</th>
               <th className="text-center p-3 lg:p-4 text-xs font-semibold text-gray-400 uppercase tracking-wider">Transporte</th>
               <th className="text-center p-3 lg:p-4 text-xs font-semibold text-gray-400 uppercase tracking-wider">Estado</th>
@@ -296,11 +319,28 @@ export default function AdminProducts() {
                   </td>
                   <td className="p-3 lg:p-4 text-sm font-semibold text-gray-800">${Number(p.price).toLocaleString()}</td>
                   <td className="p-3 lg:p-4 text-center">
-                    <span className={`text-xs font-medium px-2 py-1 rounded-full ${
-                      p.stock > 5 ? 'bg-green-50 text-green-600' : p.stock > 0 ? 'bg-orange-50 text-orange-600' : 'bg-red-50 text-red-600'
-                    }`}>
-                      {p.stock} uds
-                    </span>
+                    <div className="flex flex-col items-center gap-1">
+                      <span className={`text-xs font-medium px-2 py-1 rounded-full ${
+                        p.inventoryType === 'MADE_TO_ORDER'
+                          ? 'bg-purple-50 text-purple-600'
+                          : p.inventoryType === 'HYBRID' && p.stock <= 0
+                            ? 'bg-blue-50 text-blue-600'
+                            : p.stock > 5
+                              ? 'bg-green-50 text-green-600'
+                              : p.stock > 0
+                                ? 'bg-orange-50 text-orange-600'
+                                : 'bg-red-50 text-red-600'
+                      }`}>
+                        {p.inventoryType === 'MADE_TO_ORDER'
+                          ? 'Bajo pedido'
+                          : p.inventoryType === 'HYBRID' && p.stock <= 0
+                            ? 'Bajo pedido'
+                            : `${p.stock} uds`}
+                      </span>
+                      <span className="text-[10px] text-gray-400">
+                        {p.inventoryType === 'PRE_MADE' ? 'Pre-armado' : p.inventoryType === 'HYBRID' ? 'Híbrido' : 'Bajo pedido'}
+                      </span>
+                    </div>
                   </td>
                   <td className="p-3 lg:p-4 text-sm text-gray-500">{(p as any).category?.name || '-'}</td>
                   <td className="p-3 lg:p-4 text-center">

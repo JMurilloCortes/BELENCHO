@@ -113,10 +113,13 @@ export async function updateOrderStatus(req: AuthRequest, res: Response) {
 
     if (status === "CANCELLED") {
       for (const item of order.items) {
-        await prisma.product.update({
-          where: { id: item.productId },
-          data: { stock: { increment: item.quantity } },
-        });
+        const product = await prisma.product.findUnique({ where: { id: item.productId } });
+        if (product && product.inventoryType !== "MADE_TO_ORDER") {
+          await prisma.product.update({
+            where: { id: item.productId },
+            data: { stock: { increment: item.quantity } },
+          });
+        }
       }
     }
 
@@ -140,7 +143,7 @@ export async function getAllProducts(_req: AuthRequest, res: Response) {
 
 export async function createProduct(req: AuthRequest, res: Response) {
   try {
-    const { name, description, price, stock, transportType, categoryId, images } = req.body;
+    const { name, description, price, stock, inventoryType, transportType, categoryId, images } = req.body;
     if (!name || !price || !categoryId) {
       return res.status(400).json({ error: "Nombre, precio y categoría son requeridos" });
     }
@@ -151,6 +154,7 @@ export async function createProduct(req: AuthRequest, res: Response) {
         description: description || "",
         price: parseFloat(price),
         stock: parseInt(stock) || 0,
+        inventoryType: inventoryType || "MADE_TO_ORDER",
         transportType: transportType || "MOTO",
         categoryId,
         images: images?.length ? {
@@ -168,12 +172,13 @@ export async function createProduct(req: AuthRequest, res: Response) {
 export async function updateProduct(req: AuthRequest, res: Response) {
   try {
     const id = String(req.params.id);
-    const { name, description, price, stock, transportType, categoryId, images } = req.body;
+    const { name, description, price, stock, inventoryType, transportType, categoryId, images } = req.body;
     const data: any = {};
     if (name) data.name = name;
     if (description !== undefined) data.description = description;
     if (price) data.price = parseFloat(price);
     if (stock !== undefined) data.stock = parseInt(stock);
+    if (inventoryType) data.inventoryType = inventoryType;
     if (transportType) data.transportType = transportType;
     if (categoryId) data.categoryId = categoryId;
 
@@ -533,7 +538,9 @@ export async function createManualOrder(req: AuthRequest, res: Response) {
       const product = productMap.get(item.productId);
       if (!product) return res.status(400).json({ error: `Producto ${item.productId} no encontrado` });
       if (!product.active) return res.status(400).json({ error: `Producto ${product.name} no está disponible` });
-      if (item.quantity > product.stock) return res.status(400).json({ error: `Stock insuficiente para ${product.name}` });
+      if (product.inventoryType !== "MADE_TO_ORDER" && item.quantity > product.stock) {
+        return res.status(400).json({ error: `Stock insuficiente para ${product.name}` });
+      }
     }
 
     if (deliveryDate && deliveryTimeSlot) {
@@ -595,10 +602,13 @@ export async function createManualOrder(req: AuthRequest, res: Response) {
     });
 
     for (const item of items) {
-      await prisma.product.update({
-        where: { id: item.productId },
-        data: { stock: { decrement: item.quantity } },
-      });
+      const product = productMap.get(item.productId);
+      if (product && product.inventoryType !== "MADE_TO_ORDER") {
+        await prisma.product.update({
+          where: { id: item.productId },
+          data: { stock: { decrement: item.quantity } },
+        });
+      }
     }
 
     emitNewOrder(order);

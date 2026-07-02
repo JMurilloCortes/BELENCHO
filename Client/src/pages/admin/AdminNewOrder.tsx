@@ -119,11 +119,13 @@ export default function AdminNewOrder() {
       .catch(() => {})
   }, [deliveryDate])
 
+  const canHaveStock = (product: Product) => product.inventoryType !== 'MADE_TO_ORDER'
+
   const addToCart = (product: Product) => {
     setCart((prev) => {
       const existing = prev.find((i) => i.product.id === product.id)
       if (existing) {
-        if (existing.quantity >= product.stock) return prev
+        if (canHaveStock(product) && existing.quantity >= product.stock) return prev
         return prev.map((i) => i.product.id === product.id ? { ...i, quantity: i.quantity + 1 } : i)
       }
       return [...prev, { product, quantity: 1 }]
@@ -135,7 +137,7 @@ export default function AdminNewOrder() {
       if (i.product.id !== productId) return i
       const next = i.quantity + delta
       if (next <= 0) return null
-      if (next > i.product.stock) return i
+      if (canHaveStock(i.product) && next > i.product.stock) return i
       return { ...i, quantity: next }
     }).filter(Boolean) as CartItem[])
   }
@@ -259,6 +261,8 @@ export default function AdminNewOrder() {
                 )}
                 {filtered.map((product, idx) => {
                   const inCart = cart.find((i) => i.product.id === product.id)
+                  const showStock = product.inventoryType !== 'MADE_TO_ORDER'
+                  const isOutOfStock = showStock && product.stock <= 0
                   return (
                     <div key={product.id} className={`flex items-center gap-3 p-3 hover:bg-gray-50/60 transition-colors ${idx > 0 ? '' : ''}`}>
                       <div className="w-11 h-11 rounded-xl bg-gray-50 shrink-0 flex items-center justify-center overflow-hidden border border-gray-100">
@@ -272,7 +276,19 @@ export default function AdminNewOrder() {
                         <p className="text-sm font-semibold text-gray-800 truncate">{product.name}</p>
                         <div className="flex items-center gap-2.5 mt-0.5">
                           <span className="text-xs font-medium text-gray-700">{formatCurrency(Number(product.price))}</span>
-                          <span className="text-[10px] text-gray-400">Stock: {product.stock}</span>
+                          <span className={`text-[10px] font-medium px-1.5 py-0.5 rounded ${
+                            product.inventoryType === 'MADE_TO_ORDER'
+                              ? 'bg-purple-50 text-purple-600'
+                              : product.inventoryType === 'HYBRID' && product.stock <= 0
+                                ? 'bg-blue-50 text-blue-600'
+                                : 'bg-gray-100 text-gray-500'
+                          }`}>
+                            {product.inventoryType === 'MADE_TO_ORDER'
+                              ? 'Bajo pedido'
+                              : product.inventoryType === 'HYBRID' && product.stock <= 0
+                                ? 'Bajo pedido'
+                                : `Stock: ${product.stock}`}
+                          </span>
                           <span className={`text-[10px] flex items-center gap-0.5 px-1.5 py-0.5 rounded ${product.transportType === 'TAXI' ? 'bg-accent/10 text-accent' : 'bg-primary/10 text-primary'}`}>
                             {product.transportType === 'TAXI' ? <Car size={8} /> : <Bike size={8} />}
                             {product.transportType === 'TAXI' ? 'Taxi' : 'Moto'}
@@ -283,15 +299,15 @@ export default function AdminNewOrder() {
                         <div className="flex items-center gap-1 shrink-0">
                           <button onClick={() => updateQty(product.id, -1)} className="w-8 h-8 rounded-xl bg-gray-100 flex items-center justify-center text-gray-500 hover:bg-gray-200 transition-colors"><Minus size={13} /></button>
                           <span className="w-9 text-center text-sm font-bold text-gray-800">{inCart.quantity}</span>
-                          <button onClick={() => updateQty(product.id, 1)} disabled={inCart.quantity >= product.stock} className="w-8 h-8 rounded-xl bg-primary/10 flex items-center justify-center text-primary hover:bg-primary/20 transition-colors disabled:opacity-30"><Plus size={13} /></button>
+                          <button onClick={() => updateQty(product.id, 1)} disabled={showStock && inCart.quantity >= product.stock} className="w-8 h-8 rounded-xl bg-primary/10 flex items-center justify-center text-primary hover:bg-primary/20 transition-colors disabled:opacity-30"><Plus size={13} /></button>
                         </div>
                       ) : (
                         <button
                           onClick={() => addToCart(product)}
-                          disabled={product.stock === 0}
+                          disabled={isOutOfStock}
                           className="px-4 py-2 rounded-xl text-xs font-bold bg-gradient-to-br from-primary/90 to-primary text-white hover:from-primary hover:to-primary/90 shadow-sm hover:shadow-md transition-all duration-200 shrink-0 disabled:opacity-40 disabled:cursor-not-allowed"
                         >
-                          {product.stock === 0 ? 'Sin stock' : 'Agregar'}
+                          {isOutOfStock ? 'Sin stock' : 'Agregar'}
                         </button>
                       )}
                     </div>
@@ -497,7 +513,7 @@ export default function AdminNewOrder() {
                   <div className="flex items-center gap-0.5">
                     <button onClick={() => updateQty(item.product.id, -1)} className="w-6 h-6 rounded-lg bg-white border border-gray-200 flex items-center justify-center text-gray-400 hover:text-gray-600 hover:border-gray-300 transition-colors"><Minus size={10} /></button>
                     <span className="w-7 text-center text-xs font-bold text-gray-800">{item.quantity}</span>
-                    <button onClick={() => updateQty(item.product.id, 1)} disabled={item.quantity >= item.product.stock} className="w-6 h-6 rounded-lg bg-white border border-gray-200 flex items-center justify-center text-gray-400 hover:text-gray-600 hover:border-gray-300 transition-colors disabled:opacity-30"><Plus size={10} /></button>
+                    <button onClick={() => updateQty(item.product.id, 1)} disabled={item.product.inventoryType !== 'MADE_TO_ORDER' && item.quantity >= item.product.stock} className="w-6 h-6 rounded-lg bg-white border border-gray-200 flex items-center justify-center text-gray-400 hover:text-gray-600 hover:border-gray-300 transition-colors disabled:opacity-30"><Plus size={10} /></button>
                   </div>
                   <button onClick={() => removeFromCart(item.product.id)} className="p-1 text-gray-200 hover:text-red-400 transition-colors opacity-0 group-hover:opacity-100"><Trash2 size={12} /></button>
                 </div>

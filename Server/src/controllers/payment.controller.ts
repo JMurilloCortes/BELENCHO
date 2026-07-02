@@ -103,10 +103,13 @@ export async function handleWompiWebhook(req: Request, res: Response) {
       } else if (["DECLINED", "VOIDED", "ERROR"].includes(status)) {
         await prisma.order.update({ where: { id: order.id }, data: { status: "CANCELLED" } });
         for (const item of order.items) {
-          await prisma.product.update({
-            where: { id: item.productId },
-            data: { stock: { increment: item.quantity } },
-          });
+          const product = await prisma.product.findUnique({ where: { id: item.productId } });
+          if (product && product.inventoryType !== "MADE_TO_ORDER") {
+            await prisma.product.update({
+              where: { id: item.productId },
+              data: { stock: { increment: item.quantity } },
+            });
+          }
         }
       }
     }

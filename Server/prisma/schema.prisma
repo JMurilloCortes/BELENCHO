@@ -13,6 +13,12 @@ enum Role {
   CLIENTE
 }
 
+enum InventoryType {
+  PRE_MADE
+  MADE_TO_ORDER
+  HYBRID
+}
+
 enum OrderStatus {
   PENDING
   PAID
@@ -68,20 +74,21 @@ model Category {
 }
 
 model Product {
-  id          String   @id @default(cuid())
-  name        String
-  description String
-  price       Decimal  @db.Decimal(10, 2)
-  stock         Int            @default(0)
-  active        Boolean        @default(true)
-  transportType TransportType? @default(MOTO)
-  categoryId    String
-  category      Category       @relation(fields: [categoryId], references: [id])
-  images      ProductImage[]
-  videos      ProductVideo[]
-  reviews     Review[]
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  id             String        @id @default(cuid())
+  name           String
+  description    String
+  price          Decimal       @db.Decimal(10, 2)
+  stock          Int           @default(0)
+  inventoryType  InventoryType @default(MADE_TO_ORDER)
+  active         Boolean       @default(true)
+  transportType  TransportType? @default(MOTO)
+  categoryId     String
+  category       Category      @relation(fields: [categoryId], references: [id])
+  images         ProductImage[]
+  videos         ProductVideo[]
+  reviews        Review[]
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
 
   cartItems  CartItem[]
   favoriteBy Favorite[]

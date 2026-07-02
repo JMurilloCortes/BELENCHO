@@ -117,7 +117,7 @@ export async function createOrderFromCart(
   }
 
   for (const item of cart.items) {
-    if (item.quantity > item.product.stock) {
+    if (item.product.inventoryType !== "MADE_TO_ORDER" && item.quantity > item.product.stock) {
       throw new Error(`Stock insuficiente para ${item.product.name}`);
     }
   }
@@ -155,10 +155,12 @@ export async function createOrderFromCart(
   });
 
   for (const item of cart.items) {
-    await prisma.product.update({
-      where: { id: item.productId },
-      data: { stock: { decrement: item.quantity } },
-    });
+    if (item.product.inventoryType !== "MADE_TO_ORDER") {
+      await prisma.product.update({
+        where: { id: item.productId },
+        data: { stock: { decrement: item.quantity } },
+      });
+    }
   }
 
   await prisma.cartItem.deleteMany({ where: { cartId: cart.id } });
