@@ -200,7 +200,8 @@ export async function updateProduct(req: AuthRequest, res: Response) {
       include: { images: { orderBy: { order: "asc" } }, category: true },
     });
     res.json(updated);
-  } catch {
+  } catch (e) {
+    console.error("Error al actualizar producto:", e);
     res.status(500).json({ error: "Error al actualizar producto" });
   }
 }
